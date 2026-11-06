@@ -11,6 +11,7 @@ import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_U
 import { SKINS } from '../core/skins.ts';
 import { button, label, panel, starsRow, uiScale, COLORS, inkHex, type Button } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
+import { Tutorial, type TutStep } from '../ui/tutorial.ts';
 
 type Overlay = '' | 'pause' | 'fail' | 'result';
 
@@ -51,6 +52,10 @@ export class UIScene extends Phaser.Scene
   private panelRect = { x: 0, y: 0, w: 0, h: 0 };
   private gasRect = { x: 0, y: 0, w: 0, h: 0 };
   private busy = false;
+  private tut?: Tutorial;
+  private tutStep: TutStep = 'done';
+  // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
+  private windPulse = 0;
 
   constructor()
   {
@@ -127,6 +132,15 @@ export class UIScene extends Phaser.Scene
     const onPlay = () => this.onPlay();
     const onDeliver = () => this.refreshIcons();
     const onStamp = () => this.refreshIcons();
+    // Телефон повернули вертикально посеред польоту — ставимо на паузу, щоб куля не летіла наосліп
+    const onForcePause = () =>
+    {
+      if ( !this.overlay && this.gs?.phase === 'play' )
+      {
+        this.togglePause();
+      }
+    };
+    ev.on( 'force-pause', onForcePause );
     ev.on( 'level-ready', onReady );
     ev.on( 'level-won', onWon );
     ev.on( 'level-failed', onFail );
@@ -141,6 +155,7 @@ export class UIScene extends Phaser.Scene
       ev.off( 'play-started', onPlay );
       ev.off( 'deliver', onDeliver );
       ev.off( 'stamp', onStamp );
+      ev.off( 'force-pause', onForcePause );
     } );
     this.scale.on( 'resize', this.rebuild, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.rebuild, this ) );
@@ -159,6 +174,8 @@ export class UIScene extends Phaser.Scene
     this.result = undefined;
     this.pointers.clear();
     this.busy = false;
+    this.windPulse = 0;
+    this.tutStep = g.lvl.id === '1-1' && !save().seenTips.includes( 'tutorial' ) ? 'hold' : 'done';
     ( this.scene.get( 'bg' ) as BgScene ).setTheme( g.lvl.theme );
     this.rebuild();
   }
@@ -174,8 +191,14 @@ export class UIScene extends Phaser.Scene
     this.layer.removeAll( true );
     this.card = undefined;
     this.tipText = undefined;
+    this.tut = undefined;
     this.buildHud();
-    if ( this.gs.phase === 'intro' )
+    // Під час навчання картка рівня не потрібна: перший крок сам пояснює, що робити
+    if ( this.tutStep !== 'done' && !this.overlay )
+    {
+      this.tut = new Tutorial( this, this.layer, this.u, this.tutStep );
+    }
+    else if ( this.gs.phase === 'intro' )
     {
       this.buildCard();
     }
@@ -301,6 +324,11 @@ export class UIScene extends Phaser.Scene
     g.clear();
     g.fillStyle( COLORS.ink, 0.45 );
     g.fillRoundedRect( pr.x, pr.y - 10 * u, pr.w, pr.h + 20 * u, 18 * u );
+    if ( this.windPulse > 0 )
+    {
+      g.lineStyle( 6 * u, 0xffd23a, ( 0.5 + 0.5 * Math.sin( this.windPulse * 8 ) ) * Math.min( 1, this.windPulse ) );
+      g.strokeRoundedRect( pr.x - 6 * u, pr.y - 16 * u, pr.w + 12 * u, pr.h + 32 * u, 22 * u );
+    }
     const cur = layerIndexAt( lvl, s.y - MID_OFF );
     lvl.layers.forEach( ( l, i ) =>
     {
@@ -378,11 +406,18 @@ export class UIScene extends Phaser.Scene
     this.gasText.setColor( over ? '#ffc070' : '#ffffff' );
   }
 
-  update(): void
+  update( _time: number, delta: number ): void
   {
     if ( !this.gs?.lvl || !this.windG || !this.gs.sys.isActive() || !this.gs.cameras?.main )
     {
       return;
+    }
+    const dt = Math.min( 0.05, delta / 1000 );
+    this.windPulse = Math.max( 0, this.windPulse - dt );
+    if ( this.tut )
+    {
+      this.tut.update( this.gs, dt );
+      this.tutStep = this.tut.step;
     }
     this.drawWind();
     this.drawGas();
@@ -518,9 +553,13 @@ export class UIScene extends Phaser.Scene
     if ( lvl.tip && !save().seenTips.includes( lvl.tip ) )
     {
       const key = 'tip_' + lvl.tip;
-      if ( hasText( key ) )
+      if ( hasText( key ) && this.tutStep === 'done' )
       {
         this.showTip( t( key ) );
+        if ( lvl.tip === 'layers' )
+        {
+          this.windPulse = 6.5;
+        }
       }
       save().seenTips.push( lvl.tip );
       persist();
@@ -607,6 +646,7 @@ export class UIScene extends Phaser.Scene
   {
     addFail( this.gs.levelId );
     this.overlay = 'fail';
+    this.tutStep = 'done';
     this.pointers.clear();
     this.rebuild();
   }
@@ -648,6 +688,15 @@ export class UIScene extends Phaser.Scene
     const gasOk = g.s.gas <= lvl.gasStar + 1e-6;
     const stampOk = g.s.stamp;
     const res = applyResult( lvl.id, gasOk, stampOk, g.s.gas );
+    if ( this.tutStep !== 'done' || lvl.id === '1-1' )
+    {
+      this.tutStep = 'done';
+      if ( !save().seenTips.includes( 'tutorial' ) )
+      {
+        save().seenTips.push( 'tutorial' );
+        persist();
+      }
+    }
     const info: ResultInfo = { delivered: true, gasOk, stampOk, gas: g.s.gas, gained: res.gained, prevStars };
     const f = findLevel( lvl.id )!;
     const special = SKINS.find( ( s ) => s.world === f.world.id );

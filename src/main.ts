@@ -7,6 +7,7 @@ import { MapScene } from './scenes/MapScene.ts';
 import { ShopScene } from './scenes/ShopScene.ts';
 import { FgScene } from './scenes/FgScene.ts';
 import { choosePack } from './ui/pack.ts';
+import { setupOrientation } from './platform/orientation.ts';
 import { initPlatform, adHooks, platform } from './platform/platform.ts';
 import { loadSave } from './core/save.ts';
 import { audio } from './core/audio.ts';
@@ -43,6 +44,7 @@ async function start(): Promise<void>
     game.resume();
   };
   platform.onPlatformMute( () => audio.applyVolume() );
+  setupOrientation( game );
 
   const unlock = () => audio.unlock();
   window.addEventListener( 'pointerdown', unlock );
