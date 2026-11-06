@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t } from '../core/i18n.ts';
+import { t, tn } from '../core/i18n.ts';
 import { save, persist, type SkinSlot } from '../core/save.ts';
 import { skinsOf, skin, type Skin } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
@@ -160,7 +160,7 @@ export class ShopScene extends Phaser.Scene
     this.root.add( c );
     // Картка верстається в номінальному розмірі й масштабується цілком, щоб на низьких екранах вміст не налазив
     const cw = 260 * u;
-    const ch = 300 * u;
+    const ch = 330 * u;
     c.setScale( Math.min( fitW / cw, fitH / ch ) );
     const g = this.add.graphics();
     if ( pack )
@@ -186,7 +186,7 @@ export class ShopScene extends Phaser.Scene
       g.strokeRoundedRect( -cw / 2, -ch / 2, cw, ch, 22 * u );
     }
     c.add( g );
-    const iy = -ch / 2 + ch * 0.36;
+    const iy = -ch / 2 + ch * 0.31;
     if ( sk.slot === 'envelope' )
     {
       c.add( this.add.image( 0, iy, 'env:' + sk.id ).setScale( 0.7 * u ) );
@@ -218,17 +218,18 @@ export class ShopScene extends Phaser.Scene
         c.add( label( this, 0, iy, '—', 50 * u, '#8090b0', false ) );
       }
     }
-    c.add( label( this, 0, ch / 2 - 96 * u, sk.name, 26 * u, inkHex(), false ) );
+    c.add( label( this, 0, ch / 2 - 138 * u, tn( sk.name ), 26 * u, inkHex(), false ) );
 
-    const bw = cw - 30 * u;
-    const by = ch / 2 - 42 * u;
+    // Нижня рамка пергаменту товста, тож кнопка й напис стоять вище за неї, а не на ній
+    const bw = cw - 70 * u;
+    const by = ch / 2 - 84 * u;
     if ( equipped )
     {
-      c.add( label( this, 0, by, t( 'equipped' ), 24 * u, '#c85a10', false ) );
+      c.add( label( this, 0, by, '✔ ' + t( 'equipped' ), 24 * u, '#2f8a4e', false ) );
     }
     else if ( owned )
     {
-      c.add( button( this, 0, by, { w: bw, h: 62 * u, text: t( 'equip' ), size: 24 * u, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.equip( sk ) } ) );
+      c.add( button( this, 0, by, { w: bw, h: 56 * u, text: t( 'equip' ), size: 24 * u, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.equip( sk ) } ) );
     }
     else if ( sk.world )
     {
@@ -244,7 +245,7 @@ export class ShopScene extends Phaser.Scene
     {
       const afford = sv.wallet >= sk.price;
       const b = button( this, 0, by, {
-        w: bw, h: 62 * u, text: `${ sk.price } ★`, size: 28 * u,
+        w: bw, h: 56 * u, text: `${ sk.price } ★`, size: 28 * u,
         color: afford ? COLORS.green : COLORS.grey, dark: afford ? COLORS.greenDark : COLORS.greyDark,
         onClick: () => this.buy( sk )
       } );

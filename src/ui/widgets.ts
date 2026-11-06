@@ -1,7 +1,12 @@
 import Phaser from 'phaser';
 import { audio } from '../core/audio.ts';
 
-export const FONT = '"Trebuchet MS", "Segoe UI", Verdana, Arial, sans-serif';
+export let FONT = '"Trebuchet MS", "Segoe UI", Verdana, Arial, sans-serif';
+
+export function setFont( family: string ): void
+{
+  FONT = `"${ family }", "Trebuchet MS", "Segoe UI", sans-serif`;
+}
 
 export const COLORS = {
   ink: 0x24304a,
@@ -84,16 +89,16 @@ export class Button extends Phaser.GameObjects.Container
     const size = opts.size ?? Math.round( opts.h * 0.42 );
     if ( opts.icon )
     {
-      this.ico = scene.add.image( opts.text ? -opts.w / 2 + opts.h * 0.5 : 0, -2, opts.icon );
-      this.ico.setScale( ( opts.iconScale ?? 1 ) * opts.h / 72 );
+      this.ico = scene.add.image( 0, -2, opts.icon );
+      this.ico.setScale( ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
       this.add( this.ico );
     }
     if ( opts.text )
     {
-      const dx = opts.icon ? opts.h * 0.32 : 0;
-      this.txt = label( scene, dx, -2, opts.text, size );
+      this.txt = label( scene, 0, -2, opts.text, size );
       this.add( this.txt );
     }
+    this.arrange();
     this.draw( false );
     this.setSize( opts.w, opts.h );
     this.setInteractive( { useHandCursor: true } );
@@ -125,7 +130,22 @@ export class Button extends Phaser.GameObjects.Container
   setText( s: string ): this
   {
     this.txt?.setText( s );
+    this.arrange();
     return this;
+  }
+
+  // Іконка й текст стоять однією групою по центру кнопки, а не іконка біля краю й текст збоку
+  private arrange(): void
+  {
+    if ( !this.ico || !this.txt )
+    {
+      return;
+    }
+    const gap = this.opts.h * 0.16;
+    const iw = this.ico.displayWidth;
+    const total = iw + gap + this.txt.width;
+    this.ico.x = -total / 2 + iw / 2;
+    this.txt.x = -total / 2 + iw + gap + this.txt.width / 2;
   }
 
   setEnabled( on: boolean ): this
@@ -154,8 +174,10 @@ export class Button extends Phaser.GameObjects.Container
     const off = pressed ? 4 : 0;
     if ( this.face && this.edge )
     {
+      const fw = this.face.displayWidth;
+      const fh = this.face.displayHeight;
       g.fillStyle( 0x000000, 0.14 );
-      g.fillRoundedRect( -w / 2 + 4, -h / 2 + 10, w - 8, h - 4, r );
+      g.fillRoundedRect( -fw / 2 + 4, -fh / 2 + 10, fw - 8, fh - 4, Math.min( fh / 2, 22 ) );
       this.edge.setTint( d ).setY( 5 );
       this.face.setTint( c ).setY( off );
       this.txt?.setY( -2 + off - 2 );
@@ -181,14 +203,15 @@ export class Button extends Phaser.GameObjects.Container
   }
 }
 
-// Мазок кнопки має товсті краї, тож будуємо його в масштабі текстури й зменшуємо до потрібної висоти
+// Мазок кнопки має товсті краї, тож будуємо його в масштабі текстури й зменшуємо однаково по обох осях:
+// вузька кнопка стає меншим кругом, а не сплюснутим овалом
 export function painted( scene: Phaser.Scene, w: number, h: number ): Phaser.GameObjects.NineSlice
 {
   const src = scene.textures.get( 'pk-btn' ).getSourceImage();
-  const k = h / src.height;
   const cap = Math.min( src.width * 0.3, src.height * 0.5 );
+  const k = Math.min( h / src.height, w / ( cap * 2 + 2 ) );
   const ns = scene.add.nineslice( 0, 0, 'pk-btn', undefined, Math.max( cap * 2 + 2, w / k ), src.height, cap, cap, 0, 0 );
-  ns.setScale( Math.min( k, w / ( cap * 2 + 2 ) ), k );
+  ns.setScale( k );
   return ns;
 }
 

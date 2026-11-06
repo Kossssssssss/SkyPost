@@ -20,7 +20,6 @@ interface SkyCloud
 }
 
 interface Bird { x: number; y: number; s: number; ph: number }
-interface Streak { x: number; y: number; len: number; life: number }
 
 const CLOUD_SPEED = [ 0.05, 0.12 ];
 const CLOUD_SIZE = [ 0.11, 0.17 ];
@@ -35,7 +34,6 @@ export class BgScene extends Phaser.Scene
   private layers: Layer[] = [];
   private clouds: SkyCloud[] = [];
   private birds: Bird[] = [];
-  private streaks: Streak[] = [];
   private fx?: Phaser.GameObjects.Graphics;
   private theme: Theme = 'meadow';
   private w = 0;
@@ -266,8 +264,8 @@ export class BgScene extends Phaser.Scene
     }
     const fx = this.fx!;
     fx.clear();
+    // Декоративних рисок вітру тут немає: вони летіли завжди справа наліво й плутали з реальним вітром
     this.drawBirds( fx, dt );
-    this.drawStreaks( fx, dt );
   }
 
   // Дзеркальне тайлінгування: кожна друга копія віддзеркалена, тож шов між копіями не видно
@@ -344,26 +342,5 @@ export class BgScene extends Phaser.Scene
       g.lineTo( xx + s, y - flap );
       g.strokePath();
     }
-  }
-
-  private drawStreaks( g: Phaser.GameObjects.Graphics, dt: number ): void
-  {
-    const { w, h } = this;
-    if ( Math.random() < dt * 4 )
-    {
-      this.streaks.push( { x: w + 20, y: Math.random() * h * 0.7, len: h * ( 0.06 + Math.random() * 0.12 ), life: 1 } );
-    }
-    for ( const s of this.streaks )
-    {
-      s.x -= h * 0.9 * dt;
-      s.life -= dt * 0.5;
-      g.lineStyle( Math.max( 2, h * 0.003 ), pack!.streak, Math.max( 0, Math.min( 1, s.life * 2 ) ) * 0.5 );
-      g.beginPath();
-      g.moveTo( s.x, s.y );
-      g.lineTo( s.x + s.len * 0.5, s.y - h * 0.004 );
-      g.lineTo( s.x + s.len, s.y );
-      g.strokePath();
-    }
-    this.streaks = this.streaks.filter( ( s ) => s.life > 0 && s.x > -s.len );
   }
 }

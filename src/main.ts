@@ -8,14 +8,22 @@ import { ShopScene } from './scenes/ShopScene.ts';
 import { FgScene } from './scenes/FgScene.ts';
 import { choosePack } from './ui/pack.ts';
 import { initPlatform, adHooks, platform } from './platform/platform.ts';
+import { loadLang } from './core/i18n.ts';
+import { LangScene } from './scenes/LangScene.ts';
 import { loadSave } from './core/save.ts';
 import { audio } from './core/audio.ts';
 import { fullscreenOnFirstTap } from './platform/fullscreen.ts';
+import { loadGameFont } from './ui/font.ts';
 
 async function start(): Promise<void>
 {
-  await initPlatform();
+  await Promise.all( [ initPlatform(), loadGameFont() ] );
+  if ( import.meta.env.DEV )
+  {
+    await ( await import( './ui/fontPreview.ts' ) ).previewFont();
+  }
   loadSave();
+  loadLang();
   choosePack();
 
   const game = new Phaser.Game( {
@@ -30,7 +38,7 @@ async function start(): Promise<void>
     },
     input: { activePointers: 3 },
     render: { antialias: true },
-    scene: [ BootScene, BgScene, GameScene, FgScene, UIScene, MapScene, ShopScene ]
+    scene: [ BootScene, BgScene, GameScene, FgScene, UIScene, MapScene, ShopScene, LangScene ]
   } );
 
   adHooks.onAdStart = () =>

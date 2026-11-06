@@ -1,3 +1,5 @@
+import { platform } from '../platform/platform.ts';
+
 const en = {
   title: 'Sky Post',
   hold: 'Hold to heat',
@@ -120,15 +122,202 @@ const uk: Dict = {
   editorHelp: 'РЕДАКТОР: 1 блок 2 ціль 3 марка 4 старт 5 птах 6 потік 7 шар  Del видалити  Колесо вітер  S зберегти  P грати  [ ] рівень'
 };
 
-export type TextKey = keyof Dict;
+const ru: Dict = {
+  title: 'Воздушная почта',
+  hold: 'Удерживай, чтобы греть',
+  holdHint: 'Удерживай мышь, палец или ПРОБЕЛ — шар греется.\nОтпусти — остынет и опустится.',
+  tip_hold: 'Удерживай — шар греется и взлетает. Отпусти — опускается.\nНесёт ветер, так что садись на почтовый ящик!',
+  tip_layers: 'На каждой высоте свой ветер.\nСмотри на панель ветра слева!',
+  tip_calm: 'У земли штиль —\nидеально для мягкой посадки.',
+  tip_stars: 'Экономь газ для ★★ и хватай марку для ★★★',
+  tip_birds: 'Берегись птиц!',
+  tip_order: 'Два письма! Доставляй по очереди.',
+  tip_islands: 'Садись только на острова — вода испортит почту!',
+  tip_gusts: 'Порывы! Сила ветра здесь всё время меняется.',
+  tip_fuel: 'Бак ограничен — продумай маршрут!',
+  tip_updraft: 'Тёплые восходящие потоки поднимают бесплатно.',
+  tip_pass: 'Впереди узкие перевалы. Осторожно с горелкой!',
+  tut_hold: 'Зажми и держи — горелка нагреет шар, и он взлетит',
+  tut_release: 'Теперь отпусти — воздух остынет, и шар начнёт снижаться',
+  tut_stamp: 'Пролети сквозь марку — это третья звезда ★',
+  tut_land: 'Плавно садись на почтовый ящик, чтобы доставить почту',
+  condDeliver: 'Доставить почту',
+  condDeliverN: 'Доставить {0} письма по очереди',
+  condGas: 'Потратить не больше {0} газа',
+  condStamp: 'Собрать марку',
+  tank: 'Бак: {0}',
+  showRoute: 'Маршрут',
+  plusGas: '+50% газа',
+  freeAfter: 'Бесплатно после {0} попыток',
+  free: 'Бесплатно',
+  routeOn: 'Маршрут показан',
+  delivered: 'Доставлено!',
+  popped: 'Лопнул!',
+  splash: 'Бульк!',
+  outOfGas: 'Кончился газ!',
+  retry: 'Ещё раз',
+  next: 'Дальше',
+  map: 'Карта',
+  shop: 'Магазин',
+  back: 'Назад',
+  paused: 'Пауза',
+  resume: 'Продолжить',
+  restart: 'Заново',
+  world: 'Мир {0}',
+  needStars: 'Собери {0} ★, чтобы открыть',
+  soon: 'Скоро',
+  gas: 'Газ',
+  owned: 'Есть',
+  equip: 'Надеть',
+  equipped: 'Надето',
+  special: '★★★ на всех уровнях мира {0}',
+  newStars: '+{0} ★',
+  envelope: 'Шары',
+  basket: 'Корзины',
+  trail: 'Шлейфы',
+  pilot: 'Пилоты',
+  wallet: 'Звёзды на траты',
+  allDone: 'Все миры пройдены! Скоро будет больше.',
+  noAds: 'Реклама недоступна',
+  editorHelp: 'РЕДАКТОР: 1 блок 2 цель 3 марка 4 старт 5 птица 6 поток 7 слой  Del удалить  Колесо ветер  S сохранить  P играть  [ ] уровень'
+};
 
-const lang = ( navigator.language || 'en' ).toLowerCase().startsWith( 'uk' ) ? uk : en;
+// Назви рівнів, світів і скінів лежать у даних англійською; перекладаємо їх за самою назвою,
+// щоб не дублювати ключі в JSON рівнів. Невідома назва лишається як є
+const NAMES: Record<string, [ string, string ]> = {
+  'Meadows': [ 'Луки', 'Луга' ],
+  'Sea & Lighthouses': [ 'Море й маяки', 'Море и маяки' ],
+  'Mountains': [ 'Гори', 'Горы' ],
+  'Thunder Peaks': [ 'Грозові вершини', 'Грозовые вершины' ],
+  'Night City': [ 'Нічне місто', 'Ночной город' ],
+  'First Flight': [ 'Перший політ', 'Первый полёт' ],
+  'Two Winds': [ 'Два вітри', 'Два ветра' ],
+  'Way Back': [ 'Шлях назад', 'Путь назад' ],
+  'The Hill': [ 'Пагорб', 'Холм' ],
+  'Hilltop Post': [ 'Пошта на пагорбі', 'Почта на холме' ],
+  'Birdwatch': [ 'Пташиний край', 'Птичий край' ],
+  'Two Letters': [ 'Два листи', 'Два письма' ],
+  'Meadow Finale': [ 'Фінал на луках', 'Финал на лугах' ],
+  'Island Hop': [ 'З острова на острів', 'С острова на остров' ],
+  'Gusty Bay': [ 'Вітряна затока', 'Ветреный залив' ],
+  'Back to Shore': [ 'Назад до берега', 'Назад к берегу' ],
+  'Gull Patrol': [ 'Чайковий патруль', 'Патруль чаек' ],
+  'The Lighthouse': [ 'Маяк', 'Маяк' ],
+  'Two Parcels': [ 'Дві посилки', 'Две посылки' ],
+  'Short Tank': [ 'Малий бак', 'Малый бак' ],
+  'Storm Coast': [ 'Штормове узбережжя', 'Штормовой берег' ],
+  'Foothills': [ 'Передгір’я', 'Предгорья' ],
+  'The Pass': [ 'Перевал', 'Перевал' ],
+  'Summit Post': [ 'Пошта на вершині', 'Почта на вершине' ],
+  'Overhang': [ 'Навис', 'Навес' ],
+  'Updraft Canyon': [ 'Каньйон потоків', 'Каньон потоков' ],
+  'Rockfall': [ 'Камінепад', 'Камнепад' ],
+  'Thin Air': [ 'Розріджене повітря', 'Разреженный воздух' ],
+  'Peak Express': [ 'Гірський експрес', 'Горный экспресс' ],
+  'Classic': [ 'Класика', 'Классика' ],
+  'Sky': [ 'Небо', 'Небо' ],
+  'Sunset': [ 'Захід', 'Закат' ],
+  'Polka': [ 'Горошок', 'Горошек' ],
+  'Racer': [ 'Гонщик', 'Гонщик' ],
+  'Patchwork': [ 'Клаптики', 'Лоскутки' ],
+  'Bloom': [ 'Цвітіння', 'Цветение' ],
+  'Lighthouse': [ 'Маяк', 'Маяк' ],
+  'Aurora': [ 'Сяйво', 'Сияние' ],
+  'Wicker': [ 'Плетений', 'Плетёная' ],
+  'Painted': [ 'Фарбований', 'Крашеная' ],
+  'Golden': [ 'Золотий', 'Золотая' ],
+  'None': [ 'Без шлейфу', 'Без шлейфа' ],
+  'Puffs': [ 'Хмарки', 'Облачка' ],
+  'Sparkles': [ 'Іскри', 'Искры' ],
+  'Hearts': [ 'Серця', 'Сердца' ],
+  'Rainbow': [ 'Веселка', 'Радуга' ],
+  'Fox': [ 'Лис', 'Лис' ],
+  'Cat': [ 'Кіт', 'Кот' ],
+  'Owl': [ 'Сова', 'Сова' ],
+  'Frog': [ 'Жаба', 'Лягушка' ]
+};
+
+export type TextKey = keyof Dict;
+export type Lang = 'uk' | 'ru' | 'en';
+export const LANGS: Lang[] = [ 'uk', 'ru', 'en' ];
+// Підписи кнопок вибору кожен своєю мовою: їх читають ще до того, як мову вибрано
+export const LANG_NAMES: Record<Lang, string> = { uk: 'Українська', ru: 'Русский', en: 'English' };
+
+const DICTS: Record<Lang, Dict> = { uk, ru, en };
+const LANG_KEY = 'skypost.lang';
+
+function guessLang(): Lang
+{
+  const n = ( navigator.language || 'en' ).toLowerCase();
+  if ( n.startsWith( 'uk' ) )
+  {
+    return 'uk';
+  }
+  return /^(ru|be|kk)/.test( n ) ? 'ru' : 'en';
+}
+
+let lang: Lang = guessLang();
+let chosen = false;
+
+// Читаємо вибір після initPlatform: на CrazyGames сховище — це їхній SDK, а не localStorage
+export function loadLang(): void
+{
+  try
+  {
+    const v = platform.storage.getItem( LANG_KEY ) as Lang | null;
+    if ( v && LANGS.includes( v ) )
+    {
+      lang = v;
+      chosen = true;
+    }
+  }
+  catch
+  {
+    // Без сховища просто спитаємо мову ще раз
+  }
+  document.documentElement.lang = lang;
+}
+
+export function langChosen(): boolean
+{
+  return chosen;
+}
+
+export function currentLang(): Lang
+{
+  return lang;
+}
+
+export function setLang( l: Lang ): void
+{
+  lang = l;
+  chosen = true;
+  document.documentElement.lang = l;
+  try
+  {
+    platform.storage.setItem( LANG_KEY, l );
+  }
+  catch
+  {
+    // Не зберіглось — гра все одно йде вибраною мовою до перезапуску
+  }
+}
 
 export function t( key: TextKey, ...args: ( string | number )[] ): string
 {
-  let s = lang[ key ] ?? en[ key ] ?? key;
+  let s = DICTS[ lang ][ key ] ?? en[ key ] ?? key;
   args.forEach( ( a, i ) => { s = s.replace( '{' + i + '}', String( a ) ); } );
   return s;
+}
+
+export function tn( name: string ): string
+{
+  const tr = NAMES[ name ];
+  if ( !tr || lang === 'en' )
+  {
+    return name;
+  }
+  return lang === 'uk' ? tr[ 0 ] : tr[ 1 ];
 }
 
 export function hasText( key: string ): key is TextKey

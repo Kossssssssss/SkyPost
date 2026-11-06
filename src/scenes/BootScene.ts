@@ -3,6 +3,7 @@ import { makeCommon, makeSkins } from '../core/art.ts';
 import { platform } from '../platform/platform.ts';
 import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
+import { langChosen } from '../core/i18n.ts';
 
 export class BootScene extends Phaser.Scene
 {
@@ -39,6 +40,12 @@ export class BootScene extends Phaser.Scene
     document.getElementById( 'loading' )?.remove();
     // Гра одразу стартує з рівня, без меню: новачок — з 1-1, інші — з останнього
     this.scene.launch( 'bg' );
+    // Перший запуск: спершу мова, бо далі одразу йде навчання з текстом
+    if ( !langChosen() )
+    {
+      this.scene.start( 'lang' );
+      return;
+    }
     this.scene.start( 'game', { levelId: save().lastLevel } );
   }
 

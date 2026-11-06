@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { groundY, layerBottom, windAt, type LevelData, type Theme } from '../core/level.ts';
 import { hazardPos } from '../core/sim.ts';
 import { RES } from '../core/art.ts';
-import { inkHex } from './widgets.ts';
+import { FONT, inkHex } from './widgets.ts';
 import { cloudKey, pack } from './pack.ts';
 
 export interface ThemeStyle
@@ -81,7 +81,7 @@ export class WorldView
       if ( lvl.targets.length > 1 )
       {
         const n = this.add( scene.add.text( mb.x, mb.y - 62, String( i + 1 ), {
-          fontFamily: 'Trebuchet MS, sans-serif', fontSize: '22px', fontStyle: 'bold', color: '#ffffff', stroke: inkHex(), strokeThickness: 5
+          fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#ffffff', stroke: inkHex(), strokeThickness: 5
         } ).setOrigin( 0.5 ).setDepth( 7 ) );
         void n;
       }

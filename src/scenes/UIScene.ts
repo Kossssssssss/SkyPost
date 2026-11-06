@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { GameScene } from './GameScene.ts';
 import { BgScene } from './BgScene.ts';
-import { t, hasText } from '../core/i18n.ts';
+import { t, tn, hasText } from '../core/i18n.ts';
 import { groundY, layerBottom, layerIndexAt, windAt } from '../core/level.ts';
 import { MID_OFF } from '../core/sim.ts';
 import { save, persist, applyResult, addFail, record, starsOf, totalStars } from '../core/save.ts';
@@ -42,6 +42,10 @@ export class UIScene extends Phaser.Scene
   private gasG!: Phaser.GameObjects.Graphics;
   private gasText!: Phaser.GameObjects.Text;
   private stampIcon!: Phaser.GameObjects.Image;
+  private guideG?: Phaser.GameObjects.Graphics;
+  private guideIcon?: Phaser.GameObjects.Image;
+  private guideNum?: Phaser.GameObjects.Text;
+  private guideT = 0;
   private letterIcons: Phaser.GameObjects.Image[] = [];
   private card?: Phaser.GameObjects.Container;
   private tipText?: Phaser.GameObjects.Text;
@@ -221,7 +225,7 @@ export class UIScene extends Phaser.Scene
 
     const pauseBtn = button( this, m + bs / 2, m + bs / 2, { w: bs, h: bs, icon: 'i-pause', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.togglePause() } );
     this.hud.add( pauseBtn );
-    const name = label( this, m * 2 + bs, m + bs / 2 - 3, lvl.id + '  ' + lvl.name, 34 * u ).setOrigin( 0, 0.5 );
+    const name = label( this, m * 2 + bs, m + bs / 2 - 3, lvl.id + '  ' + tn( lvl.name ), 34 * u ).setOrigin( 0, 0.5 );
     this.hud.add( name );
 
     const muteBtn = button( this, w - m - bs / 2, m + bs / 2, {
@@ -277,6 +281,11 @@ export class UIScene extends Phaser.Scene
       }
     } );
     this.hud.add( this.add.image( pr.x + pr.w + 18 * u, this.mapY( lvl.stamp.y ), 'stamp' ).setScale( 0.5 * u ).setAlpha( 0.9 ) );
+
+    this.guideG = this.add.graphics();
+    this.guideIcon = this.add.image( 0, 0, 'mailbox' ).setScale( 0.42 * u );
+    this.guideNum = label( this, 0, 0, '', 22 * u );
+    this.hud.add( [ this.guideG, this.guideIcon, this.guideNum ] );
 
     this.refreshIcons();
   }
@@ -345,27 +354,112 @@ export class UIScene extends Phaser.Scene
         g.fillCircle( cx, cy, 7 * u );
         return;
       }
+      // Стрілка завжди одного розміру: від сили залежала довжина, і слабкий вітер втрачав древко.
+      // Колір — напрямок, силу показує лише прозорість
       const dir = Math.sign( wind );
-      const len = Phaser.Math.Clamp( Math.abs( wind ) / 90, 0.25, 1 ) * ( pr.w - 26 * u );
-      const col = dir > 0 ? 0xffb03a : 0x5ac8ff;
       const th = Math.min( 12 * u, Math.max( 5 * u, ( y1 - y0 ) * 0.18 ) );
-      g.fillStyle( col, 1 );
-      const tipX = cx + dir * len / 2;
-      const baseX = tipX - dir * th * 2;
-      if ( dir > 0 )
+      const len = Math.min( pr.w - 26 * u, th * 6 );
+      const a = Phaser.Math.Clamp( 0.55 + Math.abs( wind ) / 120, 0.55, 1 );
+      const pts = [ -len / 2, -th / 2, len / 2 - th * 1.8, -th / 2, len / 2 - th * 1.8, -th * 1.4, len / 2, 0,
+        len / 2 - th * 1.8, th * 1.4, len / 2 - th * 1.8, th / 2, -len / 2, th / 2 ];
+      const poly = [];
+      for ( let k = 0; k < pts.length; k += 2 )
       {
-        g.fillRect( cx - len / 2, cy - th / 2, len - th * 1.6, th );
+        poly.push( new Phaser.Math.Vector2( cx + dir * pts[ k ], cy + pts[ k + 1 ] ) );
       }
-      else
-      {
-        g.fillRect( cx - len / 2 + th * 1.6, cy - th / 2, len - th * 1.6, th );
-      }
-      g.fillTriangle( tipX, cy, baseX, cy - th * 1.4, baseX, cy + th * 1.4 );
+      g.fillStyle( dir > 0 ? 0xffb03a : 0x5ac8ff, a );
+      g.fillPoints( poly, true );
+      g.lineStyle( 2 * u, 0x24304a, a * 0.6 );
+      g.strokePoints( poly, true );
     } );
     const by = this.mapY( s.y - MID_OFF );
     g.lineStyle( 3 * u, 0xffffff, 0.9 );
     g.lineBetween( pr.x, by, pr.x + pr.w, by );
     this.windMarker.setPosition( pr.x + pr.w + 2 * u, by );
+  }
+
+  // Вказівник на поточну скриньку: над нею стрілка, а коли вона поза кадром — значок біля краю екрана
+  private drawGuide( dt: number ): void
+  {
+    const g = this.guideG;
+    const icon = this.guideIcon;
+    const num = this.guideNum;
+    if ( !g || !icon || !num )
+    {
+      return;
+    }
+    g.clear();
+    const lvl = this.gs.lvl;
+    const s = this.gs.s;
+    const phase = this.gs.phase;
+    // Навчання має свою стрілку, а на паузі й результатах вказівник лише заважає
+    const show = s.target < lvl.targets.length && !this.overlay && !this.tut && ( phase === 'play' || phase === 'intro' );
+    icon.setVisible( false );
+    num.setVisible( false );
+    if ( !show )
+    {
+      return;
+    }
+    this.guideT += dt;
+    const u = this.u;
+    const w = this.scale.width;
+    const h = this.scale.height;
+    const cam = this.gs.cameras.main;
+    const tg = lvl.targets[ s.target ];
+    const px = ( tg.x + tg.w / 2 - 14 - cam.worldView.x ) * cam.zoom;
+    const py = ( tg.y - 70 - cam.worldView.y ) * cam.zoom;
+    const pr = this.panelRect;
+    // Відступ із запасом на стрілку довкола значка, щоб вона не різалася краєм екрана
+    const pad = 86 * u;
+    const left = pr.x + pr.w + pad;
+    const right = w - pad;
+    const top = 22 * u + 84 * u + pad;
+    const bottom = h - pad;
+    if ( px > left - 40 * u && px < right + 40 * u && py > top - 80 * u && py < bottom + 60 * u )
+    {
+      const bob = Math.sin( this.guideT * 6 ) * 8 * u;
+      this.arrowDown( g, px, py - 58 * u + bob, 30 * u );
+      return;
+    }
+    const cx = Phaser.Math.Clamp( px, left, right );
+    const cy = Phaser.Math.Clamp( py, top, bottom );
+    const ang = Math.atan2( py - cy, px - cx );
+    const r = 40 * u;
+    const pulse = 1 + Math.sin( this.guideT * 5 ) * 0.06;
+    g.fillStyle( 0x000000, 0.18 );
+    g.fillCircle( cx + 3 * u, cy + 5 * u, r * pulse );
+    g.fillStyle( 0xffd23a, 1 );
+    g.fillCircle( cx, cy, r * pulse );
+    g.lineStyle( 4 * u, COLORS.ink, 0.85 );
+    g.strokeCircle( cx, cy, r * pulse );
+    // Стрілка на ободі значка показує, куди летіти
+    const tip = r * 1.75;
+    const base = r * 1.05;
+    const sp = 0.42;
+    g.fillStyle( 0xffd23a, 1 );
+    g.lineStyle( 4 * u, COLORS.ink, 0.85 );
+    g.beginPath();
+    g.moveTo( cx + Math.cos( ang ) * tip, cy + Math.sin( ang ) * tip );
+    g.lineTo( cx + Math.cos( ang + sp ) * base, cy + Math.sin( ang + sp ) * base );
+    g.lineTo( cx + Math.cos( ang - sp ) * base, cy + Math.sin( ang - sp ) * base );
+    g.closePath();
+    g.fillPath();
+    g.strokePath();
+    icon.setVisible( true ).setPosition( cx, cy + 2 * u );
+    if ( lvl.targets.length > 1 )
+    {
+      num.setVisible( true ).setText( String( s.target + 1 ) ).setPosition( cx - r * 0.7, cy - r * 0.7 );
+    }
+  }
+
+  private arrowDown( g: Phaser.GameObjects.Graphics, x: number, y: number, s: number ): void
+  {
+    g.fillStyle( 0x000000, 0.18 );
+    g.fillTriangle( x - s + 4, y - s + 6, x + s + 4, y - s + 6, x + 4, y + s * 0.6 + 6 );
+    g.fillStyle( 0xffd23a, 1 );
+    g.fillTriangle( x - s, y - s, x + s, y - s, x, y + s * 0.6 );
+    g.lineStyle( 4 * this.u, COLORS.ink, 0.8 );
+    g.strokeTriangle( x - s, y - s, x + s, y - s, x, y + s * 0.6 );
   }
 
   private drawGas(): void
@@ -413,6 +507,7 @@ export class UIScene extends Phaser.Scene
     }
     this.drawWind();
     this.drawGas();
+    this.drawGuide( dt );
     const cam = this.gs.cameras.main;
     const viewW = cam.width / cam.zoom;
     const span = this.gs.lvl.width - viewW;
@@ -434,9 +529,9 @@ export class UIScene extends Phaser.Scene
     this.card = c;
     this.layer.add( c );
     const cw = 660 * u;
-    const ch = 400 * u;
+    const ch = 420 * u;
     c.add( panel( this, cw, ch ) );
-    c.add( label( this, 0, -ch / 2 + 50 * u, lvl.id + '  ' + lvl.name, 40 * u, inkHex(), false ) );
+    c.add( label( this, 0, -ch / 2 + 50 * u, lvl.id + '  ' + tn( lvl.name ), 40 * u, inkHex(), false ) );
     const rec = record( lvl.id );
     const rows: [ boolean, string ][] = [
       [ rec.done, lvl.targets.length > 1 ? t( 'condDeliverN', lvl.targets.length ) : t( 'condDeliver' ) ],
@@ -453,7 +548,8 @@ export class UIScene extends Phaser.Scene
     {
       c.add( label( this, cw / 2 - 40 * u, -ch / 2 + 50 * u, t( 'tank', gasUnits( lvl.fuel + this.gs.bonusFuel ) ), 24 * u, '#c85a10', false ).setOrigin( 1, 0.5 ) );
     }
-    const by = ch / 2 - 62 * u;
+    // Нижня рамка пергаменту товста, тож кнопки стоять над нею, а не на ній
+    const by = ch / 2 - 98 * u;
     const fails = save().fails[ lvl.id ] ?? 0;
     const free = fails >= FREE_AFTER;
     const btns: Button[] = [];
@@ -615,13 +711,13 @@ export class UIScene extends Phaser.Scene
   private buildPause(): void
   {
     const u = this.u;
-    const c = this.modal( 600 * u, 470 * u, t( 'paused' ) );
+    const c = this.modal( 600 * u, 520 * u, t( 'paused' ) );
     const bw = 400 * u;
     const bh = 86 * u;
-    c.add( button( this, 0, -60 * u, { w: bw, h: bh, text: t( 'resume' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, onClick: () => this.togglePause() } ) );
-    c.add( button( this, 0, 45 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
-    c.add( button( this, -100 * u, 150 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
-    const mus = button( this, 100 * u, 150 * u, {
+    c.add( button( this, 0, -55 * u, { w: bw, h: bh, text: t( 'resume' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, onClick: () => this.togglePause() } ) );
+    c.add( button( this, 0, 50 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
+    c.add( button( this, -100 * u, 155 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
+    const mus = button( this, 100 * u, 155 * u, {
       w: 190 * u, h: bh, icon: 'i-music', color: save().music ? COLORS.blue : COLORS.grey, dark: save().music ? COLORS.blueDark : COLORS.greyDark,
       onClick: () =>
       {
@@ -696,7 +792,7 @@ export class UIScene extends Phaser.Scene
     {
       save().owned.push( special.id );
       persist();
-      info.newSkin = special.name;
+      info.newSkin = tn( special.name );
     }
     const after = totalStars();
     WORLD_UNLOCK.forEach( ( need, i ) =>
@@ -727,7 +823,7 @@ export class UIScene extends Phaser.Scene
   {
     const u = this.u;
     const lvl = this.gs.lvl;
-    const c = this.modal( 720 * u, 640 * u, t( 'delivered' ) );
+    const c = this.modal( 720 * u, 680 * u, t( 'delivered' ) );
     const flags = [ info.delivered, info.gasOk, info.stampOk ];
     const stars = starsRow( this, 0, -140 * u, 0, 120 * u, 1.15 );
     stars.forEach( ( s, i ) =>
@@ -781,10 +877,11 @@ export class UIScene extends Phaser.Scene
     {
       c.add( label( this, 0, extraY, info.newSkin + ' ✔', 30 * u, '#b05ad8', false ) );
     }
-    const by = 245 * u;
-    c.add( button( this, -230 * u, by, { w: 190 * u, h: 90 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
-    c.add( button( this, -30 * u, by, { w: 170 * u, h: 90 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
-    c.add( button( this, 190 * u, by, { w: 230 * u, h: 90 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
+    // Ряд кнопок уміщається у внутрішню частину пергаменту: 150 + 150 + 230 і проміжки по 20
+    const by = 240 * u;
+    c.add( button( this, -210 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
+    c.add( button( this, -40 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
+    c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
   }
 
   // ---------- Навігація ----------

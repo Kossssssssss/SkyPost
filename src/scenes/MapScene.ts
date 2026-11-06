@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { t } from '../core/i18n.ts';
+import { t, tn, currentLang, type Lang } from '../core/i18n.ts';
 import { save, starsOf, totalStars, record } from '../core/save.ts';
 import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked, maxStars } from '../levels/index.ts';
 import { SKINS } from '../core/skins.ts';
@@ -9,6 +9,8 @@ import { button, label, panel, painted, starsRow, uiScale, COLORS, inkHex } from
 import { pack } from '../ui/pack.ts';
 import type { BgScene } from './BgScene.ts';
 import type { Theme } from '../core/level.ts';
+
+const LANG_CODES: Record<Lang, string> = { uk: 'УКР', ru: 'РУС', en: 'ENG' };
 
 export class MapScene extends Phaser.Scene
 {
@@ -111,18 +113,23 @@ export class MapScene extends Phaser.Scene
       }
     } );
     top.add( mute );
+    const lang = button( this, w - m - 454 * u, m + bs / 2, {
+      w: 120 * u, h: bs, text: LANG_CODES[ currentLang() ], size: 30 * u, color: COLORS.blue, dark: COLORS.blueDark,
+      onClick: () => this.scene.start( 'lang', { world: this.world } )
+    } );
+    top.add( lang );
 
-    const title = wd ? `${ t( 'world', wd.id ) } · ${ wd.name }` : `${ t( 'world', this.world ) } · ${ future?.name ?? '' }`;
+    const title = wd ? `${ t( 'world', wd.id ) } · ${ tn( wd.name ) }` : `${ t( 'world', this.world ) } · ${ tn( future?.name ?? '' ) }`;
     this.root.add( label( this, w / 2, m + bs + 70 * u, title, 56 * u ) );
 
     const maxW = WORLDS.length + FUTURE_WORLDS.length;
     if ( this.world > 1 )
     {
-      this.root.add( button( this, m + bs / 2 + 10 * u, h / 2, { w: bs * 1.1, h: bs * 1.4, icon: 'i-back', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( -1 ) } ) );
+      this.root.add( button( this, m + bs * 0.6 + 10 * u, h / 2, { w: bs * 1.2, h: bs * 1.2, icon: 'i-back', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( -1 ) } ) );
     }
     if ( this.world < maxW )
     {
-      this.root.add( button( this, w - m - bs / 2 - 10 * u, h / 2, { w: bs * 1.1, h: bs * 1.4, icon: 'i-fwd', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( 1 ) } ) );
+      this.root.add( button( this, w - m - bs * 0.6 - 10 * u, h / 2, { w: bs * 1.2, h: bs * 1.2, icon: 'i-fwd', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( 1 ) } ) );
     }
 
     const unlocked = wd ? worldUnlocked( wd.id ) : false;
@@ -222,7 +229,7 @@ export class MapScene extends Phaser.Scene
         const owned = save().owned.includes( sp.id );
         const y = h - 60 * u;
         this.root.add( this.add.image( w / 2 - 260 * u, y - 10 * u, 'env:' + sp.id ).setScale( 0.5 * u ).setAlpha( owned ? 1 : 0.8 ) );
-        this.root.add( label( this, w / 2 - 210 * u, y, owned ? sp.name + ' ✔' : t( 'special', wd.id ) + ' → ' + sp.name, 28 * u ).setOrigin( 0, 0.5 ) );
+        this.root.add( label( this, w / 2 - 210 * u, y, owned ? tn( sp.name ) + ' ✔' : t( 'special', wd.id ) + ' → ' + tn( sp.name ), 28 * u ).setOrigin( 0, 0.5 ) );
       }
     }
   }
