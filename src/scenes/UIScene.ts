@@ -187,6 +187,8 @@ export class UIScene extends Phaser.Scene
       return;
     }
     this.u = uiScale();
+    // Відкладені анімації зірок посилаються на старі об'єкти; після перебудови вони б упали й зупинили гру
+    this.time.removeAllEvents();
     this.hud.removeAll( true );
     this.layer.removeAll( true );
     this.card = undefined;
@@ -748,6 +750,10 @@ export class UIScene extends Phaser.Scene
           s.setScale( 0 );
           this.time.delayedCall( 350 + i * 330, () =>
           {
+            if ( !s.scene )
+            {
+              return;
+            }
             s.setTexture( 'star' ).setDisplaySize( 120 * u, 120 * u );
             const sx = s.scaleX;
             s.setScale( 0 );
