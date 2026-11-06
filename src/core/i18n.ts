@@ -1,0 +1,129 @@
+const en = {
+  title: 'Sky Post',
+  hold: 'Hold to heat',
+  holdHint: 'Hold mouse, finger or SPACE to heat the balloon.\nRelease to cool down and descend.',
+  tip_hold: 'Hold to heat and rise. Release to cool and sink.\nThe wind carries you — land on the mailbox!',
+  tip_layers: 'Each height has its own wind.\nCheck the wind panel on the left!',
+  tip_calm: 'The air near the ground is calm —\nperfect for a soft landing.',
+  tip_stars: 'Save gas for ★★ and grab the stamp for ★★★',
+  tip_birds: 'Watch out for birds!',
+  tip_order: 'Two letters! Deliver them in order.',
+  tip_islands: 'Land only on islands — water ruins the mail!',
+  tip_gusts: 'Gusts! The wind here keeps changing strength.',
+  tip_fuel: 'Limited gas tank — plan your route!',
+  tip_updraft: 'Warm updrafts lift you up for free.',
+  tip_pass: 'Narrow passes ahead. Easy on the burner!',
+  condDeliver: 'Deliver the mail',
+  condDeliverN: 'Deliver {0} letters in order',
+  condGas: 'Use at most {0} gas',
+  condStamp: 'Grab the stamp',
+  tank: 'Gas tank: {0}',
+  showRoute: 'Show route',
+  plusGas: '+50% gas',
+  freeAfter: 'Free after {0} tries',
+  free: 'Free',
+  routeOn: 'Route shown',
+  delivered: 'Delivered!',
+  popped: 'Popped!',
+  splash: 'Splash!',
+  outOfGas: 'Out of gas!',
+  retry: 'Retry',
+  next: 'Next',
+  map: 'Map',
+  shop: 'Shop',
+  back: 'Back',
+  paused: 'Paused',
+  resume: 'Resume',
+  restart: 'Restart',
+  world: 'World {0}',
+  needStars: 'Collect {0} ★ to unlock',
+  soon: 'Coming soon',
+  gas: 'Gas',
+  owned: 'Owned',
+  equip: 'Equip',
+  equipped: 'Equipped',
+  special: '★★★ all levels of world {0}',
+  newStars: '+{0} ★',
+  envelope: 'Balloons',
+  basket: 'Baskets',
+  trail: 'Trails',
+  pilot: 'Pilots',
+  wallet: 'Stars to spend',
+  allDone: 'All worlds complete! More coming soon.',
+  noAds: 'Ads unavailable',
+  editorHelp: 'EDITOR: 1 block 2 target 3 stamp 4 start 5 bird 6 updraft 7 layer  Del remove  Wheel wind  S save  P play  [ ] level'
+};
+
+type Dict = typeof en;
+
+const uk: Dict = {
+  title: 'Повітряна пошта',
+  hold: 'Утримуй, щоб гріти',
+  holdHint: 'Утримуй мишку, палець або ПРОБІЛ — куля гріється.\nВідпусти — охолоне й опуститься.',
+  tip_hold: 'Утримуй — куля гріється й злітає. Відпусти — опускається.\nНесе вітер, тож сідай на поштову скриньку!',
+  tip_layers: 'На кожній висоті свій вітер.\nДивись на панель вітру ліворуч!',
+  tip_calm: 'Біля землі штиль —\nідеально для м\'якої посадки.',
+  tip_stars: 'Ощадь газ для ★★ і хапай марку для ★★★',
+  tip_birds: 'Стережись птахів!',
+  tip_order: 'Два листи! Доставляй по черзі.',
+  tip_islands: 'Сідай лише на острови — вода зіпсує пошту!',
+  tip_gusts: 'Пориви! Сила вітру тут весь час змінюється.',
+  tip_fuel: 'Бак обмежений — продумай маршрут!',
+  tip_updraft: 'Теплі висхідні потоки піднімають безкоштовно.',
+  tip_pass: 'Попереду вузькі перевали. Обережно з пальником!',
+  condDeliver: 'Доставити пошту',
+  condDeliverN: 'Доставити {0} листи по черзі',
+  condGas: 'Витратити не більше {0} газу',
+  condStamp: 'Зібрати марку',
+  tank: 'Бак: {0}',
+  showRoute: 'Маршрут',
+  plusGas: '+50% газу',
+  freeAfter: 'Безкоштовно після {0} спроб',
+  free: 'Безкоштовно',
+  routeOn: 'Маршрут показано',
+  delivered: 'Доставлено!',
+  popped: 'Лопнула!',
+  splash: 'Бульк!',
+  outOfGas: 'Скінчився газ!',
+  retry: 'Ще раз',
+  next: 'Далі',
+  map: 'Карта',
+  shop: 'Магазин',
+  back: 'Назад',
+  paused: 'Пауза',
+  resume: 'Продовжити',
+  restart: 'Заново',
+  world: 'Світ {0}',
+  needStars: 'Збери {0} ★, щоб відкрити',
+  soon: 'Скоро',
+  gas: 'Газ',
+  owned: 'Є',
+  equip: 'Вдягти',
+  equipped: 'Вдягнено',
+  special: '★★★ на всіх рівнях світу {0}',
+  newStars: '+{0} ★',
+  envelope: 'Кулі',
+  basket: 'Кошики',
+  trail: 'Шлейфи',
+  pilot: 'Пілоти',
+  wallet: 'Зірки на витрати',
+  allDone: 'Усі світи пройдено! Скоро буде більше.',
+  noAds: 'Реклама недоступна',
+  editorHelp: 'РЕДАКТОР: 1 блок 2 ціль 3 марка 4 старт 5 птах 6 потік 7 шар  Del видалити  Колесо вітер  S зберегти  P грати  [ ] рівень'
+};
+
+export type TextKey = keyof Dict;
+
+const lang = ( navigator.language || 'en' ).toLowerCase().startsWith( 'uk' ) ? uk : en;
+
+export function t( key: TextKey, ...args: ( string | number )[] ): string
+{
+  let s = lang[ key ] ?? en[ key ] ?? key;
+  args.forEach( ( a, i ) => { s = s.replace( '{' + i + '}', String( a ) ); } );
+  return s;
+}
+
+export function hasText( key: string ): key is TextKey
+{
+  return key in en;
+}
