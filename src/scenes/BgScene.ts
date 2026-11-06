@@ -73,6 +73,7 @@ export class BgScene extends Phaser.Scene
       this.scene.stop( 'fg' );
     } );
     this.scene.launch( 'fg' );
+    this.paintPage();
     this.layout( this.scale.width, this.scale.height );
   }
 
@@ -122,20 +123,29 @@ export class BgScene extends Phaser.Scene
     }
   }
 
+  // Chrome на Android фарбує системну панель навігації під грою кольором фону сторінки,
+  // тож тримаємо його в тон землі, а не голубим, як на екрані завантаження
+  private paintPage(): void
+  {
+    const col = '#' + THEMES[ this.theme ].ground.toString( 16 ).padStart( 6, '0' );
+    document.documentElement.style.backgroundColor = col;
+    document.body.style.backgroundColor = col;
+  }
+
   setTheme( theme: Theme ): void
   {
+    this.theme = theme;
+    this.paintPage();
     if ( pack )
     {
-      this.theme = theme;
       this.applyThemeArt();
       this.layout( this.w || this.scale.width, this.h || this.scale.height );
       return;
     }
-    if ( theme === this.theme && this.far )
+    if ( this.far?.texture.key === THEMES[ theme ].far )
     {
       return;
     }
-    this.theme = theme;
     this.far?.destroy();
     this.far = undefined;
     const key = THEMES[ theme ].far;

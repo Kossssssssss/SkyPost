@@ -10,11 +10,10 @@ import { choosePack } from './ui/pack.ts';
 import { initPlatform, adHooks, platform } from './platform/platform.ts';
 import { loadSave } from './core/save.ts';
 import { audio } from './core/audio.ts';
-import { fitViewport } from './platform/viewport.ts';
+import { fullscreenOnFirstTap } from './platform/fullscreen.ts';
 
 async function start(): Promise<void>
 {
-  fitViewport();
   await initPlatform();
   loadSave();
   choosePack();
@@ -50,6 +49,7 @@ async function start(): Promise<void>
   window.addEventListener( 'pointerdown', unlock );
   window.addEventListener( 'touchend', unlock );
   window.addEventListener( 'keydown', unlock );
+  fullscreenOnFirstTap();
 
   if ( import.meta.env.DEV )
   {
