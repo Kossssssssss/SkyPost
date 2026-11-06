@@ -2,3 +2,18 @@ node_modules
 dist
 *.zip
 .shots
+
+# Кеш і логи
+.vite
+*.log
+npm-debug.log*
+
+# Локальні налаштування
+.env
+.env.local
+*.local
+
+# Системне сміття
+.DS_Store
+Thumbs.db
+desktop.ini
