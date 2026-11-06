@@ -5,8 +5,6 @@ import { createState, step, cloneState, DT, type SimState } from './sim.ts';
 
 export const SUB = 15;
 const MAX_T = 200;
-// Поріг зірки — найкраще проходження із запасом: людина гріє не так ощадно, як пошук
-export const GAS_MARGIN = 1.3;
 
 export interface SolveRoute
 {
@@ -127,9 +125,29 @@ export function trace( lvl: LevelData, actions: number[] ): number[]
   return out;
 }
 
-export function gasThreshold( bestGas: number ): number
+// Поріг зірки — найкраще проходження із запасом: людина гріє не так ощадно, як пошук.
+// На перших рівнях гравець ще не відчуває інерції кулі, тож запас там найбільший і зменшується зі світами
+function gasMargin( id: string ): { k: number; add: number }
 {
-  return Math.ceil( ( bestGas * GAS_MARGIN + 0.8 ) * 2 ) / 2;
+  const [ world, n ] = id.split( '-' ).map( Number );
+  if ( world === 1 )
+  {
+    return n <= 4 ? { k: 2, add: 1.5 } : { k: 1.7, add: 1.5 };
+  }
+  return world === 2 ? { k: 1.5, add: 1 } : { k: 1.4, add: 1 };
+}
+
+// Беремо газ маршруту з маркою: тоді всі три зірки можна взяти за один політ
+export function gasThreshold( lvl: LevelData ): number
+{
+  const b = lvl.best;
+  if ( !b )
+  {
+    return lvl.gasStar;
+  }
+  const m = gasMargin( lvl.id );
+  const t = Math.ceil( ( Math.max( b.gas, b.stampGas ?? 0 ) * m.k + m.add ) * 2 ) / 2;
+  return lvl.fuel !== undefined ? Math.min( t, lvl.fuel ) : t;
 }
 
 // Записує в рівень поріг газу, найкращі показники й маршрут підказки (з маркою, якщо вона досяжна)
@@ -139,8 +157,8 @@ export function applySolve( lvl: LevelData, r: SolveResult ): boolean
   {
     return false;
   }
-  lvl.gasStar = gasThreshold( r.plain.gas );
   lvl.best = { gas: +r.plain.gas.toFixed( 2 ), stampGas: r.stamp ? +r.stamp.gas.toFixed( 2 ) : undefined, time: +r.plain.time.toFixed( 1 ) };
+  lvl.gasStar = gasThreshold( lvl );
   lvl.hint = trace( lvl, ( r.stamp ?? r.plain ).actions );
   return true;
 }
@@ -153,5 +171,5 @@ export function describe( lvl: LevelData, r: SolveResult ): string
   }
   const stampInfo = r.stamp ? `марка: газ ${ r.stamp.gas.toFixed( 2 ) }` : 'МАРКА НЕДОСЯЖНА';
   const fuelInfo = lvl.fuel !== undefined ? ` бак ${ lvl.fuel }` : '';
-  return `${ lvl.id } ${ lvl.name }: газ ${ r.plain.gas.toFixed( 2 ) } час ${ r.plain.time.toFixed( 1 ) } → поріг ${ gasThreshold( r.plain.gas ) }${ fuelInfo }; ${ stampInfo } (${ r.nodes } вузлів, ${ r.ms } мс)`;
+  return `${ lvl.id } ${ lvl.name }: газ ${ r.plain.gas.toFixed( 2 ) } час ${ r.plain.time.toFixed( 1 ) } → поріг ${ gasThreshold( { ...lvl, best: { gas: r.plain.gas, stampGas: r.stamp?.gas, time: r.plain.time } } ) }${ fuelInfo }; ${ stampInfo } (${ r.nodes } вузлів, ${ r.ms } мс)`;
 }
