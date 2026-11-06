@@ -8,8 +8,8 @@
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #5cb8f8; }
     body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
       -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
-    /* На Android блок із inset: 0 буває нижчим за видиму область, тож висоту беремо з динамічного вьюпорту */
-    #game { position: fixed; left: 0; top: 0; width: 100%; height: 100%; height: 100dvh; }
+    /* Точний розмір виставляє src/platform/viewport.ts з видимої області */
+    #game { position: fixed; left: 0; top: 0; width: 100%; height: 100%; }
     #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
       font: bold 32px "Trebuchet MS", sans-serif; color: #fff; text-shadow: 0 3px 0 #24304a; }
   </style>

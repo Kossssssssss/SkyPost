@@ -10,9 +10,11 @@ import { choosePack } from './ui/pack.ts';
 import { initPlatform, adHooks, platform } from './platform/platform.ts';
 import { loadSave } from './core/save.ts';
 import { audio } from './core/audio.ts';
+import { fitViewport } from './platform/viewport.ts';
 
 async function start(): Promise<void>
 {
+  fitViewport();
   await initPlatform();
   loadSave();
   choosePack();
