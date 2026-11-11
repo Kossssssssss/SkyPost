@@ -5,6 +5,16 @@ import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
 import { langChosen } from '../core/i18n.ts';
 
+const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'shop', 'route' ];
+// Скіни, вже перемальовані в акварельному стилі: текстури того ж розміру, що й намальовані кодом.
+// Префікс id (env-, bas-) збігається з префіксом ключа текстури (env:, bas:)
+const PAINTED_SKINS = [ 'env-classic', 'bas-wicker' ];
+// Перемальовані об'єкти світу. Будинок: ширина та сама, що в намальованого кодом, висота за пропорціями малюнка.
+// Скринька: той самий розмір текстури 96x128, малюнок вписаний і притиснутий донизу
+const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone' ];
+// Хмари пака замінюємо перемальованими; поки є одна форма, другий слот — її дзеркальна копія
+const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_bank_flip', 'cloud_bank' ];
+
 export class BootScene extends Phaser.Scene
 {
   constructor()
@@ -22,9 +32,21 @@ export class BootScene extends Phaser.Scene
       }
       return;
     }
-    for ( const k of [ ...packLayers(), 'cloud0', 'cloud1', 'cloud2', 'panel', 'button' ] )
+    for ( const k of [ ...packLayers(), 'cloud0', 'cloud1', 'cloud2', 'panel', 'button', ...ICONS.map( ( i ) => 'i-' + i ) ] )
     {
       this.load.image( 'pk-' + k, 'assets/packs/' + pack.id + '/' + k + '.png' );
+    }
+    for ( const id of PAINTED_SKINS )
+    {
+      this.load.image( 'pk-' + id, 'assets/balloon/' + id + '.png' );
+    }
+    for ( const id of PAINTED_WORLD )
+    {
+      this.load.image( 'pk-' + id, 'assets/world/' + id + '.png' );
+    }
+    for ( const id of new Set( PAINTED_CLOUDS ) )
+    {
+      this.load.image( 'pw-' + id, 'assets/world/' + id + '.png' );
     }
   }
 
@@ -32,6 +54,28 @@ export class BootScene extends Phaser.Scene
   {
     makeCommon( this );
     makeSkins( this );
+    // Намальовані кодом іконки й скіни замінюємо згенерованими під тими самими ключами
+    const swap = ( key: string, from: string ) =>
+    {
+      if ( this.textures.exists( from ) )
+      {
+        this.textures.remove( key );
+        this.textures.addImage( key, this.textures.get( from ).getSourceImage() as HTMLImageElement );
+      }
+    };
+    for ( const k of ICONS )
+    {
+      swap( 'i-' + k, 'pk-i-' + k );
+    }
+    for ( const id of PAINTED_SKINS )
+    {
+      swap( id.slice( 0, 3 ) + ':' + id, 'pk-' + id );
+    }
+    for ( const id of PAINTED_WORLD )
+    {
+      swap( id, 'pk-' + id );
+    }
+    PAINTED_CLOUDS.forEach( ( id, i ) => swap( 'pk-cloud' + i, 'pw-' + id ) );
     if ( pack )
     {
       this.makePaintedButton();

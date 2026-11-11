@@ -1,0 +1,18 @@
+{
+  "source": "assets/ref/style_ref.png",
+  "method": "k-means, k=12, RGB, k-means++ init, 40 iterations, every 23rd pixel",
+  "colors": [
+    { "hex": "#d6eaf1", "share": 0.265 },
+    { "hex": "#bdddef", "share": 0.229 },
+    { "hex": "#c2d0d2", "share": 0.12 },
+    { "hex": "#b3c3b4", "share": 0.06 },
+    { "hex": "#6f9362", "share": 0.058 },
+    { "hex": "#f7fbfc", "share": 0.057 },
+    { "hex": "#4e7750", "share": 0.052 },
+    { "hex": "#a0b2ce", "share": 0.044 },
+    { "hex": "#32583e", "share": 0.043 },
+    { "hex": "#8ca692", "share": 0.036 },
+    { "hex": "#aab36a", "share": 0.021 },
+    { "hex": "#182e1f", "share": 0.016 }
+  ]
+}

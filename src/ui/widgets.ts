@@ -90,7 +90,9 @@ export class Button extends Phaser.GameObjects.Container
     if ( opts.icon )
     {
       this.ico = scene.add.image( 0, -2, opts.icon );
-      this.ico.setScale( ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
+      // Намальовані іконки 48 px, згенеровані більші: зводимо до того самого екранного розміру
+      const base = opts.icon.startsWith( 'i-' ) ? 48 / this.ico.width : 1;
+      this.ico.setScale( base * ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
       this.add( this.ico );
     }
     if ( opts.text )
@@ -177,7 +179,7 @@ export class Button extends Phaser.GameObjects.Container
       const fw = this.face.displayWidth;
       const fh = this.face.displayHeight;
       g.fillStyle( 0x000000, 0.14 );
-      g.fillRoundedRect( -fw / 2 + 4, -fh / 2 + 10, fw - 8, fh - 4, Math.min( fh / 2, 22 ) );
+      g.fillRoundedRect( -fw / 2 + 4, -fh / 2 + 10, fw - 8, fh - 4, ( fh - 4 ) / 2 );
       this.edge.setTint( d ).setY( 5 );
       this.face.setTint( c ).setY( off );
       this.txt?.setY( -2 + off - 2 );

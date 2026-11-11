@@ -62,7 +62,8 @@ export class WorldView
     this.buildUpdrafts();
     this.buildClouds();
 
-    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y + 2, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( 2 ) );
+    // Будинок стоїть на смузі трави (12 px від верху ґрунту) і малюється поверх ґрунту (depth 5), інакше він ніби висить
+    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y + 14, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( 5.5 ) );
     void office;
 
     const g = this.add( scene.add.graphics().setDepth( 5 ) );
