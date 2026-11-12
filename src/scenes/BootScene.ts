@@ -11,9 +11,11 @@ const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound',
 const PAINTED_SKINS = [ 'env-classic', 'bas-wicker' ];
 // Перемальовані об'єкти світу. Будинок: ширина та сама, що в намальованого кодом, висота за пропорціями малюнка.
 // Скринька: той самий розмір текстури 96x128, малюнок вписаний і притиснутий донизу
-const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone' ];
-// Хмари пака замінюємо перемальованими; поки є одна форма, другий слот — її дзеркальна копія
-const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_bank_flip', 'cloud_bank' ];
+// Птах: два кадри (крила вгору / вниз) на однаковому полотні, вирівняні по дзьобу.
+// Полум'я: три кадри однакового розміру, притиснуті донизу (flame1 і flame2 є лише намальовані)
+const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'flame', 'flame1', 'flame2', 'letter', 'gas', 'gauge', 'gaugefill' ];
+// Хмари пака замінюємо перемальованими: довга смуга, кругла купа й тонке пасмо
+const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_puff', 'cloud_wisp' ];
 
 export class BootScene extends Phaser.Scene
 {
@@ -59,7 +61,10 @@ export class BootScene extends Phaser.Scene
     {
       if ( this.textures.exists( from ) )
       {
-        this.textures.remove( key );
+        if ( this.textures.exists( key ) )
+        {
+          this.textures.remove( key );
+        }
         this.textures.addImage( key, this.textures.get( from ).getSourceImage() as HTMLImageElement );
       }
     };
@@ -78,7 +83,12 @@ export class BootScene extends Phaser.Scene
     PAINTED_CLOUDS.forEach( ( id, i ) => swap( 'pk-cloud' + i, 'pw-' + id ) );
     if ( pack )
     {
-      this.makePaintedButton();
+      this.whiten( 'pk-button', 'pk-btn' );
+    }
+    // Заливка шкали газу міняє колір за станом (норма, перевитрата, бак майже порожній), тож теж тонується
+    if ( this.textures.exists( 'gaugefill' ) )
+    {
+      this.whiten( 'gaugefill', 'gaugefill-w' );
     }
     platform.loadingStop();
     document.getElementById( 'loading' )?.remove();
@@ -93,11 +103,11 @@ export class BootScene extends Phaser.Scene
     this.scene.start( 'game', { levelId: save().lastLevel } );
   }
 
-  // Згенерована кнопка помаранчева; знебарвлюємо її, щоб тонувати під будь-який колір і зберегти мазки
-  private makePaintedButton(): void
+  // Згенеровані кнопка й заливка кольорові; знебарвлюємо їх, щоб тонувати під будь-який колір і зберегти мазки
+  private whiten( from: string, key: string ): void
   {
-    const src = this.textures.get( 'pk-button' ).getSourceImage() as HTMLImageElement;
-    const tex = this.textures.createCanvas( 'pk-btn', src.width, src.height )!;
+    const src = this.textures.get( from ).getSourceImage() as HTMLImageElement;
+    const tex = this.textures.createCanvas( key, src.width, src.height )!;
     const ctx = tex.getContext();
     ctx.drawImage( src, 0, 0 );
     const id = ctx.getImageData( 0, 0, src.width, src.height );

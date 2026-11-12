@@ -11,6 +11,7 @@ import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_U
 import { SKINS } from '../core/skins.ts';
 import { button, label, panel, starsRow, uiScale, COLORS, inkHex, type Button } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
+import { baseScale } from '../core/art.ts';
 import { Tutorial, type TutStep } from '../ui/tutorial.ts';
 
 type Overlay = '' | 'pause' | 'fail' | 'result';
@@ -40,6 +41,7 @@ export class UIScene extends Phaser.Scene
   private windG!: Phaser.GameObjects.Graphics;
   private windMarker!: Phaser.GameObjects.Image;
   private gasG!: Phaser.GameObjects.Graphics;
+  private gasFill?: Phaser.GameObjects.Image;
   private gasText!: Phaser.GameObjects.Text;
   private stampIcon!: Phaser.GameObjects.Image;
   private guideG?: Phaser.GameObjects.Graphics;
@@ -245,10 +247,21 @@ export class UIScene extends Phaser.Scene
     const gw = Math.max( 160 * u, Math.min( 520 * u, w * 0.34, ( maxX - minX ) ) );
     const gx = Phaser.Math.Clamp( w / 2 - gw / 2, minX, Math.max( minX, maxX - gw ) );
     this.gasRect = { x: gx, y: m + 22 * u, w: gw, h: gh };
+    if ( this.textures.exists( 'gauge' ) && this.textures.exists( 'gaugefill-w' ) )
+    {
+      // Паперова смужка з рисками під заливкою; тягнеться лише середина, рвані торці лишаються
+      const cap = Math.min( 40, this.textures.get( 'gauge' ).getSourceImage().width / 4 );
+      this.hud.add( this.add.nineslice( gx + gw / 2, this.gasRect.y + gh / 2, 'gauge', undefined, gw + gh * 0.9, gh * 1.4, cap, cap, 0, 0 ) );
+      // Мазок заливки обрізаємо за рівнем газу, а не стискаємо: текстура мазка лишається тією самою
+      this.gasFill = this.add.image( gx, this.gasRect.y + gh / 2, 'gaugefill-w' ).setOrigin( 0, 0.5 ).setDisplaySize( gw, gh * 1.15 );
+      this.hud.add( this.gasFill );
+    }
     this.gasG = this.add.graphics();
     this.hud.add( this.gasG );
-    this.hud.add( this.add.image( this.gasRect.x - 24 * u, this.gasRect.y + gh / 2, 'gas' ).setScale( 1.5 * u ) );
-    this.gasText = label( this, gx + gw / 2, this.gasRect.y + gh + 24 * u, '', 26 * u );
+    const gasIcon = this.add.image( this.gasRect.x - 24 * u, this.gasRect.y + gh / 2, 'gas' );
+    this.hud.add( gasIcon.setScale( 1.5 * u * baseScale( gasIcon ) ) );
+    // Паперова шкала вища за кодову смугу, тож підпис трохи нижче, щоб не налазив на її край
+    this.gasText = label( this, gx + gw / 2, this.gasRect.y + gh + ( this.gasFill ? 31 : 24 ) * u, '', 26 * u );
     this.hud.add( this.gasText );
 
     // Іконки цілей рівня праворуч: листи по черзі й марка
@@ -257,7 +270,8 @@ export class UIScene extends Phaser.Scene
     this.hud.add( this.stampIcon );
     this.letterIcons = lvl.targets.map( ( _tg, i ) =>
     {
-      const img = this.add.image( iconsRight - 100 * u - i * 62 * u, m + bs / 2, 'letter' ).setScale( 1.35 * u );
+      const img = this.add.image( iconsRight - 100 * u - i * 62 * u, m + bs / 2, 'letter' );
+      img.setScale( 1.35 * u * baseScale( img ) );
       this.hud.add( img );
       return img;
     } ).reverse();
@@ -473,11 +487,19 @@ export class UIScene extends Phaser.Scene
     const k = Phaser.Math.Clamp( s.gas / tank, 0, 1 );
     const starK = Phaser.Math.Clamp( lvl.gasStar / tank, 0, 1 );
     g.clear();
-    g.fillStyle( COLORS.ink, 0.6 );
-    g.fillRoundedRect( r.x - 4, r.y - 4, r.w + 8, r.h + 8, ( r.h + 8 ) / 2 );
     const over = s.gas > lvl.gasStar;
     const col = lvl.fuel !== undefined && k > 0.85 ? 0xff4a3a : over ? 0xffa53a : 0x5ad86a;
-    if ( k > 0 )
+    if ( this.gasFill )
+    {
+      const f = this.gasFill.frame;
+      this.gasFill.setCrop( 0, 0, f.width * k, f.height ).setTint( col ).setVisible( k > 0 );
+    }
+    else
+    {
+      g.fillStyle( COLORS.ink, 0.6 );
+      g.fillRoundedRect( r.x - 4, r.y - 4, r.w + 8, r.h + 8, ( r.h + 8 ) / 2 );
+    }
+    if ( k > 0 && !this.gasFill )
     {
       g.fillStyle( col, 1 );
       g.fillRoundedRect( r.x, r.y, Math.max( r.h, r.w * k ), r.h, r.h / 2 );

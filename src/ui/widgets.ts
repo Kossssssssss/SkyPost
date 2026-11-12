@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { audio } from '../core/audio.ts';
+import { baseScale } from '../core/art.ts';
 
 export let FONT = '"Trebuchet MS", "Segoe UI", Verdana, Arial, sans-serif';
 
@@ -70,6 +71,9 @@ export class Button extends Phaser.GameObjects.Container
   private face?: Phaser.GameObjects.NineSlice;
   private edge?: Phaser.GameObjects.NineSlice;
   private opts: ButtonOpts;
+  // Квадратна кнопка з самою іконкою: намальована іконка вже на паперовому диску, тож диск і є кнопкою
+  private disc = false;
+  private discShadow?: Phaser.GameObjects.Image;
   txt?: Phaser.GameObjects.Text;
   ico?: Phaser.GameObjects.Image;
   enabled = true;
@@ -80,7 +84,15 @@ export class Button extends Phaser.GameObjects.Container
     this.opts = opts;
     this.bg = scene.add.graphics();
     this.add( this.bg );
-    if ( scene.textures.exists( 'pk-btn' ) )
+    this.disc = scene.textures.exists( 'pk-btn' ) && !opts.text && !!opts.icon?.startsWith( 'i-' ) && Math.abs( opts.w / opts.h - 1 ) < 0.25;
+    if ( this.disc )
+    {
+      // Тінь — той самий диск, затемнений, як у паперової панелі
+      this.discShadow = scene.add.image( 3, 7, opts.icon! ).setTint( 0x000000 ).setAlpha( 0.18 );
+      this.discShadow.setScale( Math.min( opts.w, opts.h ) / this.discShadow.width );
+      this.add( this.discShadow );
+    }
+    else if ( scene.textures.exists( 'pk-btn' ) )
     {
       this.edge = painted( scene, opts.w, opts.h );
       this.face = painted( scene, opts.w, opts.h );
@@ -91,8 +103,8 @@ export class Button extends Phaser.GameObjects.Container
     {
       this.ico = scene.add.image( 0, -2, opts.icon );
       // Намальовані іконки 48 px, згенеровані більші: зводимо до того самого екранного розміру
-      const base = opts.icon.startsWith( 'i-' ) ? 48 / this.ico.width : 1;
-      this.ico.setScale( base * ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
+      const base = opts.icon.startsWith( 'i-' ) ? 48 / this.ico.width : baseScale( this.ico );
+      this.ico.setScale( this.disc ? Math.min( opts.h, opts.w ) / this.ico.width : base * ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
       this.add( this.ico );
     }
     if ( opts.text )
@@ -174,6 +186,11 @@ export class Button extends Phaser.GameObjects.Container
     const g = this.bg;
     g.clear();
     const off = pressed ? 4 : 0;
+    if ( this.disc )
+    {
+      this.ico?.setY( off );
+      return;
+    }
     if ( this.face && this.edge )
     {
       const fw = this.face.displayWidth;
@@ -210,7 +227,8 @@ export class Button extends Phaser.GameObjects.Container
 export function painted( scene: Phaser.Scene, w: number, h: number ): Phaser.GameObjects.NineSlice
 {
   const src = scene.textures.get( 'pk-btn' ).getSourceImage();
-  const cap = Math.min( src.width * 0.3, src.height * 0.5 );
+  // Рваний край паперу тонкий, тож вузький торець: у квадратній кнопці між торцями лишається середина, без шва
+  const cap = Math.min( src.width * 0.3, src.height * 0.3 );
   const k = Math.min( h / src.height, w / ( cap * 2 + 2 ) );
   const ns = scene.add.nineslice( 0, 0, 'pk-btn', undefined, Math.max( cap * 2 + 2, w / k ), src.height, cap, cap, 0, 0 );
   ns.setScale( k );

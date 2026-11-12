@@ -6,6 +6,7 @@ import {
   EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_STAMP, EV_WIN, type SimState
 } from '../core/sim.ts';
 import { WorldView } from '../ui/worldView.ts';
+import { baseScale } from '../core/art.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { save, persist } from '../core/save.ts';
 import { skin } from '../core/skins.ts';
@@ -376,8 +377,10 @@ export class GameScene extends Phaser.Scene
       const mb = this.view.mailboxes[ i ];
       audio.deliver();
       const letter = this.add.image( this.s.x, this.s.y - 30, 'letter' ).setDepth( 20 );
+      const lk = baseScale( letter );
+      letter.setScale( lk );
       this.tweens.add( {
-        targets: letter, x: mb.x, y: mb.y - 46, scale: 0.6, duration: 380, ease: 'Quad.inOut',
+        targets: letter, x: mb.x, y: mb.y - 46, scale: 0.6 * lk, duration: 380, ease: 'Quad.inOut',
         onComplete: () =>
         {
           letter.destroy();

@@ -6,6 +6,16 @@ export const RES = 2;
 
 type Draw = ( g: CanvasRenderingContext2D, w: number, h: number ) => void;
 
+// Більша сторона намальованих кодом текстур, під які підібрані масштаби в сценах.
+// Перемальовані версії більші, тож масштаб множимо на це співвідношення
+const BASE_SIZE: Record<string, number> = { letter: 40, gas: 32 };
+
+export function baseScale( img: Phaser.GameObjects.Image ): number
+{
+  const b = BASE_SIZE[ img.texture.key ];
+  return b ? b / Math.max( img.width, img.height ) : 1;
+}
+
 function hex( c: number, a = 1 ): string
 {
   const r = ( c >> 16 ) & 255;

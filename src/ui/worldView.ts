@@ -96,7 +96,15 @@ export class WorldView
     {
       const key = h.kind === 'gull' ? 'gull0' : h.kind === 'spike' || h.kind === 'storm' ? 'spike' : 'bird0';
       const img = this.add( scene.add.image( h.x, h.y, key ).setDepth( 9 ) );
-      img.setDisplaySize( h.r * 2.6, h.kind === 'spike' || h.kind === 'storm' ? h.r * 2.6 : h.r * 1.9 );
+      if ( h.kind === 'bird' )
+      {
+        // Намальована ластівка вища за кодову (крила вгору й вниз), тож тримаємо пропорції малюнка
+        img.setScale( ( h.r * 2.8 ) / img.width );
+      }
+      else
+      {
+        img.setDisplaySize( h.r * 2.6, h.kind === 'spike' || h.kind === 'storm' ? h.r * 2.6 : h.r * 1.9 );
+      }
       this.hazards.push( img );
     } );
   }
