@@ -5,6 +5,7 @@ import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
 import { langChosen } from '../core/i18n.ts';
 import { TRAIL_PARTICLES } from '../core/skins.ts';
+import { findLevel } from '../levels/index.ts';
 
 const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'shop', 'route' ];
 // Скіни, вже перемальовані в акварельному стилі: текстури того ж розміру, що й намальовані кодом.
@@ -20,6 +21,46 @@ const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'f
 // Хмари пака замінюємо перемальованими: довга смуга, кругла купа й тонке пасмо
 const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_puff', 'cloud_wisp' ];
 
+// Черга файлів гри. Ключі, які екран завантаження вже взяв для себе (полум'я, птах, хмари), не вантажимо вдруге
+export function queueGameAssets( scene: Phaser.Scene ): void
+{
+  const load = ( key: string, url: string ) =>
+  {
+    if ( !scene.textures.exists( key ) )
+    {
+      scene.load.image( key, url );
+    }
+  };
+  if ( !pack )
+  {
+    for ( const k of [ 'meadow', 'sea', 'mountain' ] )
+    {
+      load( 'bg-' + k, 'assets/bg-' + k + '.png' );
+    }
+    return;
+  }
+  for ( const k of [ ...packLayers(), 'cloud0', 'cloud1', 'cloud2', 'panel', 'button', ...ICONS.map( ( i ) => 'i-' + i ) ] )
+  {
+    load( 'pk-' + k, 'assets/packs/' + pack.id + '/' + k + '.png' );
+  }
+  for ( const id of PAINTED_SKINS )
+  {
+    load( 'pk-' + id, 'assets/balloon/' + id + '.png' );
+  }
+  for ( const id of TRAIL_PARTICLES )
+  {
+    load( id, 'assets/trail/' + id + '.png' );
+  }
+  for ( const id of PAINTED_WORLD )
+  {
+    load( 'pk-' + id, 'assets/world/' + id + '.png' );
+  }
+  for ( const id of new Set( PAINTED_CLOUDS ) )
+  {
+    load( 'pw-' + id, 'assets/world/' + id + '.png' );
+  }
+}
+
 export class BootScene extends Phaser.Scene
 {
   constructor()
@@ -27,38 +68,7 @@ export class BootScene extends Phaser.Scene
     super( 'boot' );
   }
 
-  preload(): void
-  {
-    if ( !pack )
-    {
-      for ( const k of [ 'meadow', 'sea', 'mountain' ] )
-      {
-        this.load.image( 'bg-' + k, 'assets/bg-' + k + '.png' );
-      }
-      return;
-    }
-    for ( const k of [ ...packLayers(), 'cloud0', 'cloud1', 'cloud2', 'panel', 'button', ...ICONS.map( ( i ) => 'i-' + i ) ] )
-    {
-      this.load.image( 'pk-' + k, 'assets/packs/' + pack.id + '/' + k + '.png' );
-    }
-    for ( const id of PAINTED_SKINS )
-    {
-      this.load.image( 'pk-' + id, 'assets/balloon/' + id + '.png' );
-    }
-    for ( const id of TRAIL_PARTICLES )
-    {
-      this.load.image( id, 'assets/trail/' + id + '.png' );
-    }
-    for ( const id of PAINTED_WORLD )
-    {
-      this.load.image( 'pk-' + id, 'assets/world/' + id + '.png' );
-    }
-    for ( const id of new Set( PAINTED_CLOUDS ) )
-    {
-      this.load.image( 'pw-' + id, 'assets/world/' + id + '.png' );
-    }
-  }
-
+  // Усе вантажить екран завантаження (LoadScene) через queueGameAssets, тут лише обробка текстур
   create(): void
   {
     makeCommon( this );
@@ -99,15 +109,15 @@ export class BootScene extends Phaser.Scene
     }
     platform.loadingStop();
     document.getElementById( 'loading' )?.remove();
-    // Гра одразу стартує з рівня, без меню: новачок — з 1-1, інші — з останнього
-    this.scene.launch( 'bg' );
-    // Перший запуск: спершу мова, бо далі одразу йде навчання з текстом
+    // Перший запуск: спершу мова, бо далі текст на карті й у навчанні
     if ( !langChosen() )
     {
+      this.scene.launch( 'bg' );
       this.scene.start( 'lang' );
       return;
     }
-    this.scene.start( 'game', { levelId: save().lastLevel } );
+    // Гра відкривається меню-картою на світі останнього рівня; живий фон карта запускає сама
+    this.scene.start( 'map', { world: findLevel( save().lastLevel )?.world.id ?? 1 } );
   }
 
   // Згенеровані кнопка й заливка кольорові; знебарвлюємо їх, щоб тонувати під будь-який колір і зберегти мазки

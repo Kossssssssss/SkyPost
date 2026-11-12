@@ -2,10 +2,11 @@ import Phaser from 'phaser';
 import { t, tn, currentLang, type Lang } from '../core/i18n.ts';
 import { save, starsOf, totalStars, record } from '../core/save.ts';
 import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked, maxStars } from '../levels/index.ts';
-import { SKINS } from '../core/skins.ts';
+import { SKINS, skin, trailLook } from '../core/skins.ts';
+import { BalloonView } from '../ui/balloonView.ts';
 import { THEMES } from '../ui/worldView.ts';
 import { audio } from '../core/audio.ts';
-import { button, label, panel, painted, starsRow, uiScale, COLORS, inkHex } from '../ui/widgets.ts';
+import { button, label, panel, painted, starsRow, uiScale, fitText, fadeIn, shade, COLORS, inkHex } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import type { BgScene } from './BgScene.ts';
 import type { Theme } from '../core/level.ts';
@@ -36,6 +37,7 @@ export class MapScene extends Phaser.Scene
     this.input.keyboard!.on( 'keydown-RIGHT', () => this.flip( 1 ) );
     this.input.on( 'pointerdown', () => audio.unlock() );
     this.build();
+    fadeIn( this, this.root );
   }
 
   private flip( d: number ): void
@@ -120,7 +122,8 @@ export class MapScene extends Phaser.Scene
     top.add( lang );
 
     const title = wd ? `${ t( 'world', wd.id ) } · ${ tn( wd.name ) }` : `${ t( 'world', this.world ) } · ${ tn( future?.name ?? '' ) }`;
-    this.root.add( label( this, w / 2, m + bs + 70 * u, title, 56 * u ) );
+    // Заголовок між стрілками гортання: довга назва світу зменшується, а не налазить на них
+    this.root.add( fitText( label( this, w / 2, m + bs + 70 * u, title, 56 * u ), w - 2 * ( m + bs * 1.2 + 30 * u ) ) );
 
     const maxW = WORLDS.length + FUTURE_WORLDS.length;
     if ( this.world > 1 )
@@ -188,12 +191,18 @@ export class MapScene extends Phaser.Scene
       }
       if ( open )
       {
-        node.add( label( this, 0, -2 * u, String( i + 1 ), r * 0.85 ) );
+        node.add( label( this, 0, -r * 0.04, String( i + 1 ), r * 0.85, '#ffffff', shade( COLORS.primaryDark, 0.8 ) ) );
         starsRow( this, 0, r * 1.45, starsOf( lvl.id ), r * 0.7 ).forEach( ( s ) => node.add( s ) );
         node.setSize( r * 2, r * 2 );
         node.setInteractive( { useHandCursor: true } );
-        node.on( 'pointerover', () => node.setScale( 1.07 ) );
-        node.on( 'pointerout', () => node.setScale( 1 ) );
+        const zoom = ( to: number ) =>
+        {
+          this.tweens.killTweensOf( node );
+          this.tweens.add( { targets: node, scale: to, duration: 160, ease: 'Sine.out' } );
+        };
+        node.on( 'pointerover', () => zoom( 1.07 ) );
+        node.on( 'pointerout', () => zoom( 1 ) );
+        node.on( 'pointerdown', () => zoom( 0.95 ) );
         node.on( 'pointerup', () =>
         {
           audio.click();
@@ -207,8 +216,12 @@ export class MapScene extends Phaser.Scene
     }
     if ( current >= 0 )
     {
+      // Над поточним рівнем — уся вдягнена збірка: оболонка, пілот, кошик і шлейф
       const p = pos( current );
-      const b = this.add.image( p.x, p.y - 120 * u, 'env:' + save().equip.envelope ).setScale( 0.7 * u );
+      const k = 1.4 * u;
+      const b = new BalloonView( this, p.x, p.y - 85 * u );
+      b.setScale( k );
+      this.makeTrail( b, k );
       this.root.add( b );
       this.tweens.add( { targets: b, y: b.y - 16 * u, duration: 900, yoyo: true, repeat: -1, ease: 'Sine.inOut' } );
     }
@@ -228,19 +241,52 @@ export class MapScene extends Phaser.Scene
       {
         const owned = save().owned.includes( sp.id );
         const y = h - 60 * u;
-        this.root.add( this.add.image( w / 2 - 260 * u, y - 10 * u, 'env:' + sp.id ).setScale( 0.5 * u ).setAlpha( owned ? 1 : 0.8 ) );
-        this.root.add( label( this, w / 2 - 210 * u, y, owned ? tn( sp.name ) + ' ✔' : t( 'special', wd.id ) + ' → ' + tn( sp.name ), 28 * u ).setOrigin( 0, 0.5 ) );
+        // Куля й підпис стоять однією групою по центру екрана
+        const img = this.add.image( 0, y - 10 * u, 'env:' + sp.id ).setScale( 0.5 * u ).setAlpha( owned ? 1 : 0.8 );
+        const tx = label( this, 0, y, owned ? tn( sp.name ) + ' ✔' : t( 'special', wd.id ) + ' → ' + tn( sp.name ), 28 * u ).setOrigin( 0, 0.5 );
+        const gap = 14 * u;
+        fitText( tx, w - 2 * m - img.displayWidth - gap );
+        const total = img.displayWidth + gap + tx.width;
+        img.x = w / 2 - total / 2 + img.displayWidth / 2;
+        tx.x = w / 2 - total / 2 + img.displayWidth + gap;
+        this.root.add( [ img, tx ] );
       }
     }
+  }
+
+  private makeTrail( target: BalloonView, k: number ): void
+  {
+    const id = save().equip.trail;
+    const look = trailLook( this, skin( id ) );
+    if ( !look )
+    {
+      return;
+    }
+    // Шлейф тягнеться ліворуч, наче куля пливе до наступного рівня
+    const sz = k * 0.2 * look.k * ( look.painted ? 2 : 1 );
+    this.root.add( this.add.particles( 0, 0, look.tex, {
+      follow: target, followOffset: { x: 0, y: -3.3 * k },
+      speedX: { min: -110 * k, max: -70 * k }, speedY: { min: -12, max: 12 },
+      lifespan: 1100, frequency: id === 'trl-rainbow' ? 35 : 90,
+      scale: { start: sz, end: sz * 0.25 }, alpha: { start: 0.9, end: 0 },
+      ...( look.tint ? { tint: look.tint } : {} )
+    } ) );
   }
 
   private lockedPanel( x: number, y: number, text: string, u: number ): void
   {
     const c = this.add.container( x, y );
     this.root.add( c );
-    c.add( panel( this, 760 * u, 200 * u ) );
-    c.add( this.add.image( -290 * u, 0, 'lock' ).setScale( 1.6 * u ).setTint( 0x6a7090 ) );
-    c.add( label( this, 30 * u, 0, text, 40 * u, inkHex(), false ) );
+    const pw = 760 * u;
+    c.add( panel( this, pw, 200 * u ) );
+    // Замок і напис — одна група по центру панелі з проміжком між ними
+    const lock = this.add.image( 0, 0, 'lock' ).setScale( 1.6 * u ).setTint( 0x6a7090 );
+    const gap = 24 * u;
+    const tx = fitText( label( this, 0, 0, text, 40 * u, inkHex(), false ), pw - 140 * u - lock.displayWidth - gap );
+    const total = lock.displayWidth + gap + tx.width;
+    lock.x = -total / 2 + lock.displayWidth / 2;
+    tx.x = -total / 2 + lock.displayWidth + gap + tx.width / 2;
+    c.add( [ lock, tx ] );
   }
 
   private play( id: string ): void

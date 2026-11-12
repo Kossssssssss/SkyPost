@@ -9,7 +9,7 @@ import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
 import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_UNLOCK, worldUnlocked } from '../levels/index.ts';
 import { SKINS } from '../core/skins.ts';
-import { button, label, panel, starsRow, uiScale, COLORS, inkHex, type Button } from '../ui/widgets.ts';
+import { button, label, panel, starsRow, uiScale, fitText, fadeIn, popIn, COLORS, inkHex, type Button } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import { baseScale } from '../core/art.ts';
 import { Tutorial, type TutStep } from '../ui/tutorial.ts';
@@ -63,6 +63,8 @@ export class UIScene extends Phaser.Scene
   private tutStep: TutStep = 'done';
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
   private windPulse = 0;
+  // Наступне вікно чи картка щойно відкриваються й мають виринути плавно; перебудова при зміні розміру — без анімації
+  private pop = false;
 
   constructor()
   {
@@ -174,7 +176,9 @@ export class UIScene extends Phaser.Scene
     this.windPulse = 0;
     this.tutStep = g.lvl.id === '1-1' && !save().seenTips.includes( 'tutorial' ) ? 'hold' : 'done';
     ( this.scene.get( 'bg' ) as BgScene ).setTheme( g.lvl.theme );
+    this.pop = true;
     this.rebuild();
+    this.pop = false;
   }
 
   private rebuild(): void
@@ -228,7 +232,7 @@ export class UIScene extends Phaser.Scene
 
     const pauseBtn = button( this, m + bs / 2, m + bs / 2, { w: bs, h: bs, icon: 'i-pause', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.togglePause() } );
     this.hud.add( pauseBtn );
-    const name = label( this, m * 2 + bs, m + bs / 2 - 3, lvl.id + '  ' + tn( lvl.name ), 34 * u ).setOrigin( 0, 0.5 );
+    const name = fitText( label( this, m * 2 + bs, m + bs / 2 - 3, lvl.id + '  ' + tn( lvl.name ), 34 * u ).setOrigin( 0, 0.5 ), w * 0.3 );
     this.hud.add( name );
 
     const muteBtn = button( this, w - m - bs / 2, m + bs / 2, {
@@ -565,23 +569,35 @@ export class UIScene extends Phaser.Scene
     const cw = 660 * u;
     const ch = 420 * u;
     c.add( panel( this, cw, ch ) );
-    c.add( label( this, 0, -ch / 2 + 50 * u, lvl.id + '  ' + tn( lvl.name ), 40 * u, inkHex(), false ) );
+    // Внутрішні поля пергаменту: вміст не заходить на рамку
+    const inner = cw - 120 * u;
+    let tankW = 0;
+    if ( lvl.fuel !== undefined )
+    {
+      const tank = fitText( label( this, cw / 2 - 60 * u, -ch / 2 + 50 * u, t( 'tank', gasUnits( lvl.fuel + this.gs.bonusFuel ) ), 24 * u, '#c85a10', false ).setOrigin( 1, 0.5 ), inner * 0.3 );
+      c.add( tank );
+      tankW = tank.width + 16 * u;
+    }
+    // Назва по центру, але не налазить на напис про бак праворуч
+    c.add( fitText( label( this, 0, -ch / 2 + 50 * u, lvl.id + '  ' + tn( lvl.name ), 40 * u, inkHex(), false ), inner - tankW * 2 ) );
     const rec = record( lvl.id );
     const rows: [ boolean, string ][] = [
       [ rec.done, lvl.targets.length > 1 ? t( 'condDeliverN', lvl.targets.length ) : t( 'condDeliver' ) ],
       [ rec.gas, t( 'condGas', gasUnits( lvl.gasStar ) ) ],
       [ rec.stamp, t( 'condStamp' ) ]
     ];
-    rows.forEach( ( [ got, text ], i ) =>
+    // Умови — блок рядків «зірка + текст», вирівняних ліворуч, а сам блок стоїть по центру картки
+    const star = 46 * u;
+    const gap = 14 * u;
+    const texts = rows.map( ( [ , text ] ) => fitText( label( this, 0, 0, text, 28 * u, inkHex(), false ).setOrigin( 0, 0.5 ), inner - star - gap ) );
+    const blockW = star + gap + Math.max( ...texts.map( ( tx ) => tx.width ) );
+    const x0 = -blockW / 2;
+    rows.forEach( ( [ got ], i ) =>
     {
       const y = -ch / 2 + 120 * u + i * 56 * u;
-      c.add( this.add.image( -cw / 2 + 70 * u, y, got ? 'star' : 'starEmpty' ).setDisplaySize( 46 * u, 46 * u ) );
-      c.add( label( this, -cw / 2 + 110 * u, y, text, 28 * u, inkHex(), false ).setOrigin( 0, 0.5 ) );
+      c.add( this.add.image( x0 + star / 2, y, got ? 'star' : 'starEmpty' ).setDisplaySize( star, star ) );
+      c.add( texts[ i ].setPosition( x0 + star + gap, y ) );
     } );
-    if ( lvl.fuel !== undefined )
-    {
-      c.add( label( this, cw / 2 - 40 * u, -ch / 2 + 50 * u, t( 'tank', gasUnits( lvl.fuel + this.gs.bonusFuel ) ), 24 * u, '#c85a10', false ).setOrigin( 1, 0.5 ) );
-    }
     // Нижня рамка пергаменту товста, тож кнопки стоять над нею, а не на ній
     const by = ch / 2 - 98 * u;
     const fails = save().fails[ lvl.id ] ?? 0;
@@ -605,15 +621,15 @@ export class UIScene extends Phaser.Scene
     }
     btns.forEach( ( b, i ) =>
     {
-      b.setPosition( ( i - ( btns.length - 1 ) / 2 ) * 290 * u, by );
+      b.setPosition( ( i - ( btns.length - 1 ) / 2 ) * 266 * u, by );
       c.add( b );
     } );
-    const hold = label( this, 0, ch / 2 + 54 * u, '▲ ' + t( 'hold' ) + ' ▲', 38 * u );
+    const hold = fitText( label( this, 0, ch / 2 + 54 * u, '▲ ' + t( 'hold' ) + ' ▲', 38 * u ), cw );
     c.add( hold );
     this.tweens.add( { targets: hold, scale: 1.08, duration: 600, yoyo: true, repeat: -1, ease: 'Sine.inOut' } );
     if ( lvl.tip === 'hold' )
     {
-      c.add( label( this, 0, ch / 2 + 110 * u, t( 'holdHint' ), 24 * u ) );
+      c.add( fitText( label( this, 0, ch / 2 + 110 * u, t( 'holdHint' ), 24 * u ), cw ) );
     }
     // На низьких екранах картка стискається між верхньою панеллю й низом, щоб не закривати газ
     const top = this.gasRect.y + this.gasRect.h + 50 * u;
@@ -621,6 +637,10 @@ export class UIScene extends Phaser.Scene
     const k = Math.min( 1, ( h - top - 10 * u ) / need );
     c.setScale( k );
     c.y = k < 1 ? top + ( ch / 2 ) * k : Math.max( h * 0.42, top + ch / 2 );
+    if ( this.pop )
+    {
+      popIn( this, c );
+    }
   }
 
   // Кнопка винагороди: реклама, якщо доступна; інакше безрекламна альтернатива — безкоштовно після кількох спроб
@@ -628,9 +648,10 @@ export class UIScene extends Phaser.Scene
   {
     const u = this.u;
     const adsOk = platform.rewardedAvailable();
-    const caption = free ? text + ' · ' + t( 'free' ) : adsOk ? text : t( 'freeAfter', FREE_AFTER - fails );
+    // Довгі підписи йдуть у два рядки, щоб влізти в кнопку без дрібного шрифту
+    const caption = free ? text + '\n' + t( 'free' ) : adsOk ? text : t( 'freeAfter', FREE_AFTER - fails );
     const b = button( this, 0, 0, {
-      w: 270 * u, h: 76 * u, text: caption, icon: free || !adsOk ? icon : 'tv', size: ( free || adsOk ? 24 : 18 ) * u,
+      w: 250 * u, h: 76 * u, text: caption, icon: free || !adsOk ? icon : 'tv', size: ( adsOk && !free ? 26 : 20 ) * u,
       color: COLORS.green, dark: COLORS.greenDark,
       onClick: async () =>
       {
@@ -669,7 +690,7 @@ export class UIScene extends Phaser.Scene
     {
       const c = this.card;
       this.card = undefined;
-      this.tweens.add( { targets: c, alpha: 0, y: c.y - 40, duration: 220, onComplete: () => c.destroy() } );
+      this.tweens.add( { targets: c, alpha: 0, y: c.y - 40, duration: 240, ease: 'Sine.in', onComplete: () => c.destroy() } );
     }
     const lvl = this.gs.lvl;
     if ( lvl.tip && !save().seenTips.includes( lvl.tip ) )
@@ -693,12 +714,12 @@ export class UIScene extends Phaser.Scene
     const w = this.scale.width;
     const h = this.scale.height;
     this.tipText?.destroy();
-    const tx = label( this, w / 2, h * 0.24, text, 32 * this.u );
+    const tx = fitText( label( this, w / 2, h * 0.24, text, 32 * this.u ), w - 40 * this.u );
     this.tipText = tx;
     this.layer.add( tx );
     tx.setAlpha( 0 );
-    this.tweens.add( { targets: tx, alpha: 1, duration: 300 } );
-    this.tweens.add( { targets: tx, alpha: 0, delay: 6500, duration: 600, onComplete: () => tx.destroy() } );
+    this.tweens.add( { targets: tx, alpha: 1, duration: 300, ease: 'Sine.out' } );
+    this.tweens.add( { targets: tx, alpha: 0, delay: 6500, duration: 600, ease: 'Sine.in', onComplete: () => tx.destroy() } );
   }
 
   // ---------- Пауза ----------
@@ -726,7 +747,9 @@ export class UIScene extends Phaser.Scene
     }
     this.overlay = 'pause';
     this.pointers.clear();
+    this.pop = true;
     this.rebuild();
+    this.pop = false;
   }
 
   private modal( cw: number, ch: number, title: string ): Phaser.GameObjects.Container
@@ -738,7 +761,12 @@ export class UIScene extends Phaser.Scene
     const c = this.add.container( w / 2, h / 2 );
     this.layer.add( c );
     c.add( panel( this, cw, ch ) );
-    c.add( label( this, 0, -ch / 2 + 62 * this.u, title, 54 * this.u, inkHex(), false ) );
+    c.add( fitText( label( this, 0, -ch / 2 + 62 * this.u, title, 54 * this.u, inkHex(), false ), cw - 120 * this.u ) );
+    if ( this.pop )
+    {
+      fadeIn( this, dim );
+      popIn( this, c );
+    }
     return c;
   }
 
@@ -748,10 +776,11 @@ export class UIScene extends Phaser.Scene
     const c = this.modal( 600 * u, 520 * u, t( 'paused' ) );
     const bw = 400 * u;
     const bh = 86 * u;
-    c.add( button( this, 0, -55 * u, { w: bw, h: bh, text: t( 'resume' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, onClick: () => this.togglePause() } ) );
-    c.add( button( this, 0, 50 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
-    c.add( button( this, -100 * u, 155 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
-    const mus = button( this, 100 * u, 155 * u, {
+    // Три ряди кнопок рівно між заголовком і нижньою рамкою, з однаковими проміжками
+    c.add( button( this, 0, -75 * u, { w: bw, h: bh, text: t( 'resume' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, onClick: () => this.togglePause() } ) );
+    c.add( button( this, 0, 28 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
+    c.add( button( this, -105 * u, 131 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
+    const mus = button( this, 105 * u, 131 * u, {
       w: 190 * u, h: bh, icon: 'i-music', color: save().music ? COLORS.blue : COLORS.grey, dark: save().music ? COLORS.blueDark : COLORS.greyDark,
       onClick: () =>
       {
@@ -770,7 +799,9 @@ export class UIScene extends Phaser.Scene
     this.overlay = 'fail';
     this.tutStep = 'done';
     this.pointers.clear();
+    this.pop = true;
     this.rebuild();
+    this.pop = false;
   }
 
   private buildFail(): void
@@ -791,7 +822,7 @@ export class UIScene extends Phaser.Scene
       } );
       rb.setPosition( 70 * u, 115 * u );
       c.add( rb );
-      c.add( button( this, -205 * u, 115 * u, { w: 120 * u, h: 76 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
+      c.add( button( this, -135 * u, 115 * u, { w: 120 * u, h: 76 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     }
     else
     {
@@ -850,7 +881,9 @@ export class UIScene extends Phaser.Scene
     this.hud.removeAll( true );
     this.layer.removeAll( true );
     this.buildHud();
+    this.pop = true;
     this.buildResult( info, true );
+    this.pop = false;
   }
 
   private buildResult( info: ResultInfo, animate: boolean ): void
@@ -894,7 +927,7 @@ export class UIScene extends Phaser.Scene
     rows.forEach( ( r, i ) =>
     {
       const ok = i === 0 ? info.gasOk : info.stampOk;
-      c.add( label( this, 0, -30 * u + i * 44 * u, ( ok ? '✔ ' : '✖ ' ) + r, 26 * u, ok ? '#24804a' : '#a05050', false ) );
+      c.add( fitText( label( this, 0, -30 * u + i * 44 * u, ( ok ? '✔ ' : '✖ ' ) + r, 26 * u, ok ? '#24804a' : '#a05050', false ), 600 * u ) );
     } );
     let extraY = 70 * u;
     if ( info.gained > 0 )

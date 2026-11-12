@@ -3,6 +3,65 @@ import { save } from '../core/save.ts';
 import { RES } from '../core/art.ts';
 import { TOP_OFF } from '../core/sim.ts';
 
+// Мальовані скіни мають різну площу малюнка на однаковому полотні, тож кожен зводимо до еталона:
+// кошики — до рамки плетеного (по обох осях), пілоти — до площі лиса (однаково по осях, щоб вуха не стискали тіло)
+const REF: Record<string, string> = { bas: 'bas:bas-wicker', plt: 'plt:plt-fox' };
+const fitCache = new Map<string, { x: number; y: number }>();
+
+function measure( scene: Phaser.Scene, key: string ): { w: number; h: number; area: number }
+{
+  const src = scene.textures.get( key ).getSourceImage() as HTMLImageElement | HTMLCanvasElement;
+  const cv = document.createElement( 'canvas' );
+  cv.width = src.width;
+  cv.height = src.height;
+  const ctx = cv.getContext( '2d', { willReadFrequently: true } )!;
+  ctx.drawImage( src, 0, 0 );
+  const d = ctx.getImageData( 0, 0, cv.width, cv.height ).data;
+  let x0 = cv.width, y0 = cv.height, x1 = -1, y1 = -1, area = 0;
+  for ( let y = 0; y < cv.height; y++ )
+  {
+    for ( let x = 0; x < cv.width; x++ )
+    {
+      if ( d[ ( y * cv.width + x ) * 4 + 3 ] > 40 )
+      {
+        area++;
+        x0 = Math.min( x0, x );
+        x1 = Math.max( x1, x );
+        y0 = Math.min( y0, y );
+        y1 = Math.max( y1, y );
+      }
+    }
+  }
+  return area ? { w: x1 - x0 + 1, h: y1 - y0 + 1, area } : { w: cv.width, h: cv.height, area: cv.width * cv.height };
+}
+
+export function skinFit( scene: Phaser.Scene, key: string ): { x: number; y: number }
+{
+  const hit = fitCache.get( key );
+  if ( hit )
+  {
+    return hit;
+  }
+  const ref = REF[ key.slice( 0, 3 ) ];
+  let fit = { x: 1, y: 1 };
+  if ( ref && ref !== key && scene.textures.exists( key ) && scene.textures.exists( ref ) )
+  {
+    const a = measure( scene, key );
+    const b = measure( scene, ref );
+    if ( key.startsWith( 'bas' ) )
+    {
+      fit = { x: b.w / a.w, y: b.h / a.h };
+    }
+    else
+    {
+      const k = Math.sqrt( b.area / a.area );
+      fit = { x: k, y: k };
+    }
+  }
+  fitCache.set( key, fit );
+  return fit;
+}
+
 export class BalloonView extends Phaser.GameObjects.Container
 {
   private env: Phaser.GameObjects.Image;
@@ -40,8 +99,13 @@ export class BalloonView extends Phaser.GameObjects.Container
   applySkins( equip = save().equip ): void
   {
     this.env.setTexture( 'env:' + equip.envelope );
-    this.basket.setTexture( 'bas:' + equip.basket );
-    this.pilot.setTexture( 'plt:' + equip.pilot );
+    const k = 1 / RES;
+    const bk = 'bas:' + equip.basket;
+    const pk = 'plt:' + equip.pilot;
+    const bf = skinFit( this.scene, bk );
+    const pf = skinFit( this.scene, pk );
+    this.basket.setTexture( bk ).setScale( k * bf.x, k * bf.y );
+    this.pilot.setTexture( pk ).setScale( k * 0.9 * pf.x, k * 0.9 * pf.y );
   }
 
   pose( burning: boolean, heat: number, tilt: number, dt: number ): void

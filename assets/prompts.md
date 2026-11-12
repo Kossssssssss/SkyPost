@@ -1252,3 +1252,87 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: —
 - промпт: Four cute small animal pilots side by side in a row with even spacing, each shown from the chest up facing forward with big friendly eyes, each wearing a brown leather aviator cap with round brass goggles pushed up on the forehead and a small knitted scarf: the first a brown bear cub with a faded brick red scarf, the second a grey raccoon with a dark eye mask and an ochre scarf, the third a small grey mouse with big round ears and a dusty blue scarf, the fourth a black and white penguin with a cream scarf, front view, full figures in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadbar_s11.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00078
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long horizontal empty progress bar shaped like a slim rounded tube of torn cream paper with a thin sepia ink border and a small brass cap on each end, the inside a plain light cream channel, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadbar_s22.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00078
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long horizontal empty progress bar shaped like a slim rounded tube of torn cream paper with a thin sepia ink border and a small brass cap on each end, the inside a plain light cream channel, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadbar_s44.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00078
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long horizontal empty progress bar shaped like a slim rounded tube of torn cream paper with a thin sepia ink border and a small brass cap on each end, the inside a plain light cream channel, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/ribbon_s44.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x768, seed 44, ціна $0.00169
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long waving faded brick red cloth ribbon banner with folded forked ends on both sides and a wide flat plain middle band, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/ribbon_s11.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x768, seed 11, ціна $0.00169
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long waving faded brick red cloth ribbon banner with folded forked ends on both sides and a wide flat plain middle band, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/ribbon_s33.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x768, seed 33, ціна $0.00169
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long waving faded brick red cloth ribbon banner with folded forked ends on both sides and a wide flat plain middle band, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadmap_s11.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00247
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: An old hand-painted travel map of a cozy countryside seen from high above, rolling sage green hills, patchwork farm fields, winding dusty blue rivers, a sea bay with tiny sailboats along the right side, small villages with faded brick red roofs, round tree groves, distant mountains along the top edge, a compass rose in the lower left corner, dotted sepia paths between the villages, soft cloud shadows on the land, wide landscape composition with a calm open middle area, the map fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/ribbon_s22.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x768, seed 22, ціна $0.00169
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long waving faded brick red cloth ribbon banner with folded forked ends on both sides and a wide flat plain middle band, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadmap_s33.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00247
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: An old hand-painted travel map of a cozy countryside seen from high above, rolling sage green hills, patchwork farm fields, winding dusty blue rivers, a sea bay with tiny sailboats along the right side, small villages with faded brick red roofs, round tree groves, distant mountains along the top edge, a compass rose in the lower left corner, dotted sepia paths between the villages, soft cloud shadows on the land, wide landscape composition with a calm open middle area, the map fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadmap_s22.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00247
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: An old hand-painted travel map of a cozy countryside seen from high above, rolling sage green hills, patchwork farm fields, winding dusty blue rivers, a sea bay with tiny sailboats along the right side, small villages with faded brick red roofs, round tree groves, distant mountains along the top edge, a compass rose in the lower left corner, dotted sepia paths between the villages, soft cloud shadows on the land, wide landscape composition with a calm open middle area, the map fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadmap_s44.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00247
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: An old hand-painted travel map of a cozy countryside seen from high above, rolling sage green hills, patchwork farm fields, winding dusty blue rivers, a sea bay with tiny sailboats along the right side, small villages with faded brick red roofs, round tree groves, distant mountains along the top edge, a compass rose in the lower left corner, dotted sepia paths between the villages, soft cloud shadows on the land, wide landscape composition with a calm open middle area, the map fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/loadbar_s33.png
+- дата: 2026-11-12 16:19
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00078
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long horizontal empty progress bar shaped like a slim rounded tube of torn cream paper with a thin sepia ink border and a small brass cap on each end, the inside a plain light cream channel, front view, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style

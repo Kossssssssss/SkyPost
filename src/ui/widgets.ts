@@ -23,9 +23,23 @@ export const COLORS = {
   panelEdge: 0xe0c89a
 };
 
+export function hexOf( c: number ): string
+{
+  return '#' + c.toString( 16 ).padStart( 6, '0' );
+}
+
 export function inkHex(): string
 {
-  return '#' + COLORS.ink.toString( 16 ).padStart( 6, '0' );
+  return hexOf( COLORS.ink );
+}
+
+// Той самий колір, темніший у k разів: обводка й тінь напису беруться з кольору кнопки під ним
+export function shade( c: number, k: number ): number
+{
+  const r = Math.round( ( ( c >> 16 ) & 255 ) * k );
+  const g = Math.round( ( ( c >> 8 ) & 255 ) * k );
+  const b = Math.round( ( c & 255 ) * k );
+  return ( r << 16 ) | ( g << 8 ) | b;
 }
 
 // Масштаб інтерфейсу: на дрібних екранах телефонів кнопки більші, щоб влучати пальцем
@@ -36,19 +50,71 @@ export function uiScale(): number
   return Phaser.Math.Clamp( 620 / Math.max( 1, short ), 1, 1.75 );
 }
 
-export function label( scene: Phaser.Scene, x: number, y: number, str: string, size: number, color = '#ffffff', stroke = true ): Phaser.GameObjects.Text
+// stroke: true — чорнильна обводка, число — обводка цього кольору, false — без обводки
+export function label( scene: Phaser.Scene, x: number, y: number, str: string, size: number, color = '#ffffff', stroke: boolean | number = true ): Phaser.GameObjects.Text
 {
   const tx = scene.add.text( x, y, str, {
     fontFamily: FONT,
     fontSize: Math.round( size ) + 'px',
     fontStyle: 'bold',
     color,
-    align: 'center',
-    stroke: stroke ? inkHex() : undefined,
-    strokeThickness: stroke ? Math.max( 3, size * 0.16 ) : 0
+    align: 'center'
   } );
   tx.setOrigin( 0.5 );
+  if ( stroke !== false )
+  {
+    outline( tx, size, stroke === true ? COLORS.ink : stroke );
+  }
   return tx;
+}
+
+// Обводка товщає разом зі шрифтом; тінь — темніший тон обводки трохи нижче, для глибини й читабельності
+export function outline( tx: Phaser.GameObjects.Text, size: number, col: number ): void
+{
+  tx.setStroke( hexOf( col ), Math.max( 3, size * 0.16 ) );
+  const d = shade( col, 0.55 );
+  tx.setShadow( 0, Math.max( 1.5, size * 0.07 ), `rgba(${ ( d >> 16 ) & 255 },${ ( d >> 8 ) & 255 },${ d & 255 },0.5)`, Math.max( 2, size * 0.1 ), true, true );
+}
+
+// Зменшує шрифт, доки напис не влізе в рамку (не дрібніше minK від початкового); не влазить і так — обрізає з «…»
+export function fitText( tx: Phaser.GameObjects.Text, maxW: number, maxH = Infinity, minK = 0.62 ): Phaser.GameObjects.Text
+{
+  const base = parseFloat( String( tx.style.fontSize ) );
+  const strokeK = tx.style.strokeThickness / base;
+  const k = Math.min( 1, maxW / Math.max( 1, tx.width ), maxH / Math.max( 1, tx.height ) );
+  if ( k < 1 )
+  {
+    const px = base * Math.max( minK, k * 0.98 );
+    tx.setFontSize( Math.round( px ) + 'px' );
+    if ( strokeK > 0 )
+    {
+      tx.setStroke( tx.style.stroke as string, Math.max( 3, px * strokeK ) );
+    }
+  }
+  const full = tx.text;
+  if ( tx.width > maxW && full.length > 1 )
+  {
+    let n = full.length - 1;
+    while ( n > 1 && tx.setText( full.slice( 0, n ).trimEnd() + '…' ).width > maxW )
+    {
+      n--;
+    }
+  }
+  return tx;
+}
+
+// Плавна поява: сцени, модальні вікна й картки виринають, а не з'являються стрибком
+export function popIn( scene: Phaser.Scene, target: Phaser.GameObjects.Container, from = 0.92, duration = 240 ): void
+{
+  const s = target.scale;
+  target.setAlpha( 0 ).setScale( s * from );
+  scene.tweens.add( { targets: target, alpha: 1, scale: s, duration, ease: 'Back.out' } );
+}
+
+export function fadeIn( scene: Phaser.Scene, target: Phaser.GameObjects.GameObject & { setAlpha( a: number ): unknown }, duration = 220, to = 1 ): void
+{
+  target.setAlpha( 0 );
+  scene.tweens.add( { targets: target, alpha: to, duration, ease: 'Sine.out' } );
 }
 
 export interface ButtonOpts
@@ -64,6 +130,9 @@ export interface ButtonOpts
   onClick: () => void;
 }
 
+const HOVER = 1.05;
+const PRESS = 0.95;
+
 export class Button extends Phaser.GameObjects.Container
 {
   private bg: Phaser.GameObjects.Graphics;
@@ -74,6 +143,13 @@ export class Button extends Phaser.GameObjects.Container
   // Квадратна кнопка з самою іконкою: намальована іконка вже на паперовому диску, тож диск і є кнопкою
   private disc = false;
   private discShadow?: Phaser.GameObjects.Image;
+  // 0 — кнопка вгорі, 1 — натиснута; тягнеться твіном, щоб натиск ішов плавно
+  private press = 0;
+  private hover = false;
+  private down = false;
+  private scaleTw?: Phaser.Tweens.Tween;
+  private pressTw?: Phaser.Tweens.Tween;
+  private fullText = '';
   txt?: Phaser.GameObjects.Text;
   ico?: Phaser.GameObjects.Image;
   enabled = true;
@@ -98,10 +174,9 @@ export class Button extends Phaser.GameObjects.Container
       this.face = painted( scene, opts.w, opts.h );
       this.add( [ this.edge, this.face ] );
     }
-    const size = opts.size ?? Math.round( opts.h * 0.42 );
     if ( opts.icon )
     {
-      this.ico = scene.add.image( 0, -2, opts.icon );
+      this.ico = scene.add.image( 0, 0, opts.icon );
       // Намальовані іконки 48 px, згенеровані більші: зводимо до того самого екранного розміру
       const base = opts.icon.startsWith( 'i-' ) ? 48 / this.ico.width : baseScale( this.ico );
       this.ico.setScale( this.disc ? Math.min( opts.h, opts.w ) / this.ico.width : base * ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
@@ -109,63 +184,129 @@ export class Button extends Phaser.GameObjects.Container
     }
     if ( opts.text )
     {
-      this.txt = label( scene, 0, -2, opts.text, size );
+      this.fullText = opts.text;
+      this.txt = label( scene, 0, 0, opts.text, 10, '#ffffff', false );
       this.add( this.txt );
     }
     this.arrange();
-    this.draw( false );
+    this.draw();
+    // Дотик ловить уся площа кнопки, а не лише мазок чи напис на ній
     this.setSize( opts.w, opts.h );
     this.setInteractive( { useHandCursor: true } );
-    this.on( 'pointerover', () => this.enabled && this.setScale( 1.05 ) );
+    this.on( 'pointerover', () =>
+    {
+      this.hover = true;
+      this.zoom();
+    } );
     this.on( 'pointerout', () =>
     {
-      this.setScale( 1 );
-      this.draw( false );
+      this.hover = false;
+      this.down = false;
+      this.zoom();
+      this.pressTo( 0 );
     } );
     this.on( 'pointerdown', () =>
     {
       if ( this.enabled )
       {
-        this.draw( true );
+        this.down = true;
+        this.zoom();
+        this.pressTo( 1 );
       }
     } );
-    this.on( 'pointerup', () =>
+    this.on( 'pointerup', ( p: Phaser.Input.Pointer ) =>
     {
-      this.draw( false );
+      this.down = false;
+      // На дотиковому екрані наведення немає: після відпускання кнопка повертається до звичайного розміру
+      if ( p.wasTouch )
+      {
+        this.hover = false;
+      }
+      this.zoom();
+      this.pressTo( 0 );
       if ( this.enabled )
       {
         audio.click();
         opts.onClick();
       }
     } );
+    this.once( 'destroy', () =>
+    {
+      this.scaleTw?.remove();
+      this.pressTw?.remove();
+    } );
     scene.add.existing( this );
+  }
+
+  private zoom(): void
+  {
+    const to = !this.enabled ? 1 : this.down ? PRESS : this.hover ? HOVER : 1;
+    this.scaleTw?.remove();
+    if ( this.scene )
+    {
+      this.scaleTw = this.scene.tweens.add( { targets: this, scale: to, duration: this.down ? 90 : 160, ease: 'Sine.out' } );
+    }
+  }
+
+  private pressTo( v: number ): void
+  {
+    this.pressTw?.remove();
+    if ( !this.scene )
+    {
+      return;
+    }
+    this.pressTw = this.scene.tweens.addCounter( {
+      from: this.press, to: v, duration: v > this.press ? 70 : 150, ease: 'Sine.out',
+      onUpdate: ( tw ) =>
+      {
+        this.press = tw.getValue() ?? v;
+        this.draw();
+      }
+    } );
   }
 
   setText( s: string ): this
   {
-    this.txt?.setText( s );
+    this.fullText = s;
     this.arrange();
     return this;
   }
 
-  // Іконка й текст стоять однією групою по центру кнопки, а не іконка біля краю й текст збоку
+  // Іконка й напис стоять однією групою по центру кнопки з невеликим проміжком; напис підганяється під кнопку
   private arrange(): void
   {
-    if ( !this.ico || !this.txt )
+    const { w, h } = this.opts;
+    const both = !!this.ico && !!this.txt;
+    const gap = both ? h * 0.1 : 0;
+    const iw = both ? this.ico!.displayWidth : 0;
+    if ( this.txt )
+    {
+      const size = Math.min( this.opts.size ?? h * 0.42, h * 0.48 );
+      this.txt.setText( this.fullText ).setFontSize( Math.round( size ) + 'px' );
+      // Обводка — темний тон самої кнопки, а не чорнило: напис наче намальований тією ж фарбою
+      outline( this.txt, size, shade( this.opts.dark ?? COLORS.primaryDark, 0.8 ) );
+      // Мальований мазок має рвані краї, тож бічні поля ширші
+      const padX = this.face ? h * 0.32 : h * 0.24;
+      fitText( this.txt, w - padX * 2 - iw - gap, h * 0.72 );
+    }
+    if ( !both )
     {
       return;
     }
-    const gap = this.opts.h * 0.16;
-    const iw = this.ico.displayWidth;
-    const total = iw + gap + this.txt.width;
-    this.ico.x = -total / 2 + iw / 2;
-    this.txt.x = -total / 2 + iw + gap + this.txt.width / 2;
+    const tw = this.txt!.width;
+    const total = iw + gap + tw;
+    this.ico!.x = -total / 2 + iw / 2;
+    this.txt!.x = -total / 2 + iw + gap + tw / 2;
   }
 
   setEnabled( on: boolean ): this
   {
     this.enabled = on;
     this.setAlpha( on ? 1 : 0.55 );
+    if ( this.input )
+    {
+      this.input.cursor = on ? 'pointer' : 'default';
+    }
     return this;
   }
 
@@ -173,11 +314,12 @@ export class Button extends Phaser.GameObjects.Container
   {
     this.opts.color = color;
     this.opts.dark = dark;
-    this.draw( false );
+    this.arrange();
+    this.draw();
     return this;
   }
 
-  private draw( pressed: boolean ): void
+  private draw(): void
   {
     const { w, h } = this.opts;
     const c = this.opts.color ?? COLORS.primary;
@@ -185,12 +327,14 @@ export class Button extends Phaser.GameObjects.Container
     const r = Math.min( h / 2, 22 );
     const g = this.bg;
     g.clear();
-    const off = pressed ? 4 : 0;
+    const off = this.press * 4;
     if ( this.disc )
     {
       this.ico?.setY( off );
       return;
     }
+    // Вміст трохи вище геометричного центру: нижня товщина кнопки зсуває її видиму середину вгору
+    const cy = off - h * 0.04;
     if ( this.face && this.edge )
     {
       const fw = this.face.displayWidth;
@@ -199,8 +343,8 @@ export class Button extends Phaser.GameObjects.Container
       g.fillRoundedRect( -fw / 2 + 4, -fh / 2 + 10, fw - 8, fh - 4, ( fh - 4 ) / 2 );
       this.edge.setTint( d ).setY( 5 );
       this.face.setTint( c ).setY( off );
-      this.txt?.setY( -2 + off - 2 );
-      this.ico?.setY( -2 + off - 2 );
+      this.txt?.setY( cy );
+      this.ico?.setY( cy );
       return;
     }
     g.fillStyle( 0x000000, 0.18 );
@@ -211,14 +355,8 @@ export class Button extends Phaser.GameObjects.Container
     g.fillRoundedRect( -w / 2, -h / 2 + off, w, h - 6, r );
     g.fillStyle( 0xffffff, 0.22 );
     g.fillRoundedRect( -w / 2 + 6, -h / 2 + off + 4, w - 12, ( h - 6 ) * 0.38, Math.min( r, ( h - 6 ) * 0.19 ) );
-    if ( this.txt )
-    {
-      this.txt.y = -2 + off - 3;
-    }
-    if ( this.ico )
-    {
-      this.ico.y = -2 + off - 3;
-    }
+    this.txt?.setY( cy - 2 );
+    this.ico?.setY( cy - 2 );
   }
 }
 

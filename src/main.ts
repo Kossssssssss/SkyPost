@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { BootScene } from './scenes/BootScene.ts';
+import { LoadScene } from './scenes/LoadScene.ts';
 import { BgScene } from './scenes/BgScene.ts';
 import { GameScene } from './scenes/GameScene.ts';
 import { UIScene } from './scenes/UIScene.ts';
@@ -38,7 +39,7 @@ async function start(): Promise<void>
     },
     input: { activePointers: 3 },
     render: { antialias: true },
-    scene: [ BootScene, BgScene, GameScene, FgScene, UIScene, MapScene, ShopScene, LangScene ]
+    scene: [ LoadScene, BootScene, BgScene, GameScene, FgScene, UIScene, MapScene, ShopScene, LangScene ]
   } );
 
   adHooks.onAdStart = () =>

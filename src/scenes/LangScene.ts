@@ -2,7 +2,9 @@ import Phaser from 'phaser';
 import { LANGS, LANG_NAMES, currentLang, setLang, type Lang } from '../core/i18n.ts';
 import { save } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
-import { button, label, panel, uiScale, COLORS, inkHex } from '../ui/widgets.ts';
+import { findLevel } from '../levels/index.ts';
+import { pack } from '../ui/pack.ts';
+import { button, label, panel, uiScale, fitText, fadeIn, COLORS, inkHex } from '../ui/widgets.ts';
 
 const COLS: Record<Lang, [ number, number ]> = {
   uk: [ COLORS.green, COLORS.greenDark ],
@@ -33,6 +35,7 @@ export class LangScene extends Phaser.Scene
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
     this.input.on( 'pointerdown', () => audio.unlock() );
     this.build();
+    fadeIn( this, this.root );
   }
 
   private build(): void
@@ -49,7 +52,7 @@ export class LangScene extends Phaser.Scene
     this.root.add( c );
     c.add( panel( this, cw, ch ) );
     // Заголовок усіма трьома мовами: гравець ще не вибрав, якою читати
-    c.add( label( this, 0, -ch / 2 + 70 * u, 'Мова · Язык · Language', 40 * u, inkHex(), false ) );
+    c.add( fitText( label( this, 0, -ch / 2 + 70 * u, 'Мова · Язык · Language', 40 * u, inkHex(), false ), cw - 120 * u ) );
     LANGS.forEach( ( l, i ) =>
     {
       const [ col, dark ] = COLS[ l ];
@@ -75,7 +78,12 @@ export class LangScene extends Phaser.Scene
     }
     else
     {
-      this.scene.start( 'game', { levelId: save().lastLevel } );
+      // Старий статичний фон карта малює сама, тож живий фон без пакета не потрібен
+      if ( !pack )
+      {
+        this.scene.stop( 'bg' );
+      }
+      this.scene.start( 'map', { world: findLevel( save().lastLevel )?.world.id ?? 1 } );
     }
   }
 }

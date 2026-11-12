@@ -69,7 +69,7 @@ export class Tutorial
     c.add( tx );
     c.setAlpha( 0 );
     this.layer.add( c );
-    this.scene.tweens.add( { targets: c, alpha: 1, y: c.y - 10 * u, duration: 260 } );
+    this.scene.tweens.add( { targets: c, alpha: 1, y: c.y - 10 * u, duration: 260, ease: 'Sine.out' } );
     this.bubble = c;
   }
 

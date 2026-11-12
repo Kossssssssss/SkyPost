@@ -3,8 +3,8 @@ import { t, tn } from '../core/i18n.ts';
 import { save, persist, type SkinSlot } from '../core/save.ts';
 import { skinsOf, skin, trailLook, type Skin } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
-import { BalloonView } from '../ui/balloonView.ts';
-import { button, label, panel, uiScale, COLORS, inkHex } from '../ui/widgets.ts';
+import { BalloonView, skinFit } from '../ui/balloonView.ts';
+import { button, label, panel, uiScale, fitText, fadeIn, COLORS, inkHex } from '../ui/widgets.ts';
 import { worldPerfect } from '../levels/index.ts';
 import { pack } from '../ui/pack.ts';
 
@@ -36,6 +36,7 @@ export class ShopScene extends Phaser.Scene
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
     this.input.keyboard!.on( 'keydown-ESC', () => this.back() );
     this.build();
+    fadeIn( this, this.root );
   }
 
   private back(): void
@@ -184,6 +185,24 @@ export class ShopScene extends Phaser.Scene
       g.strokeRoundedRect( -cw / 2, -ch / 2, cw, ch, 22 * u );
     }
     c.add( g );
+    // Наведення й клік ловить уся картка; зона лежить під кнопкою, тож кнопку не перекриває
+    const hit = this.add.zone( 0, 0, cw, ch ).setInteractive();
+    hit.on( 'pointerover', () =>
+    {
+      if ( this.hovered?.id !== sk.id )
+      {
+        this.hovered = sk;
+        this.preview?.applySkins( { ...save().equip, [ sk.slot ]: sk.id } );
+      }
+    } );
+    hit.on( 'pointerup', () =>
+    {
+      if ( owned && !equipped )
+      {
+        this.equip( sk );
+      }
+    } );
+    c.add( hit );
     const iy = -ch / 2 + ch * 0.31;
     if ( sk.slot === 'envelope' )
     {
@@ -191,11 +210,13 @@ export class ShopScene extends Phaser.Scene
     }
     else if ( sk.slot === 'basket' )
     {
-      c.add( this.add.image( 0, iy, 'bas:' + sk.id ).setScale( 1.6 * u ) );
+      const f = skinFit( this, 'bas:' + sk.id );
+      c.add( this.add.image( 0, iy, 'bas:' + sk.id ).setScale( 1.6 * u * f.x, 1.6 * u * f.y ) );
     }
     else if ( sk.slot === 'pilot' )
     {
-      c.add( this.add.image( 0, iy, 'plt:' + sk.id ).setScale( 1.5 * u ) );
+      const f = skinFit( this, 'plt:' + sk.id );
+      c.add( this.add.image( 0, iy, 'plt:' + sk.id ).setScale( 1.5 * u * f.x, 1.5 * u * f.y ) );
     }
     else
     {
@@ -220,14 +241,13 @@ export class ShopScene extends Phaser.Scene
         c.add( label( this, 0, iy, '—', 50 * u, '#8090b0', false ) );
       }
     }
-    c.add( label( this, 0, ch / 2 - 138 * u, tn( sk.name ), 26 * u, inkHex(), false ) );
-
     // Нижня рамка пергаменту товста, тож кнопка й напис стоять вище за неї, а не на ній
     const bw = cw - 70 * u;
     const by = ch / 2 - 84 * u;
+    c.add( fitText( label( this, 0, ch / 2 - 138 * u, tn( sk.name ), 26 * u, inkHex(), false ), bw ) );
     if ( equipped )
     {
-      c.add( label( this, 0, by, '✔ ' + t( 'equipped' ), 24 * u, '#2f8a4e', false ) );
+      c.add( fitText( label( this, 0, by, '✔ ' + t( 'equipped' ), 24 * u, '#2f8a4e', false ), bw ) );
     }
     else if ( owned )
     {
@@ -241,7 +261,7 @@ export class ShopScene extends Phaser.Scene
         sv.owned.push( sk.id );
         persist();
       }
-      c.add( label( this, 0, by, t( 'special', sk.world ), 17 * u, '#7a50a0', false ).setWordWrapWidth( bw ) );
+      c.add( fitText( label( this, 0, by, t( 'special', sk.world ), 17 * u, '#7a50a0', false ).setWordWrapWidth( bw ), bw, 56 * u ) );
     }
     else
     {
@@ -254,23 +274,6 @@ export class ShopScene extends Phaser.Scene
       b.setEnabled( afford );
       c.add( b );
     }
-    const hit = this.add.zone( 0, -ch * 0.12, cw, ch * 0.7 ).setInteractive();
-    hit.on( 'pointerover', () =>
-    {
-      if ( this.hovered?.id !== sk.id )
-      {
-        this.hovered = sk;
-        this.preview?.applySkins( { ...save().equip, [ sk.slot ]: sk.id } );
-      }
-    } );
-    hit.on( 'pointerup', () =>
-    {
-      if ( owned && !equipped )
-      {
-        this.equip( sk );
-      }
-    } );
-    c.add( hit );
   }
 
   private equip( sk: Skin ): void
