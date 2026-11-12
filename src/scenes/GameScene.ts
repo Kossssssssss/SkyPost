@@ -9,7 +9,7 @@ import { WorldView } from '../ui/worldView.ts';
 import { baseScale } from '../core/art.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { save, persist } from '../core/save.ts';
-import { skin } from '../core/skins.ts';
+import { skin, trailLook } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
 
@@ -146,32 +146,47 @@ export class GameScene extends Phaser.Scene
   private makeTrail(): void
   {
     const id = save().equip.trail;
-    const sk = skin( id );
+    const look = trailLook( this, skin( id ) );
+    if ( !look )
+    {
+      return;
+    }
     const base = { follow: this.balloon, followOffset: { x: 0, y: -8 }, emitting: false };
-    let cfg: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig | undefined;
-    let tex = 'soft';
+    // Масштаби розраховані на кодові текстури 32 px (хмарки — 64 px); k перераховує під мальовані 64 px
+    const k = look.k;
+    const sc = ( start: number, end: number ) => ( { start: start * k, end: end * k } );
+    const fall = { speedY: { min: 10, max: 35 }, speedX: { min: -18, max: 18 } };
+    let cfg: Phaser.Types.GameObjects.Particles.ParticleEmitterConfig;
     switch ( id )
     {
       case 'trl-puff':
-        cfg = { lifespan: 1300, frequency: 80, scale: { start: 0.25, end: 0.75 }, alpha: { start: 0.55, end: 0 }, speed: { min: 5, max: 20 }, tint: sk.colors };
+        cfg = { lifespan: 1300, frequency: 80, scale: look.painted ? sc( 0.5, 1.1 ) : sc( 0.5, 1.5 ), alpha: { start: 0.55, end: 0 }, speed: { min: 5, max: 20 } };
         break;
       case 'trl-spark':
-        tex = 'spark';
-        cfg = { lifespan: 900, frequency: 45, scale: { start: 0.5, end: 0 }, alpha: { start: 1, end: 0.2 }, speed: { min: 10, max: 40 }, rotate: { min: 0, max: 180 }, tint: sk.colors, blendMode: Phaser.BlendModes.ADD };
+        // Мальована зірка при додаванні кольорів вицвітає до плями, тож ADD лише для кодової
+        cfg = { lifespan: 900, frequency: 45, scale: sc( 0.5, 0 ), alpha: { start: 1, end: 0.2 }, speed: { min: 10, max: 40 }, rotate: { min: 0, max: 180 }, blendMode: look.painted ? Phaser.BlendModes.NORMAL : Phaser.BlendModes.ADD };
         break;
       case 'trl-heart':
-        tex = 'heart';
-        cfg = { lifespan: 1200, frequency: 140, scale: { start: 0.55, end: 0.25 }, alpha: { start: 0.9, end: 0 }, speedY: { min: -30, max: -10 }, speedX: { min: -10, max: 10 }, tint: sk.colors };
+        cfg = { lifespan: 1200, frequency: 140, scale: sc( 0.55, 0.25 ), alpha: { start: 0.9, end: 0 }, speedY: { min: -30, max: -10 }, speedX: { min: -10, max: 10 } };
         break;
       case 'trl-rainbow':
-        tex = 'dot';
-        cfg = { lifespan: 1000, frequency: 22, scale: { start: 0.4, end: 0.1 }, alpha: { start: 0.9, end: 0 }, speed: { min: 0, max: 8 }, tint: sk.colors };
+        cfg = { lifespan: 1000, frequency: 22, scale: sc( 0.4, 0.1 ), alpha: { start: 0.9, end: 0 }, speed: { min: 0, max: 8 } };
         break;
+      case 'trl-flower':
+        cfg = { lifespan: 1300, frequency: 120, scale: sc( 0.6, 0.25 ), alpha: { start: 0.95, end: 0 }, speedY: { min: -25, max: -5 }, speedX: { min: -12, max: 12 }, rotate: { min: 0, max: 360 } };
+        break;
+      case 'trl-snow':
+        cfg = { lifespan: 1400, frequency: 90, scale: sc( 0.45, 0.15 ), alpha: { start: 1, end: 0 }, ...fall, rotate: { min: 0, max: 360 } };
+        break;
+      default:
+        // Листи, листя й пір'я плавно падають і трохи хитаються
+        cfg = { lifespan: 1500, frequency: 150, scale: sc( 0.65, 0.42 ), alpha: { start: 0.95, end: 0 }, ...fall, rotate: { min: -40, max: 40 } };
     }
-    if ( cfg )
+    if ( look.tint )
     {
-      this.trail = this.add.particles( 0, 0, tex, { ...cfg, ...base } ).setDepth( 9 );
+      cfg.tint = look.tint;
     }
+    this.trail = this.add.particles( 0, 0, look.tex, { ...cfg, ...base } ).setDepth( 9 );
   }
 
   showHint(): void

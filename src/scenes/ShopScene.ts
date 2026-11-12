@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, tn } from '../core/i18n.ts';
 import { save, persist, type SkinSlot } from '../core/save.ts';
-import { skinsOf, skin, type Skin } from '../core/skins.ts';
+import { skinsOf, skin, trailLook, type Skin } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { button, label, panel, uiScale, COLORS, inkHex } from '../ui/widgets.ts';
@@ -9,8 +9,6 @@ import { worldPerfect } from '../levels/index.ts';
 import { pack } from '../ui/pack.ts';
 
 const SLOTS: SkinSlot[] = [ 'envelope', 'basket', 'trail', 'pilot' ];
-
-const TRAIL_TEX: Record<string, string> = { 'trl-puff': 'soft', 'trl-spark': 'spark', 'trl-heart': 'heart', 'trl-rainbow': 'dot' };
 
 export class ShopScene extends Phaser.Scene
 {
@@ -135,18 +133,18 @@ export class ShopScene extends Phaser.Scene
 
   private makeTrail( id: string, target: Phaser.GameObjects.Container, u: number ): void
   {
-    const tex = TRAIL_TEX[ id ];
-    if ( !tex )
+    const look = trailLook( this, skin( id ) );
+    if ( !look )
     {
       return;
     }
-    const sk = skin( id );
     // Шлейф тягнеться ліворуч, імітуючи політ кулі
-    this.trail = this.add.particles( 0, 0, tex, {
+    this.trail = this.add.particles( 0, 0, look.tex, {
       follow: target, followOffset: { x: 0, y: -10 * u },
       speedX: { min: -260 * u, max: -180 * u }, speedY: { min: -20, max: 20 },
       lifespan: 1300, frequency: id === 'trl-rainbow' ? 25 : 70,
-      scale: { start: 0.6 * u, end: 0.15 * u }, alpha: { start: 0.9, end: 0 }, tint: sk.colors
+      scale: { start: 0.6 * u * look.k * ( look.painted ? 2 : 1 ), end: 0.15 * u * look.k * ( look.painted ? 2 : 1 ) }, alpha: { start: 0.9, end: 0 },
+      ...( look.tint ? { tint: look.tint } : {} )
     } );
     this.root.addAt( this.trail, 2 );
   }
@@ -201,15 +199,19 @@ export class ShopScene extends Phaser.Scene
     }
     else
     {
-      const tex = TRAIL_TEX[ sk.id ];
-      if ( tex )
+      const look = trailLook( this, sk );
+      if ( look )
       {
         for ( let k = 0; k < 5; k++ )
         {
-          const img = this.add.image( -60 * u + k * 30 * u, iy + Math.sin( k ) * 12 * u, tex ).setScale( ( 0.5 + k * 0.12 ) * u );
-          const col = sk.colors[ k % sk.colors.length ];
-          // Білий шлейф на кремовій картці не видно, тож іконку трохи затемнюємо
-          img.setTint( col === 0xffffff ? 0xa8bcd8 : col );
+          // Мальовані частинки дрібніші за кодові: на іконці їх збільшуємо вдвічі
+          const img = this.add.image( -60 * u + k * 30 * u, iy + Math.sin( k ) * 12 * u, look.tex ).setScale( ( 0.5 + k * 0.12 ) * u * look.k * ( look.painted ? 1.8 : 1 ) );
+          if ( look.tint )
+          {
+            const col = look.tint[ k % look.tint.length ];
+            // Білий шлейф на кремовій картці не видно, тож іконку трохи затемнюємо
+            img.setTint( col === 0xffffff ? 0xa8bcd8 : col );
+          }
           c.add( img );
         }
       }

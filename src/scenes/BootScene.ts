@@ -4,16 +4,19 @@ import { platform } from '../platform/platform.ts';
 import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
 import { langChosen } from '../core/i18n.ts';
+import { TRAIL_PARTICLES } from '../core/skins.ts';
 
 const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'shop', 'route' ];
 // Скіни, вже перемальовані в акварельному стилі: текстури того ж розміру, що й намальовані кодом.
 // Префікс id (env-, bas-) збігається з префіксом ключа текстури (env:, bas:)
-const PAINTED_SKINS = [ 'env-classic', 'bas-wicker' ];
+const PAINTED_SKINS = [ 'env-classic', 'env-sky', 'env-sunset', 'env-polka', 'env-checker', 'env-patch', 'env-bloom', 'env-light', 'env-aurora', 'env-airmail',
+  'bas-wicker', 'bas-blue', 'bas-crate', 'bas-flower', 'bas-gold', 'bas-barrel', 'bas-airmail', 'bas-picnic', 'bas-tin', 'bas-quilt',
+  'plt-fox', 'plt-cat', 'plt-owl', 'plt-frog', 'plt-bunny', 'plt-hedgehog', 'plt-bear', 'plt-raccoon', 'plt-mouse', 'plt-penguin' ];
 // Перемальовані об'єкти світу. Будинок: ширина та сама, що в намальованого кодом, висота за пропорціями малюнка.
 // Скринька: той самий розмір текстури 96x128, малюнок вписаний і притиснутий донизу
 // Птах: два кадри (крила вгору / вниз) на однаковому полотні, вирівняні по дзьобу.
 // Полум'я: три кадри однакового розміру, притиснуті донизу (flame1 і flame2 є лише намальовані)
-const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'flame', 'flame1', 'flame2', 'letter', 'gas', 'gauge', 'gaugefill' ];
+const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'flame', 'flame1', 'flame2', 'letter', 'gas', 'gauge', 'gaugefill', 'altscale' ];
 // Хмари пака замінюємо перемальованими: довга смуга, кругла купа й тонке пасмо
 const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_puff', 'cloud_wisp' ];
 
@@ -41,6 +44,10 @@ export class BootScene extends Phaser.Scene
     for ( const id of PAINTED_SKINS )
     {
       this.load.image( 'pk-' + id, 'assets/balloon/' + id + '.png' );
+    }
+    for ( const id of TRAIL_PARTICLES )
+    {
+      this.load.image( id, 'assets/trail/' + id + '.png' );
     }
     for ( const id of PAINTED_WORLD )
     {

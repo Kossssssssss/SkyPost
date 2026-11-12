@@ -40,6 +40,7 @@ export class UIScene extends Phaser.Scene
   private layer!: Phaser.GameObjects.Container;
   private windG!: Phaser.GameObjects.Graphics;
   private windMarker!: Phaser.GameObjects.Image;
+  private altScale?: Phaser.GameObjects.Image;
   private gasG!: Phaser.GameObjects.Graphics;
   private gasFill?: Phaser.GameObjects.Image;
   private gasText!: Phaser.GameObjects.Text;
@@ -280,6 +281,13 @@ export class UIScene extends Phaser.Scene
     const top = m * 2 + bs + 40 * u;
     const ph = Math.max( 220 * u, h - top - 40 * u );
     this.panelRect = { x: m, y: top, w: pw, h: Math.min( ph, 640 * u ) };
+    if ( this.textures.exists( 'altscale' ) )
+    {
+      // Мальована смужка неба під шкалою висоти: темніє догори, тож сама підказує, де вище
+      const pr = this.panelRect;
+      this.altScale = this.add.image( pr.x + pr.w / 2, pr.y + pr.h / 2, 'altscale' ).setDisplaySize( pr.w + 8 * u, pr.h + 28 * u );
+      this.hud.add( this.altScale );
+    }
     this.windG = this.add.graphics();
     this.hud.add( this.windG );
     this.windMarker = this.add.image( 0, 0, 'env:' + save().equip.envelope ).setScale( 0.32 * u );
@@ -337,8 +345,11 @@ export class UIScene extends Phaser.Scene
     const pr = this.panelRect;
     const u = this.u;
     g.clear();
-    g.fillStyle( COLORS.ink, 0.45 );
-    g.fillRoundedRect( pr.x, pr.y - 10 * u, pr.w, pr.h + 20 * u, 18 * u );
+    if ( !this.altScale )
+    {
+      g.fillStyle( COLORS.ink, 0.45 );
+      g.fillRoundedRect( pr.x, pr.y - 10 * u, pr.w, pr.h + 20 * u, 18 * u );
+    }
     if ( this.windPulse > 0 )
     {
       g.lineStyle( 6 * u, 0xffd23a, ( 0.5 + 0.5 * Math.sin( this.windPulse * 8 ) ) * Math.min( 1, this.windPulse ) );
@@ -351,12 +362,13 @@ export class UIScene extends Phaser.Scene
       const y1 = this.mapY( layerBottom( lvl, i ) );
       if ( i === cur )
       {
-        g.fillStyle( 0xffffff, 0.22 );
+        // На мальованому небі низ кремовий, і білі позначки там зникають: беремо сепію
+        g.fillStyle( this.altScale ? 0xc98a3a : 0xffffff, this.altScale ? 0.28 : 0.22 );
         g.fillRect( pr.x + 4 * u, y0 + 2, pr.w - 8 * u, y1 - y0 - 4 );
       }
       if ( i > 0 )
       {
-        g.fillStyle( 0xffffff, 0.5 );
+        g.fillStyle( this.altScale ? 0x3b2f2a : 0xffffff, 0.5 );
         g.fillRect( pr.x + 6 * u, y0 - 1, pr.w - 12 * u, 2 );
       }
       const wind = windAt( lvl, ( l.top + layerBottom( lvl, i ) ) / 2, s.t );
@@ -387,7 +399,7 @@ export class UIScene extends Phaser.Scene
       g.strokePoints( poly, true );
     } );
     const by = this.mapY( s.y - MID_OFF );
-    g.lineStyle( 3 * u, 0xffffff, 0.9 );
+    g.lineStyle( 3 * u, this.altScale ? 0x3b2f2a : 0xffffff, 0.9 );
     g.lineBetween( pr.x, by, pr.x + pr.w, by );
     this.windMarker.setPosition( pr.x + pr.w + 2 * u, by );
   }
