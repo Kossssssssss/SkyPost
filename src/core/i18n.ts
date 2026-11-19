@@ -49,6 +49,11 @@ const en = {
   equip: 'Equip',
   equipped: 'Equipped',
   special: '★★★ all levels of world {0}',
+  specialShort: '★★★ in world {0}',
+  finalTitle: 'All mail delivered!',
+  finalStars: 'Stars collected: {0} / {1}',
+  finalThanks: 'Thanks for flying with Sky Post!',
+  finalSoon: 'New worlds are on their way',
   newStars: '+{0} ★',
   envelope: 'Balloons',
   basket: 'Baskets',
@@ -111,6 +116,11 @@ const uk: Dict = {
   equip: 'Вдягти',
   equipped: 'Вдягнено',
   special: '★★★ на всіх рівнях світу {0}',
+  specialShort: '★★★ у світі {0}',
+  finalTitle: 'Усю пошту доставлено!',
+  finalStars: 'Зібрано зірок: {0} / {1}',
+  finalThanks: 'Дякуємо, що літали з Повітряною поштою!',
+  finalSoon: 'Нові світи вже в дорозі',
   newStars: '+{0} ★',
   envelope: 'Кулі',
   basket: 'Кошики',
@@ -171,6 +181,11 @@ const ru: Dict = {
   equip: 'Надеть',
   equipped: 'Надето',
   special: '★★★ на всех уровнях мира {0}',
+  specialShort: '★★★ в мире {0}',
+  finalTitle: 'Вся почта доставлена!',
+  finalStars: 'Собрано звёзд: {0} / {1}',
+  finalThanks: 'Спасибо, что летали с Воздушной почтой!',
+  finalSoon: 'Новые миры уже в пути',
   newStars: '+{0} ★',
   envelope: 'Шары',
   basket: 'Корзины',
@@ -266,7 +281,8 @@ const LANG_KEY = 'skypost.lang';
 
 function guessLang(): Lang
 {
-  const n = ( navigator.language || 'en' ).toLowerCase();
+  // На CrazyGames мову підказує портал (вимога SDK), деінде — браузер; без даних — англійська
+  const n = ( platform.locale() || navigator.language || 'en' ).toLowerCase();
   if ( n.startsWith( 'uk' ) )
   {
     return 'uk';
@@ -280,6 +296,8 @@ let chosen = false;
 // Читаємо вибір після initPlatform: на CrazyGames сховище — це їхній SDK, а не localStorage
 export function loadLang(): void
 {
+  // Портал уже ініціалізований, тож здогадку перераховуємо з його даних
+  lang = guessLang();
   try
   {
     const v = platform.storage.getItem( LANG_KEY ) as Lang | null;

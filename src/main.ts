@@ -8,23 +8,22 @@ import { MapScene } from './scenes/MapScene.ts';
 import { ShopScene } from './scenes/ShopScene.ts';
 import { FgScene } from './scenes/FgScene.ts';
 import { choosePack } from './ui/pack.ts';
-import { initPlatform, adHooks, platform } from './platform/platform.ts';
-import { loadLang } from './core/i18n.ts';
+import { adHooks, platform } from './platform/platform.ts';
+import { gameDataReady } from './core/startup.ts';
 import { LangScene } from './scenes/LangScene.ts';
-import { loadSave } from './core/save.ts';
 import { audio } from './core/audio.ts';
 import { fullscreenOnFirstTap } from './platform/fullscreen.ts';
 import { loadGameFont } from './ui/font.ts';
 
 async function start(): Promise<void>
 {
-  await Promise.all( [ initPlatform(), loadGameFont() ] );
+  // SDK порталу не тримає екран завантаження: він вантажиться паралельно, а LoadScene дочекається його перед файлами гри
+  const data = gameDataReady();
+  await loadGameFont();
   if ( import.meta.env.DEV )
   {
     await ( await import( './ui/fontPreview.ts' ) ).previewFont();
   }
-  loadSave();
-  loadLang();
   choosePack();
 
   const game = new Phaser.Game( {
@@ -38,6 +37,9 @@ async function start(): Promise<void>
       height: 1080
     },
     input: { activePointers: 3 },
+    // Картинки через <img>, а не XHR-blob: тоді браузер віддає їх із <link rel="preload" as="image"> в index.html,
+    // а не качає вдруге. crossOrigin явно, щоб режим запиту збігався з crossorigin у preload
+    loader: { imageLoadType: 'HTMLImageElement', crossOrigin: 'anonymous' },
     render: { antialias: true },
     scene: [ LoadScene, BootScene, BgScene, GameScene, FgScene, UIScene, MapScene, ShopScene, LangScene ]
   } );
@@ -52,7 +54,11 @@ async function start(): Promise<void>
     audio.setAdMuted( false );
     game.resume();
   };
-  platform.onPlatformMute( () => audio.applyVolume() );
+  void data.then( () =>
+  {
+    platform.onPlatformMute( () => audio.applyVolume() );
+    audio.applyVolume();
+  } );
 
   const unlock = () => audio.unlock();
   window.addEventListener( 'pointerdown', unlock );

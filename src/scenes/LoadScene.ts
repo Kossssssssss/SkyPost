@@ -1,15 +1,17 @@
 import Phaser from 'phaser';
-import { queueGameAssets } from './BootScene.ts';
+import { queueGameAssets, worldUrl } from './BootScene.ts';
 import { FONT } from '../ui/widgets.ts';
 import { currentLang, type Lang } from '../core/i18n.ts';
+import { gameDataReady } from '../core/startup.ts';
 
 // Розміри макета: гра в режимі EXPAND, тож одна сторона екрана завжди дорівнює базовій, а інша не менша
 const BW = 1920;
 const BH = 1080;
 const SEPIA = '#3b2f2a';
 const CREAM = '#fbf1dc';
-// Внутрішній канал тубуса на bar.png (1018x115): туди лягає заливка
-const CH = { x0: 64, x1: 956, y0: 28, y1: 82 };
+// Внутрішній канал тубуса на bar.webp (1018x115). Заливка bar_fill.webp того ж розміру повторює його хвилясту форму
+// (scripts/make_bar_fill.py), тож її лише обрізаємо по x від x0 до x1
+const CH = { x0: 86, x1: 936, y0: 22 };
 // Пальник на balloon.webp (604x1024): звідси б'є полум'я, а з кошика сиплеться шлейф
 const BURNER = { x: 302, y: 722 };
 const BASKET = { x: 302, y: 940 };
@@ -55,19 +57,21 @@ export class LoadScene extends Phaser.Scene
     const L = 'assets/loading/';
     this.load.image( 'ld-map', L + 'map.webp' );
     this.load.image( 'ld-balloon', L + 'balloon.webp' );
-    this.load.image( 'ld-bar', L + 'bar.png' );
-    this.load.image( 'ld-ribbon', L + 'ribbon.png' );
+    this.load.image( 'ld-bar', L + 'bar.webp' );
+    this.load.image( 'ld-barfill', L + 'bar_fill.webp' );
+    this.load.image( 'ld-ribbon', L + 'ribbon.webp' );
     // Ці ключі збігаються з ключами гри: BootScene потім підмінить ними намальовані кодом текстури
-    const W = 'assets/world/';
     for ( const id of [ 'flame', 'flame1', 'flame2', 'bird0', 'bird1', 'letter', 'gaugefill' ] )
     {
-      this.load.image( 'pk-' + id, W + id + '.png' );
+      this.load.image( 'pk-' + id, worldUrl( id ) );
     }
-    this.load.image( 'pw-cloud_wisp', W + 'cloud_wisp.png' );
-    this.load.image( 'pw-cloud_puff', W + 'cloud_puff.png' );
-    this.load.image( 'pw-cloud_bank', W + 'cloud_bank.png' );
+    for ( const id of [ 'cloud_wisp', 'cloud_puff', 'cloud_bank' ] )
+    {
+      this.load.image( 'pw-' + id, worldUrl( id ) );
+    }
     this.load.image( 'p-puff', 'assets/trail/p-puff.png' );
-    this.load.image( 'env-classic-ld', 'assets/balloon/env-classic.png' );
+    // Під ключем гри: кулька на смузі — той самий скін, тож гра не вантажить його вдруге
+    this.load.image( 'pk-env-classic', 'assets/balloon/env-classic.png' );
   }
 
   create(): void
@@ -85,15 +89,24 @@ export class LoadScene extends Phaser.Scene
     // Тепер решта гри, з відсотками на смузі
     this.load.on( 'progress', ( p: number ) => { this.target = p; } );
     this.load.once( 'complete', () => { this.target = 1; } );
-    queueGameAssets( this );
-    if ( this.load.totalToLoad === 0 )
+    // Файли гри ставимо в чергу, щойно готові SDK, сейв і мова (мова могла змінитися — перемальовуємо підказку)
+    void gameDataReady().then( () =>
     {
-      this.target = 1;
-    }
-    else
-    {
-      this.load.start();
-    }
+      if ( !this.sys.isActive() )
+      {
+        return;
+      }
+      this.tipIdx = -1;
+      queueGameAssets( this );
+      if ( this.load.totalToLoad === 0 )
+      {
+        this.target = 1;
+      }
+      else
+      {
+        this.load.start();
+      }
+    } );
   }
 
   private buildWorld(): void
@@ -232,15 +245,11 @@ export class LoadScene extends Phaser.Scene
     const bk = bar.scale;
     const bx0 = -bar.displayWidth / 2;
     const by0 = barY - bar.displayHeight / 2;
-    // Заливка — смужка шкали газу, розтягнута на канал тубуса; росте обрізанням, а не масштабом, щоб мазки не пливли
-    const src = this.textures.get( 'pk-gaugefill' ).getSourceImage();
-    const chW = ( CH.x1 - CH.x0 ) * bk;
-    const chH = ( CH.y1 - CH.y0 ) * bk;
-    this.fill = this.add.image( bx0 + CH.x0 * bk, by0 + CH.y0 * bk, 'pk-gaugefill' ).setOrigin( 0, 0 )
-      .setScale( chW / src.width, chH / src.height ).setTint( 0xe9b98a );
-    this.fill.setCrop( 0, 0, 0, src.height );
+    // Заливка за формою каналу лежить точно поверх смуги; росте обрізанням, а не масштабом, щоб мазки не пливли
+    this.fill = this.add.image( 0, barY, 'ld-barfill' ).setScale( bk ).setTint( 0xe9b98a );
+    this.fill.setCrop( 0, 0, 0, this.fill.height );
     // Маленька кулька їде по смузі на краю заливки
-    this.rider = this.add.image( this.fill.x, by0 + CH.y0 * bk - 4, 'env-classic-ld' ).setOrigin( 0.5, 1 ).setScale( 0.62 );
+    this.rider = this.add.image( bx0 + CH.x0 * bk, by0 + CH.y0 * bk - 4, 'pk-env-classic' ).setOrigin( 0.5, 1 ).setScale( 0.62 );
     this.tweens.add( { targets: this.rider, angle: { from: -6, to: 6 }, duration: 900, ease: 'Sine.InOut', yoyo: true, repeat: -1 } );
 
     this.pct = this.add.text( 0, barY + 2, '0%', {
@@ -253,6 +262,7 @@ export class LoadScene extends Phaser.Scene
     this.ui.add( [ ribbon, title, bar, this.fill, this.rider, this.pct, this.tip ] );
   }
 
+  // Статична копія першого кадру цього екрана є в index.html (видно, поки вантажиться код): розкладку й числа міняти разом
   private layout(): void
   {
     const w = this.scale.width;
@@ -291,9 +301,9 @@ export class LoadScene extends Phaser.Scene
 
     // Смуга наздоганяє справжній прогрес, але не швидше за MIN_FILL_S на всю довжину
     this.shown = Math.min( this.target, this.shown + dt / 1000 / MIN_FILL_S );
-    const src = this.textures.get( 'pk-gaugefill' ).getSourceImage();
-    this.fill.setCrop( 0, 0, src.width * this.shown, src.height );
-    this.rider.x = this.fill.x + this.fill.displayWidth * this.shown;
+    const cut = CH.x0 + ( CH.x1 - CH.x0 ) * this.shown;
+    this.fill.setCrop( 0, 0, this.shown > 0 ? cut : 0, this.fill.height );
+    this.rider.x = this.fill.x - this.fill.displayWidth / 2 + cut * this.fill.scaleX;
     this.pct.setText( Math.round( this.shown * 100 ) + '%' );
 
     const tips = TIPS[ currentLang() ];
@@ -325,7 +335,7 @@ export class LoadScene extends Phaser.Scene
       // Після зникнення великі текстури екрана більше не потрібні
       this.events.once( 'shutdown', () => setTimeout( () =>
       {
-        for ( const k of [ 'ld-map', 'ld-balloon', 'ld-bar', 'ld-ribbon', 'env-classic-ld' ] )
+        for ( const k of [ 'ld-map', 'ld-balloon', 'ld-bar', 'ld-barfill', 'ld-ribbon' ] )
         {
           this.textures.remove( k );
         }

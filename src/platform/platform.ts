@@ -15,15 +15,19 @@ export interface Ads
   init(): Promise<void>;
   // true, коли рекламу з винагородою справді можна показати; інакше гра дає безрекламну альтернативу
   rewardedAvailable(): boolean;
-  midgame(): Promise<void>;
+  // true, якщо реклама справді показалась
+  midgame(): Promise<boolean>;
   rewarded(): Promise<boolean>;
   gameplayStart(): void;
   gameplayStop(): void;
+  loadingStart(): void;
   loadingStop(): void;
   happytime(): void;
   progress( percent: number ): void;
   platformMuted(): boolean;
   onPlatformMute( cb: ( muted: boolean ) => void ): void;
+  // Мова гравця за даними порталу (наприклад, 'uk-UA'); null — портал не знає
+  locale(): string | null;
   storage: KeyValueStorage;
 }
 
@@ -78,9 +82,10 @@ class StubAds implements Ads
     return true;
   }
 
-  midgame(): Promise<void>
+  midgame(): Promise<boolean>
   {
-    return this.fake( 'Midgame ad (stub)' ).then( () => {} );
+    // Поза dev-збіркою заглушка нічого не показує
+    return import.meta.env.DEV ? this.fake( 'Midgame ad (stub)' ) : Promise.resolve( false );
   }
 
   rewarded(): Promise<boolean>
@@ -90,6 +95,7 @@ class StubAds implements Ads
 
   gameplayStart(): void {}
   gameplayStop(): void {}
+  loadingStart(): void {}
   loadingStop(): void {}
   happytime(): void {}
   progress(): void {}
@@ -100,6 +106,11 @@ class StubAds implements Ads
   }
 
   onPlatformMute(): void {}
+
+  locale(): string | null
+  {
+    return null;
+  }
 
   private fake( label: string ): Promise<boolean>
   {
@@ -141,6 +152,7 @@ interface CgSdk
     addSettingsChangeListener( fn: ( s: { muteAudio: boolean } ) => void ): void;
   };
   data: KeyValueStorage;
+  user?: { systemInfo?: { locale?: string } };
 }
 
 class CrazyGamesAds implements Ads
@@ -148,6 +160,8 @@ class CrazyGamesAds implements Ads
   readonly name: string = 'crazygames';
   storage: KeyValueStorage;
   private adblock = false;
+  // На Basic Launch реклама вимкнена (adsDisabled): тоді кнопки винагороди переходять на безрекламну альтернативу
+  private noAds = false;
   private playing = false;
   private busy = false;
 
@@ -173,12 +187,12 @@ class CrazyGamesAds implements Ads
 
   rewardedAvailable(): boolean
   {
-    return !this.adblock;
+    return !this.adblock && !this.noAds;
   }
 
-  midgame(): Promise<void>
+  midgame(): Promise<boolean>
   {
-    return this.request( 'midgame' ).then( () => {} );
+    return this.request( 'midgame' );
   }
 
   rewarded(): Promise<boolean>
@@ -212,7 +226,14 @@ class CrazyGamesAds implements Ads
           adHooks.onAdStart();
         },
         adFinished: () => done( true ),
-        adError: () => done( false )
+        adError: ( e ) =>
+        {
+          if ( e?.code === 'adsDisabled' || e?.code === 'adblock' )
+          {
+            this.noAds = true;
+          }
+          done( false );
+        }
       } );
     } );
   }
@@ -233,6 +254,11 @@ class CrazyGamesAds implements Ads
       this.playing = false;
       this.sdk.game.gameplayStop();
     }
+  }
+
+  loadingStart(): void
+  {
+    this.sdk.game.loadingStart();
   }
 
   loadingStop(): void
@@ -258,6 +284,18 @@ class CrazyGamesAds implements Ads
   onPlatformMute( cb: ( muted: boolean ) => void ): void
   {
     this.sdk.game.addSettingsChangeListener( ( s ) => cb( !!s.muteAudio ) );
+  }
+
+  locale(): string | null
+  {
+    try
+    {
+      return this.sdk.user?.systemInfo?.locale ?? null;
+    }
+    catch
+    {
+      return null;
+    }
   }
 }
 
@@ -310,4 +348,6 @@ export async function initPlatform(): Promise<void>
     }
   }
   await platform.init();
+  // Завантаження вже йде (екран завантаження показаний раніше за SDK), тож повідомляємо одразу
+  platform.loadingStart();
 }

@@ -30,7 +30,9 @@ export class BgScene extends Phaser.Scene
   private sky!: Phaser.GameObjects.Graphics;
   private far?: Phaser.GameObjects.Image;
   private sun!: Phaser.GameObjects.Image;
-  private rays?: Phaser.GameObjects.Graphics;
+  // Намальовані промені окремим кільцем під диском: повільно обертаються й ледь дихають
+  private sunRays?: Phaser.GameObjects.Image;
+  private raysK = 1;
   private layers: Layer[] = [];
   private clouds: SkyCloud[] = [];
   private birds: Bird[] = [];
@@ -55,7 +57,11 @@ export class BgScene extends Phaser.Scene
   create(): void
   {
     this.sky = this.add.graphics();
-    this.sun = this.add.image( 0, 0, 'soft' ).setTint( pack?.sun ?? 0xfff4c0 ).setAlpha( 0.7 ).setBlendMode( Phaser.BlendModes.ADD );
+    // Намальоване акварельне сонце: без променів і світіння, приглушена охра. Без пака лишається м'яка пляма
+    this.sunRays = pack && this.textures.exists( 'pk-sun_rays' ) ? this.add.image( 0, 0, 'pk-sun_rays' ).setAlpha( 0.9 ) : undefined;
+    this.sun = pack && this.textures.exists( 'pk-sun' )
+      ? this.add.image( 0, 0, 'pk-sun' ).setAlpha( 0.9 )
+      : this.add.image( 0, 0, 'soft' ).setTint( 0xfff4c0 ).setAlpha( 0.7 ).setBlendMode( Phaser.BlendModes.ADD );
     this.far = undefined;
     this.layers = [];
     this.clouds = [];
@@ -77,7 +83,6 @@ export class BgScene extends Phaser.Scene
 
   private buildPack(): void
   {
-    this.rays = this.add.graphics().setBlendMode( Phaser.BlendModes.ADD );
     const cloud = ( depth: number ) =>
     {
       for ( let i = 0; i < 3; i++ )
@@ -177,7 +182,12 @@ export class BgScene extends Phaser.Scene
       this.sky.fillGradientStyle( th.skyTop, th.skyTop, th.skyBottom, th.skyBottom, 1 );
       this.sky.fillRect( 0, 0, w, h );
     }
-    this.sun.setPosition( w * 0.8, h * 0.16 ).setScale( Math.min( w, h ) / 220 );
+    // Діаметр сонця — 13% меншої сторони екрана (м'яку пляму без пака лишаємо як була)
+    const sunK = this.sun.texture.key === 'pk-sun' ? ( Math.min( w, h ) * 0.13 ) / this.sun.width : Math.min( w, h ) / 220;
+    this.sun.setPosition( w * 0.8, h * ( this.sun.texture.key === 'pk-sun' ? 0.22 : 0.16 ) ).setScale( sunK );
+    // Радіус диска: 112 px на sun.webp і 155 px на sun_rays.webp, тож промені точно облягають наш диск
+    this.raysK = sunK * 112 / 155;
+    this.sunRays?.setPosition( this.sun.x, this.sun.y ).setScale( this.raysK );
     for ( const l of this.layers )
     {
       const tex = this.textures.get( l.key ).getSourceImage();
@@ -209,8 +219,8 @@ export class BgScene extends Phaser.Scene
   {
     let d = 1;
     this.sky.setDepth( 0 );
+    this.sunRays?.setDepth( d++ );
     this.sun.setDepth( d++ );
-    this.rays?.setDepth( d++ );
     const order: ( Phaser.GameObjects.Image | Phaser.GameObjects.Graphics )[] = [];
     for ( const c of this.clouds.filter( ( c ) => c.depth === 0 ) )
     {
@@ -253,7 +263,8 @@ export class BgScene extends Phaser.Scene
       this.camY *= 1 - Math.min( 1, dt * 2 );
     }
     this.menuDrop += ( ( menu ? 0.07 : 0 ) - this.menuDrop ) * Math.min( 1, dt * 3 );
-    this.drawRays();
+    // Повний оберт приблизно за 5 хвилин і подих ±3%: небо живе, але не мерехтить
+    this.sunRays?.setRotation( this.t * 0.02 ).setScale( this.raysK * ( 1 + Math.sin( this.t * 0.8 ) * 0.03 ) );
     for ( const l of this.layers )
     {
       this.placeLayer( l );
@@ -299,22 +310,6 @@ export class BgScene extends Phaser.Scene
     const raw = c.x * span - this.camX * sp - this.t * 40 * sp * 4;
     c.img.x = ( ( raw % span ) + span ) % span - cw;
     c.img.y = h * c.y - this.camY * sp;
-  }
-
-  private drawRays(): void
-  {
-    const g = this.rays!;
-    const r = Math.max( this.w, this.h ) * 0.9;
-    g.clear();
-    g.fillStyle( 0xffffff, 0.06 );
-    const cx = this.sun.x;
-    const cy = this.sun.y;
-    // Промені повільно обертаються — небо здається живим, навіть коли куля стоїть
-    for ( let i = 0; i < 10; i++ )
-    {
-      const a = this.t * 0.03 + ( i * Math.PI ) / 5;
-      g.fillTriangle( cx, cy, cx + Math.cos( a - 0.07 ) * r, cy + Math.sin( a - 0.07 ) * r, cx + Math.cos( a + 0.07 ) * r, cy + Math.sin( a + 0.07 ) * r );
-    }
   }
 
   private drawBirds( g: Phaser.GameObjects.Graphics, dt: number ): void

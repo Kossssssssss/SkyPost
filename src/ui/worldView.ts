@@ -5,6 +5,28 @@ import { RES } from '../core/art.ts';
 import { FONT, inkHex } from './widgets.ts';
 import { cloudKey, pack } from './pack.ts';
 
+// Смуги ground_<тема>.webp і water_<тема>.webp у рівні: висота в одиницях рівня і де на картинці (частка висоти)
+// трава переходить у землю (у води — гребені в суцільну воду). Ця межа стає на лінію ґрунту, трава стирчить над нею.
+// Під лінією ґрунту має лишатися не менше GROUND_H (40) одиниць смуги, бо камера бачить до низу рівня
+const GROUND_ART: Record<string, { height: number; surface: number }> = {
+  meadow: { height: 90, surface: 0.44 },
+  sea: { height: 80, surface: 0.29 },
+  mountain: { height: 85, surface: 0.42 },
+  water: { height: 90, surface: 0.2 }
+};
+
+// Намальовані блоки (block_<тема>.webp) як NineSlice: кути й краї (трава, сніг, бурульки) не тягнуться.
+// Відступи — у пікселях текстури; lift — скільки текстури (трава/сніг) стирчить над верхом блока
+const BLOCK_ART: Record<string, { left: number; right: number; top: number; bottom: number; lift: number }> = {
+  meadow: { left: 30, right: 30, top: 80, bottom: 30, lift: 60 },
+  sea: { left: 30, right: 30, top: 90, bottom: 30, lift: 70 },
+  mountain: { left: 30, right: 30, top: 150, bottom: 70, lift: 10 }
+};
+// Маяк (lighthouse.webp): ліхтар зверху й основа знизу не тягнуться; тіло вежі посередині 116 px завширшки
+const LIGHTHOUSE_ART = { top: 215, bottom: 80, body: 116, sink: 30 };
+// Блок нормального розміру показуємо в половину текстури; дрібні — дрібніше, щоб кути не налазили один на одного
+const BLOCK_SCALE = 0.5;
+
 export interface ThemeStyle
 {
   skyTop: number;
@@ -48,6 +70,8 @@ export class WorldView
   private hazards: Phaser.GameObjects.Image[] = [];
   private motes: Phaser.GameObjects.Image[] = [];
   private water?: Phaser.GameObjects.Graphics;
+  // Намальована вода: копії смуги, що повільно гойдаються
+  private waterImgs: { img: Phaser.GameObjects.Image; x: number; y: number }[] = [];
   mailboxes: Phaser.GameObjects.Image[] = [];
   markers: Phaser.GameObjects.Graphics[] = [];
   stamp: Phaser.GameObjects.Image;
@@ -207,6 +231,35 @@ export class WorldView
   {
     const lvl = this.lvl;
     const gy = groundY( lvl );
+    // Намальована смуга (трава й земля або вода); без малюнка для теми — стара заливка кодом
+    const key = lvl.water ? 'pk-water_' + lvl.theme : 'pk-ground_' + lvl.theme;
+    const art = GROUND_ART[ lvl.water ? 'water' : lvl.theme ];
+    if ( pack && art && this.scene.textures.exists( key ) )
+    {
+      const src = this.scene.textures.get( key ).getSourceImage();
+      const k = art.height / src.height;
+      const tw = src.width * k;
+      const y = gy - art.surface * art.height;
+      // Копії через одну віддзеркалені, тож шов між ними не видно; 1 px перекриття проти щілин.
+      // Вода ширша з обох боків: вона гойдається вбік
+      const pad = lvl.water ? 460 : 400;
+      // На високих екранах камера бачить нижче за смугу: туди тягнемо вниз її нижні 15 % (та сама вода чи земля)
+      const fillFrom = src.height * 0.85;
+      const fillK = 440 / ( src.height * 0.15 );
+      const fillY = y + art.height - 2 - fillFrom * fillK;
+      for ( let x = -pad, i = 0; x < lvl.width + pad; x += tw - 1, i++ )
+      {
+        const depth = lvl.water ? 4 : 5;
+        const img = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( k ).setFlipX( i % 2 === 1 ).setDepth( depth ) );
+        const fill = this.add( this.scene.add.image( x, fillY, key ).setOrigin( 0, 0 ).setScale( k, fillK ).setFlipX( i % 2 === 1 ).setDepth( depth - 0.01 ) );
+        fill.setCrop( 0, fillFrom, src.width, src.height - fillFrom );
+        if ( lvl.water )
+        {
+          this.waterImgs.push( { img, x, y }, { img: fill, x, y: fillY } );
+        }
+      }
+      return;
+    }
     if ( lvl.water )
     {
       this.water = this.add( this.scene.add.graphics().setDepth( 4 ) );
@@ -229,6 +282,19 @@ export class WorldView
     if ( this.lvl.theme === 'sea' && h > w * 2.5 )
     {
       this.drawLighthouse( g, x, y, w, h );
+      return;
+    }
+    // На морі блоки стоять у воді: вода (depth 4) накриває їхню основу; на суші основу ховає смуга землі (depth 5)
+    const depth = this.lvl.water ? 3.9 : 4.95;
+    const art = BLOCK_ART[ this.lvl.theme ];
+    const key = 'pk-block_' + this.lvl.theme;
+    if ( pack && art && this.scene.textures.exists( key ) )
+    {
+      const hh = onGround ? h + 60 : h;
+      const s = Math.min( BLOCK_SCALE, ( w * 0.9 ) / ( art.left + art.right ), ( hh * 0.9 ) / ( art.top + art.bottom ) );
+      const top = y - art.lift * s;
+      this.add( this.scene.add.nineslice( x, top, key, undefined, w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
+        .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ) );
       return;
     }
     const r = Math.min( 18, w / 3, h / 3 );
@@ -262,6 +328,18 @@ export class WorldView
 
   private drawLighthouse( g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number ): void
   {
+    if ( pack && this.scene.textures.exists( 'pk-lighthouse' ) )
+    {
+      // Масштаб — середнє між «тіло в ширину блока» і «весь маяк у висоту блока»: інакше блок низький для такої
+      // ширини, ліхтар виходить величезним, а смуги стиснутими. Вежа трохи занурена у воду
+      const a = LIGHTHOUSE_ART;
+      const src = this.scene.textures.get( 'pk-lighthouse' ).getSourceImage();
+      const hh = h + a.sink;
+      const s = Math.sqrt( ( w / a.body ) * ( hh / src.height ) );
+      this.add( this.scene.add.nineslice( x + w / 2, y, 'pk-lighthouse', undefined, src.width, Math.max( hh / s, a.top + a.bottom ), 0, 0, a.top, a.bottom )
+        .setOrigin( 0.5, 0 ).setScale( s ).setDepth( 3.9 ) );
+      return;
+    }
     const base = y + h + 60;
     g.fillStyle( 0x8a6e4e, 1 );
     g.fillRoundedRect( x - 30, y + h - 30, w + 60, 90, 20 );
@@ -372,6 +450,11 @@ export class WorldView
       this.stamp.rotation = Math.sin( t * 1.7 ) * 0.15;
       this.stampGlow.y = this.stamp.y;
       this.stampGlow.setScale( 1.5 + Math.sin( t * 3 ) * 0.15 );
+    }
+    // Вода повільно хитається вбік і ледь підіймається: хвилі живі, але лінія води лишається на місці
+    for ( const w of this.waterImgs )
+    {
+      w.img.setPosition( w.x + Math.sin( t * 0.6 ) * 30, w.y + Math.sin( t * 1.3 ) * 3 );
     }
     if ( this.water )
     {

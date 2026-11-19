@@ -7,14 +7,15 @@ import { MID_OFF } from '../core/sim.ts';
 import { save, persist, applyResult, addFail, record, starsOf, totalStars } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
-import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_UNLOCK, worldUnlocked } from '../levels/index.ts';
+import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_UNLOCK, worldUnlocked, maxStars } from '../levels/index.ts';
 import { SKINS } from '../core/skins.ts';
 import { button, label, panel, starsRow, uiScale, fitText, fadeIn, popIn, COLORS, inkHex, type Button } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import { baseScale } from '../core/art.ts';
 import { Tutorial, type TutStep } from '../ui/tutorial.ts';
+import { BalloonView } from '../ui/balloonView.ts';
 
-type Overlay = '' | 'pause' | 'fail' | 'result';
+type Overlay = '' | 'pause' | 'fail' | 'result' | 'final';
 
 const FREE_AFTER = 3;
 const AD_EVERY = 3;
@@ -59,6 +60,8 @@ export class UIScene extends Phaser.Scene
   private panelRect = { x: 0, y: 0, w: 0, h: 0 };
   private gasRect = { x: 0, y: 0, w: 0, h: 0 };
   private busy = false;
+  // Щойно показали рекламу між рівнями: до старту наступного рівня rewarded не пропонуємо (правило CrazyGames)
+  private afterMidgame = false;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
@@ -113,7 +116,6 @@ export class UIScene extends Phaser.Scene
     } );
 
     const kb = this.input.keyboard!;
-    kb.on( 'keydown-ESC', () => this.togglePause() );
     kb.on( 'keydown-P', () => this.togglePause() );
     kb.on( 'keydown-R', () =>
     {
@@ -127,6 +129,10 @@ export class UIScene extends Phaser.Scene
       if ( this.overlay === 'result' )
       {
         this.goNext();
+      }
+      else if ( this.overlay === 'final' )
+      {
+        this.toMap();
       }
       else if ( this.overlay === 'fail' )
       {
@@ -216,6 +222,10 @@ export class UIScene extends Phaser.Scene
     else if ( this.overlay === 'result' && this.result )
     {
       this.buildResult( this.result, false );
+    }
+    else if ( this.overlay === 'final' )
+    {
+      this.buildFinal();
     }
   }
 
@@ -603,7 +613,9 @@ export class UIScene extends Phaser.Scene
     const fails = save().fails[ lvl.id ] ?? 0;
     const free = fails >= FREE_AFTER;
     const btns: Button[] = [];
-    if ( lvl.hint && !this.gs.hint )
+    // Одразу після midgame лишаємо тільки безкоштовні винагороди
+    const offer = free || !this.afterMidgame;
+    if ( offer && lvl.hint && !this.gs.hint )
     {
       btns.push( this.rewardButton( t( 'showRoute' ), 'i-route', free, fails, () =>
       {
@@ -611,7 +623,7 @@ export class UIScene extends Phaser.Scene
         this.rebuild();
       } ) );
     }
-    if ( lvl.fuel !== undefined && this.gs.bonusFuel === 0 )
+    if ( offer && lvl.fuel !== undefined && this.gs.bonusFuel === 0 )
     {
       btns.push( this.rewardButton( t( 'plusGas' ), 'gas', free, fails, () =>
       {
@@ -675,6 +687,11 @@ export class UIScene extends Phaser.Scene
         {
           grant();
         }
+        else if ( !platform.rewardedAvailable() )
+        {
+          // Портал сказав, що реклами немає: перемальовуємо, щоб кнопка показала безрекламну альтернативу
+          this.rebuild();
+        }
       }
     } );
     if ( !free && !adsOk )
@@ -686,6 +703,7 @@ export class UIScene extends Phaser.Scene
 
   private onPlay(): void
   {
+    this.afterMidgame = false;
     if ( this.card )
     {
       const c = this.card;
@@ -951,6 +969,35 @@ export class UIScene extends Phaser.Scene
     c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
   }
 
+  // ---------- Фінал ----------
+
+  // Після останнього рівня гри: підсумок замість мовчазного повернення на карту
+  private showFinal(): void
+  {
+    this.overlay = 'final';
+    this.pointers.clear();
+    platform.happytime();
+    this.layer.removeAll( true );
+    this.pop = true;
+    this.buildFinal();
+    this.pop = false;
+  }
+
+  private buildFinal(): void
+  {
+    const u = this.u;
+    const c = this.modal( 720 * u, 660 * u, t( 'finalTitle' ) );
+    // Куля гравця в його скінах, як у магазині (BalloonView стоїть низом кошика в точці y)
+    const pv = new BalloonView( this, 0, 20 * u );
+    pv.setScale( 2.3 * u );
+    c.add( pv );
+    this.tweens.add( { targets: pv, y: pv.y - 10 * u, duration: 1600, yoyo: true, repeat: -1, ease: 'Sine.inOut' } );
+    c.add( fitText( label( this, 0, 50 * u, t( 'finalStars', totalStars(), maxStars() ), 34 * u, inkHex(), false ), 600 * u ) );
+    c.add( fitText( label( this, 0, 100 * u, t( 'finalThanks' ), 26 * u, inkHex(), false ), 600 * u ) );
+    c.add( fitText( label( this, 0, 142 * u, t( 'finalSoon' ), 26 * u, '#24804a', false ), 600 * u ) );
+    c.add( button( this, 0, 235 * u, { w: 300 * u, h: 86 * u, text: t( 'map' ), icon: 'i-map', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.toMap() } ) );
+  }
+
   // ---------- Навігація ----------
 
   private restart( keep = true ): void
@@ -976,11 +1023,15 @@ export class UIScene extends Phaser.Scene
       save().levelsSinceAd = 0;
       persist();
       this.busy = true;
-      await platform.midgame();
+      this.afterMidgame = await platform.midgame();
       this.busy = false;
     }
     this.overlay = '';
-    if ( next && levelUnlocked( next ) )
+    if ( !next )
+    {
+      this.showFinal();
+    }
+    else if ( levelUnlocked( next ) )
     {
       this.gs.restartLevel( next, false );
     }
@@ -998,6 +1049,7 @@ export class UIScene extends Phaser.Scene
       return;
     }
     this.overlay = '';
+    this.afterMidgame = false;
     platform.gameplayStop();
     const f = findLevel( this.gs.levelId );
     this.scene.stop( 'game' );

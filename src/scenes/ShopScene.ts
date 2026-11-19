@@ -34,7 +34,6 @@ export class ShopScene extends Phaser.Scene
     this.root = this.add.container( 0, 0 );
     this.scale.on( 'resize', this.build, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
-    this.input.keyboard!.on( 'keydown-ESC', () => this.back() );
     this.build();
     fadeIn( this, this.root );
   }
@@ -159,7 +158,7 @@ export class ShopScene extends Phaser.Scene
     this.root.add( c );
     // Картка верстається в номінальному розмірі й масштабується цілком, щоб на низьких екранах вміст не налазив
     const cw = 260 * u;
-    const ch = 330 * u;
+    const ch = 315 * u;
     c.setScale( Math.min( fitW / cw, fitH / ch ) );
     const g = this.add.graphics();
     if ( pack )
@@ -242,16 +241,16 @@ export class ShopScene extends Phaser.Scene
       }
     }
     // Нижня рамка пергаменту товста, тож кнопка й напис стоять вище за неї, а не на ній
-    const bw = cw - 70 * u;
-    const by = ch / 2 - 84 * u;
-    c.add( fitText( label( this, 0, ch / 2 - 138 * u, tn( sk.name ), 26 * u, inkHex(), false ), bw ) );
+    const bw = cw - 65 * u;
+    const by = ch / 2 - 81 * u;
+    c.add( fitText( label( this, 0, ch / 2 - 140 * u, tn( sk.name ), 31 * u, inkHex(), false ), bw ) );
     if ( equipped )
     {
-      c.add( fitText( label( this, 0, by, '✔ ' + t( 'equipped' ), 24 * u, '#2f8a4e', false ), bw ) );
+      c.add( fitText( label( this, 0, by, '✔ ' + t( 'equipped' ), 28 * u, '#2f8a4e', false ), bw ) );
     }
     else if ( owned )
     {
-      c.add( button( this, 0, by, { w: bw, h: 56 * u, text: t( 'equip' ), size: 24 * u, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.equip( sk ) } ) );
+      c.add( button( this, 0, by, { w: bw, h: 64 * u, text: t( 'equip' ), size: 28 * u, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.equip( sk ) } ) );
     }
     else if ( sk.world )
     {
@@ -261,13 +260,13 @@ export class ShopScene extends Phaser.Scene
         sv.owned.push( sk.id );
         persist();
       }
-      c.add( fitText( label( this, 0, by, t( 'special', sk.world ), 17 * u, '#7a50a0', false ).setWordWrapWidth( bw ), bw, 56 * u ) );
+      c.add( fitText( label( this, 0, by, t( 'specialShort', sk.world ), 22 * u, '#7a50a0', false ), bw ) );
     }
     else
     {
       const afford = sv.wallet >= sk.price;
       const b = button( this, 0, by, {
-        w: bw, h: 56 * u, text: `${ sk.price } ★`, size: 28 * u,
+        w: bw, h: 66 * u, text: `${ sk.price } ★`, size: 33 * u,
         color: afford ? COLORS.green : COLORS.grey, dark: afford ? COLORS.greenDark : COLORS.greyDark,
         onClick: () => this.buy( sk )
       } );

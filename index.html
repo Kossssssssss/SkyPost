@@ -4,18 +4,161 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Sky Post</title>
+  <!-- Усе для екрана завантаження качається одразу, паралельно з кодом гри: коли стартує Phaser, файли вже в кеші.
+       Phaser бере картинки через <img crossorigin="anonymous"> (loader у main.ts), тому тут as="image" + crossorigin:
+       режим запиту має збігатися, інакше браузер завантажить їх удруге.
+       Список має збігатися з LoadScene.preload і шрифтами з ui/font.ts -->
+  <link rel="preload" href="fonts/rubik-700-latin.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/rubik-700-cyrillic.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="fonts/rubik-700-latin-ext.woff2" as="font" type="font/woff2" crossorigin />
+  <link rel="preload" href="assets/loading/map.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/loading/balloon.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/loading/bar.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/loading/bar_fill.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/loading/ribbon.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/flame.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/flame1.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/flame2.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/bird0.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/bird1.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/letter.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/gaugefill.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/cloud_wisp.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/cloud_puff.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/world/cloud_bank.webp" as="image" crossorigin />
+  <link rel="preload" href="assets/trail/p-puff.png" as="image" crossorigin />
+  <link rel="preload" href="assets/balloon/env-classic.png" as="image" crossorigin />
   <style>
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #5cb8f8; }
     body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
       -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
     #game { position: fixed; inset: 0; }
-    /* Поки вантажиться код, видно ту саму карту, що й на екрані завантаження: перехід без блимання */
-    #loading { position: fixed; inset: 0; background: #efe4cc url(assets/loading/map.webp) center / cover no-repeat; }
+    @font-face { font-family: 'Rubik'; font-weight: 700; font-display: block; src: url(fonts/rubik-700-latin.woff2) format('woff2');
+      unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+    /* Поки вантажиться код, видно статичну копію першого кадру LoadScene (карта, куля, стрічка, порожня смуга).
+       Phaser малює поверх неї те саме в тих самих місцях і прибирає її, тож перехід непомітний */
+    #loading { position: fixed; inset: 0; overflow: hidden; background: #efe4cc; }
+    #stage { position: absolute; left: 0; top: 0; transform-origin: 0 0; opacity: 0; transition: opacity 0.15s; }
+    #stage.on { opacity: 1; }
+    #stage > * { position: absolute; display: block; max-width: none; }
+    #stage .txt { white-space: nowrap; font-family: 'Rubik', 'Trebuchet MS', sans-serif; font-weight: 700; line-height: 1;
+      transform: translate(-50%, -50%); color: #3b2f2a; paint-order: stroke fill; }
   </style>
 </head>
 <body>
   <div id="game"></div>
-  <div id="loading"></div>
+  <div id="loading"><div id="stage">
+    <!-- crossorigin, як у Phaser: картинки беруться з того самого preload -->
+    <img id="ld-map" src="assets/loading/map.webp" crossorigin="anonymous" alt="" />
+    <!-- Тіні хмар і передні хмари, які в LoadScene на старті вже в кадрі (решта ще за краєм екрана) -->
+    <img id="ld-sh1" src="assets/world/cloud_puff.webp" crossorigin="anonymous" alt="" style="filter: brightness(0); opacity: 0.1" />
+    <img id="ld-sh2" src="assets/world/cloud_bank.webp" crossorigin="anonymous" alt="" style="filter: brightness(0); opacity: 0.1" />
+    <img id="ld-sh3" src="assets/world/cloud_puff.webp" crossorigin="anonymous" alt="" style="filter: brightness(0); opacity: 0.1" />
+    <img id="ld-shadow" src="assets/loading/balloon.webp" crossorigin="anonymous" alt="" style="filter: brightness(0); opacity: 0.15" />
+    <img id="ld-balloon" src="assets/loading/balloon.webp" crossorigin="anonymous" alt="" />
+    <img id="ld-glow" src="assets/world/flame.webp" crossorigin="anonymous" alt="" style="mix-blend-mode: plus-lighter; opacity: 0.22" />
+    <img id="ld-flame" src="assets/world/flame.webp" crossorigin="anonymous" alt="" />
+    <img id="ld-cl1" src="assets/world/cloud_puff.webp" crossorigin="anonymous" alt="" style="opacity: 0.9" />
+    <img id="ld-cl2" src="assets/world/cloud_wisp.webp" crossorigin="anonymous" alt="" style="opacity: 0.9" />
+    <img id="ld-ribbon" src="assets/loading/ribbon.webp" crossorigin="anonymous" alt="" />
+    <div id="ld-title" class="txt" style="color: #fbf1dc; -webkit-text-stroke-color: #3b2f2a">Sky Post</div>
+    <img id="ld-bar" src="assets/loading/bar.webp" crossorigin="anonymous" alt="" />
+    <img id="ld-rider" src="assets/balloon/env-classic.png" crossorigin="anonymous" alt="" />
+    <div id="ld-pct" class="txt">0%</div>
+  </div></div>
+  <script>
+    // Розкладка дзеркалить LoadScene.layout()/buildUi() у момент t = 0 (усі числа звідти; міняти разом).
+    // Сцена в координатах гри: EXPAND від 1920x1080, тож одиниця гри = min(вікно / база) пікселів CSS
+    ( function ()
+    {
+      var stage = document.getElementById( 'stage' );
+      var $ = function ( id ) { return document.getElementById( id ); };
+      // x, y — точка origin у координатах гри; sx, sy — масштаб; ox, oy — origin у частках розміру
+      function put( id, x, y, sx, sy, ox, oy )
+      {
+        var el = $( id ), w = el.naturalWidth, h = el.naturalHeight;
+        el.style.width = w + 'px';
+        el.style.height = h + 'px';
+        el.style.left = ( x - ox * w ) + 'px';
+        el.style.top = ( y - oy * h ) + 'px';
+        el.style.transformOrigin = ( ox * 100 ) + '% ' + ( oy * 100 ) + '%';
+        el.style.transform = 'scale(' + sx + ',' + sy + ')';
+      }
+      function text( id, x, y, px, stroke )
+      {
+        var el = $( id );
+        el.style.left = x + 'px';
+        el.style.top = y + 'px';
+        el.style.fontSize = px + 'px';
+        el.style.webkitTextStrokeWidth = stroke + 'px';
+      }
+      function layout()
+      {
+        // Phaser уже прибрав копію: більше нема що розкладати
+        if ( !stage.isConnected )
+        {
+          removeEventListener( 'resize', layout );
+          return;
+        }
+        var k0 = Math.min( innerWidth / 1920, innerHeight / 1080 );
+        var w = innerWidth / k0, h = innerHeight / k0;
+        stage.style.width = w + 'px';
+        stage.style.height = h + 'px';
+        stage.style.transform = 'scale(' + k0 + ')';
+
+        var cover = Math.max( w / 1920, h / 1080 ) * 1.08;
+        put( 'ld-map', w / 2 + 35, h / 2 + 12, cover, cover, 0.5, 0.5 );
+
+        // Як drift(): хмара йде від w + pad до -pad, phase — пройдена частка шляху, yk — висота в частках екрана
+        var drift = function ( id, sc, phase, yk )
+        {
+          var pad = $( id ).naturalWidth * sc * 0.6 + 200;
+          put( id, w + pad - ( w + 2 * pad ) * phase, h * yk, sc, sc, 0.5, 0.5 );
+        };
+        drift( 'ld-sh1', 1.9, 0.25, 0.886 );
+        drift( 'ld-sh2', 2.2, 0.5, 0.772 );
+        drift( 'ld-sh3', 2.5, 0.75, 0.658 );
+        drift( 'ld-cl1', 1.45, 0.37, 0.86 );
+        drift( 'ld-cl2', 1.8, 0.74, 0.5 );
+
+        var tall = h / w > 1.2;
+        var k = tall ? 1.05 : 0.6;
+        var hx = w / 2 + ( tall ? 0 : 40 ), hy = h / 2 - 1024 * k * 0.5 - ( tall ? 40 : 20 );
+        put( 'ld-shadow', hx + 160 * k, hy + 1024 * k * 1.12, 0.22 * k / 0.6, 0.1 * k / 0.6, 0.5, 0.5 );
+        put( 'ld-balloon', hx, hy, k, k, 0.5, 0 );
+        put( 'ld-glow', hx, hy + 652 * k, 3.2 * k, 2.4 * k, 0.5, 0.5 );
+        put( 'ld-flame', hx, hy + 722 * k, 0.62 * k, 0.62 * k, 0.5, 1 );
+
+        var us = tall ? 1.6 : 1, ux = w / 2, uy = h / 2 + ( tall ? -40 : 0 );
+        put( 'ld-ribbon', ux, uy - 440 * us, 0.92 * us, 0.92 * us, 0.5, 0.5 );
+        text( 'ld-title', ux, uy - 446 * us, 78 * us, 9 * us );
+        var bk = 0.82;
+        put( 'ld-bar', ux, uy + 400 * us, bk * us, bk * us, 0.5, 0.5 );
+        // Кулька стоїть на лівому краї каналу (CH.x0 = 86, CH.y0 = 22 на bar.webp), нахилена на старті гойдання
+        var rx = -1018 * bk / 2 + 86 * bk, ry = 400 - 115 * bk / 2 + 22 * bk - 4;
+        put( 'ld-rider', ux + rx * us, uy + ry * us, 0.62 * us, 0.62 * us, 0.5, 1 );
+        $( 'ld-rider' ).style.transform += ' rotate(-6deg)';
+        text( 'ld-pct', ux, uy + 402 * us, 40 * us, 0 );
+      }
+      // Показуємо все разом, коли завантажені картинки й шрифт. img.decode() не беремо: у фоновій вкладці він може не завершитись.
+      // Шрифт чекаємо не довше 1.5 с; розкладку рахуємо по природних розмірах картинок, тож лише після їх load
+      var imgs = Array.prototype.slice.call( stage.getElementsByTagName( 'img' ) );
+      var ready = imgs.map( function ( i )
+      {
+        return i.complete ? null : new Promise( function ( r ) { i.onload = i.onerror = r; } );
+      } );
+      if ( document.fonts )
+      {
+        ready.push( Promise.race( [ document.fonts.load( '700 78px Rubik' ), new Promise( function ( r ) { setTimeout( r, 1500 ); } ) ] ).catch( function () {} ) );
+      }
+      Promise.all( ready ).then( function ()
+      {
+        layout();
+        stage.className = 'on';
+        addEventListener( 'resize', layout );
+      } );
+    } )();
+  </script>
   <script type="module" src="/src/main.ts"></script>
 </body>
 </html>

@@ -3,7 +3,6 @@ import { makeCommon, makeSkins } from '../core/art.ts';
 import { platform } from '../platform/platform.ts';
 import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
-import { langChosen } from '../core/i18n.ts';
 import { TRAIL_PARTICLES } from '../core/skins.ts';
 import { findLevel } from '../levels/index.ts';
 
@@ -17,9 +16,16 @@ const PAINTED_SKINS = [ 'env-classic', 'env-sky', 'env-sunset', 'env-polka', 'en
 // Скринька: той самий розмір текстури 96x128, малюнок вписаний і притиснутий донизу
 // Птах: два кадри (крила вгору / вниз) на однаковому полотні, вирівняні по дзьобу.
 // Полум'я: три кадри однакового розміру, притиснуті донизу (flame1 і flame2 є лише намальовані)
-const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'flame', 'flame1', 'flame2', 'letter', 'gas', 'gauge', 'gaugefill', 'altscale' ];
+const PAINTED_WORLD = [ 'office', 'mailbox', 'mailboxDone', 'bird0', 'bird1', 'flame', 'flame1', 'flame2', 'letter', 'gas', 'gauge', 'gaugefill', 'altscale', 'sun', 'sun_rays' ];
 // Хмари пака замінюємо перемальованими: довга смуга, кругла купа й тонке пасмо
 const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_puff', 'cloud_wisp' ];
+// Ці малюнки світу бере ще екран завантаження, тож вони у WebP: важать у 5–6 разів менше за PNG
+const WEBP_WORLD = new Set( [ 'flame', 'flame1', 'flame2', 'bird0', 'bird1', 'letter', 'gaugefill', 'sun', 'sun_rays', ...PAINTED_CLOUDS ] );
+// Шари пейзажу, перемальовані акварельним пайплайном (scripts/key_layer.py), лежать у WebP
+const PACK_WEBP = new Set( [ 'far', 'mid', 'near', 'sea-far', 'sea-mid', 'sea-near', 'mountain-far', 'mountain-mid', 'mountain-near' ] );
+// Намальовані смуги землі й води, блоки й маяк для worldView
+const GROUND_FILES = [ 'ground_meadow', 'ground_sea', 'ground_mountain', 'water_sea', 'block_meadow', 'block_sea', 'block_mountain', 'lighthouse' ];
+export const worldUrl = ( id: string ): string => 'assets/world/' + id + ( WEBP_WORLD.has( id ) ? '.webp' : '.png' );
 
 // Черга файлів гри. Ключі, які екран завантаження вже взяв для себе (полум'я, птах, хмари), не вантажимо вдруге
 export function queueGameAssets( scene: Phaser.Scene ): void
@@ -41,7 +47,11 @@ export function queueGameAssets( scene: Phaser.Scene ): void
   }
   for ( const k of [ ...packLayers(), 'cloud0', 'cloud1', 'cloud2', 'panel', 'button', ...ICONS.map( ( i ) => 'i-' + i ) ] )
   {
-    load( 'pk-' + k, 'assets/packs/' + pack.id + '/' + k + '.png' );
+    load( 'pk-' + k, 'assets/packs/' + pack.id + '/' + k + ( PACK_WEBP.has( k ) ? '.webp' : '.png' ) );
+  }
+  for ( const f of GROUND_FILES )
+  {
+    load( 'pk-' + f, 'assets/world/' + f + '.webp' );
   }
   for ( const id of PAINTED_SKINS )
   {
@@ -53,11 +63,11 @@ export function queueGameAssets( scene: Phaser.Scene ): void
   }
   for ( const id of PAINTED_WORLD )
   {
-    load( 'pk-' + id, 'assets/world/' + id + '.png' );
+    load( 'pk-' + id, worldUrl( id ) );
   }
   for ( const id of new Set( PAINTED_CLOUDS ) )
   {
-    load( 'pw-' + id, 'assets/world/' + id + '.png' );
+    load( 'pw-' + id, worldUrl( id ) );
   }
 }
 
@@ -109,11 +119,12 @@ export class BootScene extends Phaser.Scene
     }
     platform.loadingStop();
     document.getElementById( 'loading' )?.remove();
-    // Перший запуск: спершу мова, бо далі текст на карті й у навчанні
-    if ( !langChosen() )
+    // Перший запуск: одразу в перший рівень, без мапи й вибору мови (CrazyGames: новий гравець має потрапити в гру
+    // щонайбільше за 1 клік). Мову вгадано з порталу чи браузера, змінити її можна кнопкою на мапі
+    if ( Object.keys( save().levels ).length === 0 )
     {
       this.scene.launch( 'bg' );
-      this.scene.start( 'lang' );
+      this.scene.start( 'game', { levelId: '1-1' } );
       return;
     }
     // Гра відкривається меню-картою на світі останнього рівня; живий фон карта запускає сама
