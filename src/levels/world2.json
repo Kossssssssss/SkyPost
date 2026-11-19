@@ -162,6 +162,7 @@
     {
       "id": "2-6",
       "name": "Two Parcels",
+      "difficulty": "hard",
       "theme": "sea",
       "width": 2600,
       "height": 720,
@@ -231,6 +232,7 @@
     {
       "id": "2-8",
       "name": "Storm Coast",
+      "difficulty": "hard",
       "theme": "sea",
       "width": 3000,
       "height": 720,

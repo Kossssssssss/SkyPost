@@ -69,6 +69,11 @@ export function queueGameAssets( scene: Phaser.Scene ): void
   {
     load( 'pw-' + id, worldUrl( id ) );
   }
+  // Значки на карті: печатки складності й знак нової механіки (scripts/split_marks.py)
+  for ( const id of [ 'mk-hard', 'mk-super', 'mk-new' ] )
+  {
+    load( id, 'assets/world/' + id + '.webp' );
+  }
 }
 
 export class BootScene extends Phaser.Scene

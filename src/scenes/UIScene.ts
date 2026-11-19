@@ -32,6 +32,8 @@ interface ResultInfo
   prevStars: number;
   newSkin?: string;
   newWorld?: number;
+  // Гравець подивився рекламу «×2»: монети за рівень подвоєно
+  doubled?: boolean;
 }
 
 export class UIScene extends Phaser.Scene
@@ -62,6 +64,8 @@ export class UIScene extends Phaser.Scene
   private busy = false;
   // Щойно показали рекламу між рівнями: до старту наступного рівня rewarded не пропонуємо (правило CrazyGames)
   private afterMidgame = false;
+  // Наступна перебудова екрана результату анімує подвоєні монети
+  private popGain = false;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
@@ -602,9 +606,17 @@ export class UIScene extends Phaser.Scene
     const texts = rows.map( ( [ , text ] ) => fitText( label( this, 0, 0, text, 28 * u, inkHex(), false ).setOrigin( 0, 0.5 ), inner - star - gap ) );
     const blockW = star + gap + Math.max( ...texts.map( ( tx ) => tx.width ) );
     const x0 = -blockW / 2;
+    // Під назвою — попередження про складність тими ж кольорами, що й вузол на карті; умови зсуваються нижче
+    let shift = 0;
+    if ( lvl.difficulty )
+    {
+      const txt = lvl.difficulty === 'super' ? t( 'superLevel' ) : t( 'hardLevel' );
+      c.add( fitText( label( this, 0, -ch / 2 + 92 * u, txt, 26 * u, lvl.difficulty === 'super' ? '#34406e' : '#7a3a82', false ), inner ) );
+      shift = 18 * u;
+    }
     rows.forEach( ( [ got ], i ) =>
     {
-      const y = -ch / 2 + 120 * u + i * 56 * u;
+      const y = -ch / 2 + 120 * u + shift + i * 56 * u;
       c.add( this.add.image( x0 + star / 2, y, got ? 'star' : 'starEmpty' ).setDisplaySize( star, star ) );
       c.add( texts[ i ].setPosition( x0 + star + gap, y ) );
     } );
@@ -950,7 +962,26 @@ export class UIScene extends Phaser.Scene
     let extraY = 70 * u;
     if ( info.gained > 0 )
     {
-      c.add( label( this, 0, extraY, t( 'newStars', info.gained ), 36 * u, '#ffd23a' ) );
+      // Поруч із новими зірками — реклама з винагородою «×2»: ще стільки ж монет у гаманець.
+      // Кнопку показуємо, лише коли реклама справді можлива, і ховаємо після подвоєння
+      const offer = !info.doubled && platform.rewardedAvailable();
+      const gained = label( this, offer ? -95 * u : 0, extraY, t( 'newStars', info.gained * ( info.doubled ? 2 : 1 ) ), 36 * u, '#ffd23a' );
+      c.add( gained );
+      if ( this.popGain )
+      {
+        // Щойно подвоїли: число монет помітно «підстрибує», щоб винагороду було видно
+        this.popGain = false;
+        gained.setScale( 1.6 );
+        this.tweens.add( { targets: gained, scale: 1, duration: 420, ease: 'Back.out' } );
+      }
+      if ( offer )
+      {
+        const b = button( this, 105 * u, extraY, {
+          w: 170 * u, h: 64 * u, text: '×2', icon: 'tv', size: 32 * u, color: COLORS.green, dark: COLORS.greenDark,
+          onClick: () => void this.doubleCoins( info )
+        } );
+        c.add( b );
+      }
       extraY += 46 * u;
     }
     if ( info.newWorld )
@@ -967,6 +998,31 @@ export class UIScene extends Phaser.Scene
     c.add( button( this, -210 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     c.add( button( this, -40 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
     c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
+  }
+
+  private async doubleCoins( info: ResultInfo ): Promise<void>
+  {
+    if ( this.busy || info.doubled )
+    {
+      return;
+    }
+    this.busy = true;
+    const ok = await platform.rewarded();
+    this.busy = false;
+    if ( ok )
+    {
+      info.doubled = true;
+      save().wallet += info.gained;
+      persist();
+      audio.buy();
+      this.popGain = true;
+    }
+    // Після реклами (або відмови порталу) перемальовуємо: кнопка зникає, а число монет оновлюється з поштовхом
+    if ( this.overlay === 'result' )
+    {
+      this.layer.removeAll( true );
+      this.buildResult( info, false );
+    }
   }
 
   // ---------- Фінал ----------
@@ -1017,8 +1073,9 @@ export class UIScene extends Phaser.Scene
       return;
     }
     const next = nextLevelId( this.gs.levelId );
-    // Реклама між рівнями — лише на природній паузі після перемоги й не частіше, ніж раз на кілька рівнів
-    if ( save().levelsSinceAd >= AD_EVERY )
+    // Реклама між рівнями — лише на природній паузі після перемоги й не частіше, ніж раз на кілька рівнів.
+    // Якщо гравець щойно дивився «×2», midgame переноситься на наступний рівень (правило CrazyGames: не обидві між тими самими рівнями)
+    if ( save().levelsSinceAd >= AD_EVERY && !this.result?.doubled )
     {
       save().levelsSinceAd = 0;
       persist();

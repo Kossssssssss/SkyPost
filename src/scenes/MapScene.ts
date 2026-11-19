@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { t, tn, currentLang, type Lang } from '../core/i18n.ts';
 import { save, starsOf, totalStars, record } from '../core/save.ts';
 import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked, maxStars } from '../levels/index.ts';
+import { MECHANIC_TIPS } from '../core/level.ts';
 import { SKINS, skin, trailLook } from '../core/skins.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { THEMES } from '../ui/worldView.ts';
@@ -12,6 +13,12 @@ import type { BgScene } from './BgScene.ts';
 import type { Theme } from '../core/level.ts';
 
 const LANG_CODES: Record<Lang, string> = { uk: 'УКР', ru: 'РУС', en: 'ENG' };
+
+// Колір вузла рівня за складністю: [основний, тінь]
+const DIFF_COLORS: Record<string, [ number, number ]> = {
+  hard: [ 0x9a5aa0, 0x6a3a72 ],
+  super: [ 0x34406e, 0x1e2648 ]
+};
 
 export class MapScene extends Phaser.Scene
 {
@@ -175,24 +182,33 @@ export class MapScene extends Phaser.Scene
       g.fillStyle( 0x000000, 0.2 );
       g.fillCircle( 0, 8 * u, r );
       node.add( g );
+      // Важкі рівні — сливові, надважкі — темно-чорнильні, щоб винна печатка над ними не зливалась
+      const [ col, dark ] = !open ? [ COLORS.grey, COLORS.greyDark ] : DIFF_COLORS[ lvl.difficulty ?? '' ] ?? [ COLORS.primary, COLORS.primaryDark ];
       if ( this.textures.exists( 'pk-btn' ) )
       {
-        node.add( painted( this, r * 2, r * 2 ).setTint( open ? COLORS.primaryDark : COLORS.greyDark ).setY( 5 * u ) );
-        node.add( painted( this, r * 2, r * 2 ).setTint( open ? COLORS.primary : COLORS.grey ) );
+        node.add( painted( this, r * 2, r * 2 ).setTint( dark ).setY( 5 * u ) );
+        node.add( painted( this, r * 2, r * 2 ).setTint( col ) );
       }
       else
       {
-        g.fillStyle( open ? COLORS.primaryDark : COLORS.greyDark, 1 );
+        g.fillStyle( dark, 1 );
         g.fillCircle( 0, 4 * u, r );
-        g.fillStyle( open ? COLORS.primary : COLORS.grey, 1 );
+        g.fillStyle( col, 1 );
         g.fillCircle( 0, 0, r - 4 * u );
         g.fillStyle( 0xffffff, 0.25 );
         g.fillEllipse( 0, -r * 0.4, r * 1.2, r * 0.5 );
       }
       if ( open )
       {
-        node.add( label( this, 0, -r * 0.04, String( i + 1 ), r * 0.85, '#ffffff', shade( COLORS.primaryDark, 0.8 ) ) );
+        node.add( label( this, 0, -r * 0.04, String( i + 1 ), r * 0.85, '#ffffff', shade( dark, 0.8 ) ) );
         starsRow( this, 0, r * 1.45, starsOf( lvl.id ), r * 0.7 ).forEach( ( s ) => node.add( s ) );
+        // Знак нової механіки — у лівому верхньому куті, доки рівень не пройдено
+        if ( lvl.tip && MECHANIC_TIPS.has( lvl.tip ) && !record( lvl.id ).done && this.textures.exists( 'mk-new' ) )
+        {
+          const img = this.add.image( -r * 0.8, -r * 0.8, 'mk-new' );
+          node.add( img.setScale( r * 1.0 / img.width ).setAngle( -10 ) );
+          this.tweens.add( { targets: img, scale: img.scale * 1.12, duration: 700, yoyo: true, repeat: -1, ease: 'Sine.inOut' } );
+        }
         node.setSize( r * 2, r * 2 );
         node.setInteractive( { useHandCursor: true } );
         const zoom = ( to: number ) =>
@@ -212,6 +228,13 @@ export class MapScene extends Phaser.Scene
       else
       {
         node.add( this.add.image( 0, 0, 'lock' ).setScale( r / 48 ).setAlpha( 0.9 ) );
+      }
+      // Печатка складності — у правому верхньому куті, навіть на закритому рівні: видно, що попереду
+      const seal = lvl?.difficulty ? 'mk-' + lvl.difficulty : '';
+      if ( seal && this.textures.exists( seal ) )
+      {
+        const img = this.add.image( r * 0.78, -r * 0.78, seal );
+        node.add( img.setScale( r * 1.15 / img.width ).setAngle( 12 ) );
       }
     }
     if ( current >= 0 )

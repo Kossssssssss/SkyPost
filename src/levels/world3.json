@@ -90,6 +90,7 @@
     {
       "id": "3-4",
       "name": "Overhang",
+      "difficulty": "super",
       "theme": "mountain",
       "width": 2400,
       "height": 720,
@@ -145,6 +146,7 @@
     {
       "id": "3-6",
       "name": "Rockfall",
+      "difficulty": "hard",
       "theme": "mountain",
       "width": 2600,
       "height": 720,

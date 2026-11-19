@@ -66,9 +66,15 @@ export interface LevelData
   fuel?: number;
   gasStar: number;
   tip?: string;
+  // Позначка на карті й на картці рівня: важкий або надважкий
+  difficulty?: 'hard' | 'super';
   hint?: number[];
   best?: { gas: number; stampGas?: number; time?: number };
 }
+
+// Підказки, що знайомлять з новою механікою (а не просто пояснюють керування чи зірки):
+// на карті такий рівень позначено, доки його не пройдено
+export const MECHANIC_TIPS = new Set( [ 'layers', 'birds', 'order', 'islands', 'gusts', 'fuel', 'updraft', 'pass' ] );
 
 export interface WorldData
 {

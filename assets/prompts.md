@@ -2008,3 +2008,31 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: —
 - промпт: A single tall rectangular block of grey granite rock, seen straight from the front, straight vertical sides and a flat top, dusty grey and blue grey stone with a few cracks, a soft cap of cream snow along the top edge slightly overhanging, a row of small icicles hanging from the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/map_marks_s11.png
+- дата: 2026-11-19 17:09
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 11, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: Three small round badges standing side by side in a row with even spacing: the left is a round faded brick red wax seal with a simple embossed feather in the middle and soft wavy melted edges, the middle is a round deep dark wine red wax seal with a simple embossed little crown in the middle and soft wavy melted edges, the right is a small ochre yellow five-pointed paper star with a tiny cream sparkle beside it. Front view, each badge centered in its third, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/map_marks_s22.png
+- дата: 2026-11-19 17:09
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 22, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: Three small round badges standing side by side in a row with even spacing: the left is a round faded brick red wax seal with a simple embossed feather in the middle and soft wavy melted edges, the middle is a round deep dark wine red wax seal with a simple embossed little crown in the middle and soft wavy melted edges, the right is a small ochre yellow five-pointed paper star with a tiny cream sparkle beside it. Front view, each badge centered in its third, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/map_marks_s33.png
+- дата: 2026-11-19 17:10
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 33, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: Three small round badges standing side by side in a row with even spacing: the left is a round faded brick red wax seal with a simple embossed feather in the middle and soft wavy melted edges, the middle is a round deep dark wine red wax seal with a simple embossed little crown in the middle and soft wavy melted edges, the right is a small ochre yellow five-pointed paper star with a tiny cream sparkle beside it. Front view, each badge centered in its third, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/map_marks_s44.png
+- дата: 2026-11-19 17:10
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 44, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: Three small round badges standing side by side in a row with even spacing: the left is a round faded brick red wax seal with a simple embossed feather in the middle and soft wavy melted edges, the middle is a round deep dark wine red wax seal with a simple embossed little crown in the middle and soft wavy melted edges, the right is a small ochre yellow five-pointed paper star with a tiny cream sparkle beside it. Front view, each badge centered in its third, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
