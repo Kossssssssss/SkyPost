@@ -80,6 +80,12 @@ export class WorldView
   markers: Phaser.GameObjects.Graphics[] = [];
   stamp: Phaser.GameObjects.Image;
   stampGlow: Phaser.GameObjects.Image;
+  // Місце посадки поточного листа: стовп світла, ореол над майданчиком і іскри, що підіймаються з нього
+  private padBeam!: Phaser.GameObjects.Image;
+  private padHalo!: Phaser.GameObjects.Image;
+  private padBand!: Phaser.GameObjects.Image;
+  private padSparks?: Phaser.GameObjects.Particles.ParticleEmitter;
+  private padZone = new Phaser.Geom.Rectangle( 0, 0, 1, 1 );
 
   constructor( scene: Phaser.Scene, lvl: LevelData )
   {
@@ -121,6 +127,23 @@ export class WorldView
         void n;
       }
     } );
+    // Світло — позаду трави, як будинок: низ ховає блок, а стебла лишаються перед ним
+    this.padBeam = this.add( scene.add.image( 0, 0, 'soft' ).setTint( 0xffd23a ).setDepth( behindGrass - 0.01 ).setBlendMode( Phaser.BlendModes.ADD ) );
+    this.padHalo = this.add( scene.add.image( 0, 0, 'soft' ).setTint( 0xfff0a0 ).setDepth( behindGrass - 0.005 ).setBlendMode( Phaser.BlendModes.ADD ) );
+    // Межа зони: середина 'soft' (40 з 64 px), розтягнута на ширину майданчика, — яскравість майже рівна,
+    // а краї м'яко тануть там, де він закінчується. Перед травою, тож підсвічує самі стебла й повітря над ними
+    this.padBand = this.add( scene.add.image( 0, 0, 'soft' ).setCrop( 12, 0, 40, 64 ).setTint( 0xffe07a ).setDepth( FRONT_DEPTH + 0.01 ).setBlendMode( Phaser.BlendModes.ADD ) );
+    const spark = scene.textures.exists( 'p-star' ) ? 'p-star' : 'spark';
+    if ( scene.textures.exists( spark ) )
+    {
+      const sz = scene.textures.getFrame( spark ).width;
+      this.padSparks = this.add( scene.add.particles( 0, 0, spark, {
+        emitZone: { type: 'random', source: this.padZone, quantity: 1 } as Phaser.Types.GameObjects.Particles.EmitZoneData,
+        speedY: { min: -45, max: -20 }, speedX: { min: -8, max: 8 }, lifespan: { min: 900, max: 1400 },
+        frequency: 150, scale: { start: 12 / sz, end: 5 / sz }, alpha: { start: 0.9, end: 0, ease: 'Cubic.in' },
+        rotate: { min: 0, max: 360 }, tint: [ 0xffd23a, 0xffe9a0, 0xffffff ]
+      } ).setDepth( 6 ) );
+    }
     this.setActiveTarget( 0 );
 
     this.stampGlow = this.add( scene.add.image( lvl.stamp.x, lvl.stamp.y, 'soft' ).setTint( 0xffe07a ).setScale( 1.6 ).setAlpha( 0.6 ).setDepth( 8 ).setBlendMode( Phaser.BlendModes.ADD ) );
@@ -442,10 +465,32 @@ export class WorldView
       {
         m.fillRect( x, tg.y - 3, 11, 5 );
       }
-      m.fillStyle( col, active ? 0.18 : 0.06 );
-      m.fillRect( tg.x - tg.w / 2, tg.y - 80, tg.w, 77 );
+      if ( !active )
+      {
+        m.fillStyle( col, 0.06 );
+        m.fillRect( tg.x - tg.w / 2, tg.y - 80, tg.w, 77 );
+      }
       this.mailboxes[ i ].setTexture( done ? 'mailboxDone' : 'mailbox' );
     } );
+    const tg = this.lvl.targets[ idx ];
+    this.padBeam.setVisible( !!tg );
+    this.padHalo.setVisible( !!tg );
+    this.padBand.setVisible( !!tg );
+    this.padSparks?.setVisible( !!tg );
+    if ( !tg )
+    {
+      this.padSparks?.stop();
+      return;
+    }
+    // 'soft' — радіальна пляма 64 px: центр на майданчику, тож угору світло тане, а нижню половину ховає блок
+    this.padBeam.setPosition( tg.x, tg.y ).setScale( tg.w * 1.05 / 64, 200 / 64 );
+    this.padHalo.setPosition( tg.x, tg.y ).setScale( tg.w * 1.25 / 64, 46 / 64 );
+    this.padBand.setPosition( tg.x, tg.y - 22 ).setScale( tg.w / 40, 96 / 64 );
+    if ( this.padSparks )
+    {
+      this.padZone.setTo( tg.x - tg.w / 2 + 6, tg.y - 8, tg.w - 12, 6 );
+      this.padSparks.start();
+    }
   }
 
   update( t: number, dt: number ): void
@@ -518,6 +563,10 @@ export class WorldView
       this.stampGlow.y = this.stamp.y;
       this.stampGlow.setScale( 1.5 + Math.sin( t * 3 ) * 0.15 );
     }
+    // Світло на місці посадки дихає, щоб око знаходило його навіть у русі
+    this.padBeam.setAlpha( 0.18 + Math.sin( t * 2.4 ) * 0.05 );
+    this.padHalo.setAlpha( 0.5 + Math.sin( t * 2.4 + 0.6 ) * 0.08 );
+    this.padBand.setAlpha( 0.26 + Math.sin( t * 2.4 + 0.6 ) * 0.06 );
     // Вода повільно хитається вбік і ледь підіймається: хвилі живі, але лінія води лишається на місці
     for ( const w of this.waterImgs )
     {
