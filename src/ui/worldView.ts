@@ -26,6 +26,10 @@ const BLOCK_ART: Record<string, { left: number; right: number; top: number; bott
 const LIGHTHOUSE_ART = { top: 215, bottom: 80, body: 116, sink: 30 };
 // Блок нормального розміру показуємо в половину текстури; дрібні — дрібніше, щоб кути не налазили один на одного
 const BLOCK_SCALE = 0.5;
+// Передній шар трави: над кулею (10) і шлейфом, але під пилом і вибухами (11+)
+const FRONT_DEPTH = 10.5;
+// Скільки одиниць рівня трави над поверхнею стоїть перед кулею (кошик — 18): решта стебел лишається позаду
+const FRONT_GRASS = 12;
 
 export interface ThemeStyle
 {
@@ -86,9 +90,15 @@ export class WorldView
     this.buildUpdrafts();
     this.buildClouds();
 
-    // Будинок стоїть на смузі трави (12 px від верху ґрунту) і малюється поверх ґрунту (depth 5), інакше він ніби висить
-    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y + 14, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( 5.5 ) );
-    void office;
+    // Будинок стоїть на лінії ґрунту (лише трохи нижче, щоб не висів) і малюється поверх ґрунту (depth 5);
+    // його низ і так ховає передня трава. Глибше не садимо: інакше над травою видно лише дах.
+    // Якщо старт на блоці, будинок цілком стоїть на ньому: ліворуч від кулі, а як не влазить — праворуч чи біля блока
+    // Нерухомі будинок і скриньки — позаду всієї трави (смуги землі й блоків), а не лише її нижньої смуги, як куля:
+    // інакше верхівки стебел на їхньому тлі обриваються рівною лінією
+    const behindGrass = lvl.water ? 3.89 : 4.94;
+    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( behindGrass ) );
+    const op = this.officePos( office.displayWidth * 0.85 );
+    office.setPosition( op.x, op.y + 3 );
 
     const g = this.add( scene.add.graphics().setDepth( 5 ) );
     this.drawGround( g, th );
@@ -101,7 +111,7 @@ export class WorldView
     {
       const m = this.add( scene.add.graphics().setDepth( 6 ) );
       this.markers.push( m );
-      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 14, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( 0.8 / RES ).setDepth( 6 ) );
+      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 14, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( 0.8 / RES ).setDepth( behindGrass ) );
       this.mailboxes.push( mb );
       if ( lvl.targets.length > 1 )
       {
@@ -227,6 +237,38 @@ export class WorldView
     }
   }
 
+  // Де поставити будинок шириною foot (низ стін): точка на поверхні (y — лінія трави), щоб він не звисав із краю блока.
+  // На блоці старту — ліворуч або праворуч від кулі; блок завузький — на землю поруч із ним (на воді — по центру блока)
+  private officePos( foot: number ): { x: number; y: number }
+  {
+    const lvl = this.lvl;
+    const { start, blocks } = lvl;
+    const prefer = start.x - 70;
+    const b = blocks.find( ( k ) => start.x >= k.x && start.x <= k.x + k.w && Math.abs( k.y - start.y ) < 40 );
+    if ( !b )
+    {
+      return { x: prefer, y: start.y };
+    }
+    // Будинок не має налазити на кулю: між ними щонайменше половина будинку й кошик
+    const gap = foot / 2 + 24;
+    const lo = b.x + foot / 2 + 6;
+    const hi = b.x + b.w - foot / 2 - 6;
+    for ( const x of [ prefer, start.x + 70, start.x - gap, start.x + gap ] )
+    {
+      if ( x >= lo && x <= hi && Math.abs( x - start.x ) >= gap )
+      {
+        return { x, y: b.y };
+      }
+    }
+    if ( !lvl.water && b.y + b.h >= groundY( lvl ) - 1 )
+    {
+      // Блок стоїть на землі: будинок — біля його підніжжя, з того боку, де більше місця в рівні
+      const left = b.x - foot / 2 - 10;
+      return { x: left - foot / 2 > 0 ? left : b.x + b.w + foot / 2 + 10, y: groundY( lvl ) };
+    }
+    return { x: Phaser.Math.Clamp( prefer, lo, Math.max( lo, hi ) ), y: b.y };
+  }
+
   private drawGround( g: Phaser.GameObjects.Graphics, th: ThemeStyle ): void
   {
     const lvl = this.lvl;
@@ -256,6 +298,15 @@ export class WorldView
         if ( lvl.water )
         {
           this.waterImgs.push( { img, x, y }, { img: fill, x, y: fillY } );
+        }
+        else
+        {
+          // Псевдо-3D: стебла трави над лінією ґрунту ще раз, але перед кулею, будинком і скриньками —
+          // те, що стоїть на траві, ховає низ у ній
+          // Спереду лише нижня частина стебел: верхівки лишаються позаду, і кошик виглядає з трави, а не зникає в ній
+          const cut = Math.max( 0, src.height * art.surface - FRONT_GRASS / k );
+          const front = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( k ).setFlipX( i % 2 === 1 ).setDepth( FRONT_DEPTH ) );
+          front.setCrop( 0, cut, src.width, src.height * art.surface + 4 - cut );
         }
       }
       return;
@@ -295,6 +346,22 @@ export class WorldView
       const top = y - art.lift * s;
       this.add( this.scene.add.nineslice( x, top, key, undefined, w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
         .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ) );
+      // Трава, що стирчить над блоком, — ще й перед кулею (смуга лише з верхнього краю текстури, без тягнутої середини).
+      // Сніговій шапці гір (lift 10) це не потрібно
+      if ( art.lift >= 30 )
+      {
+        // Окремий кадр текстури — рядки від середини стебел до лінії верху блока; з нього NineSlice без тягнутої середини
+        const cut = Math.max( 0, Math.round( art.lift - FRONT_GRASS / s ) );
+        const band = art.lift + 6 - cut;
+        const frame = 'front-' + cut;
+        const tex = this.scene.textures.get( key );
+        if ( !tex.has( frame ) )
+        {
+          tex.add( frame, 0, 0, cut, tex.getSourceImage().width, band );
+        }
+        this.add( this.scene.add.nineslice( x, top + cut * s, key, frame, w / s, band, art.left, art.right, band, 0 )
+          .setOrigin( 0, 0 ).setScale( s ).setDepth( FRONT_DEPTH ) );
+      }
       return;
     }
     const r = Math.min( 18, w / 3, h / 3 );
