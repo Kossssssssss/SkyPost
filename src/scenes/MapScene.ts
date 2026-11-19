@@ -14,6 +14,9 @@ import type { Theme } from '../core/level.ts';
 
 const LANG_CODES: Record<Lang, string> = { uk: 'УКР', ru: 'РУС', en: 'ENG' };
 
+// Рівні, які вже показувались на карті відкритими в цій сесії, і світи ('w' + номер), чию карту вже бачили
+const seenOpen = new Set<string>();
+
 // Колір вузла рівня за складністю: [основний, тінь]
 const DIFF_COLORS: Record<string, [ number, number ]> = {
   hard: [ 0x9a5aa0, 0x6a3a72 ],
@@ -236,7 +239,32 @@ export class MapScene extends Phaser.Scene
         const img = this.add.image( r * 0.78, -r * 0.78, seal );
         node.add( img.setScale( r * 1.15 / img.width ).setAngle( 12 ) );
       }
+      // Рівень відкрився, відколи карту показували востаннє: вузол вискакує з іскрами
+      if ( open && seenOpen.has( 'w' + this.world ) && !seenOpen.has( lvl.id ) )
+      {
+        node.setScale( 0 );
+        this.tweens.add( { targets: node, scale: 1, duration: 420, delay: 350, ease: 'Back.out' } );
+        if ( this.textures.exists( 'p-star' ) )
+        {
+          const em = this.add.particles( p.x, p.y, 'p-star', {
+            speed: { min: 60, max: 220 * u }, lifespan: 700, scale: { start: 0.35 * u, end: 0 }, alpha: { start: 1, end: 0 },
+            tint: [ 0xffe07a, 0xffffff ], emitting: false
+          } );
+          this.root.add( em );
+          this.time.delayedCall( 450, () => em.explode( 14 ) );
+          this.time.delayedCall( 1300, () => em.destroy() );
+        }
+      }
     }
+    // Запам'ятовуємо відкриті рівні; перший показ світу за сесію нічого не анімує
+    levels.forEach( ( l ) =>
+    {
+      if ( unlocked && levelUnlocked( l.id ) )
+      {
+        seenOpen.add( l.id );
+      }
+    } );
+    seenOpen.add( 'w' + this.world );
     if ( current >= 0 )
     {
       // Над поточним рівнем — уся вдягнена збірка: оболонка, пілот, кошик і шлейф

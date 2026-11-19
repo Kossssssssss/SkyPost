@@ -1,7 +1,33 @@
 import { platform } from '../platform/platform.ts';
 import { save, persist } from './save.ts';
 
-// Увесь звук синтезується на льоту: нуль файлів, мінімальний стартовий розмір збірки
+const MUSIC_URL = 'assets/audio/music.mp3';
+// Гучність треку відносно шини музики: згенерований трек тихий (пік ~0.3), тож трохи підсилюємо
+const TRACK_GAIN = 1.4;
+// Скільки секунд кінець кола накладається на початок наступного
+const CROSSFADE = 3;
+
+// Тривалість треку без тиші в кінці: генератор лишає кілька секунд тиші, і на них коло б «провисало»
+function audibleLength( buf: AudioBuffer ): number
+{
+  const d = buf.getChannelData( 0 );
+  const win = Math.floor( buf.sampleRate / 4 );
+  for ( let end = d.length; end - win > 0; end -= win )
+  {
+    let s = 0;
+    for ( let i = end - win; i < end; i++ )
+    {
+      s += d[ i ] * d[ i ];
+    }
+    if ( Math.sqrt( s / win ) > 0.008 )
+    {
+      return end / buf.sampleRate;
+    }
+  }
+  return buf.duration;
+}
+
+// Ефекти синтезуються на льоту; музика — згенерований трек, а синтезована петля лишається запасною
 class Synth
 {
   private ctx?: AudioContext;
@@ -14,6 +40,9 @@ class Synth
   private musicTimer = 0;
   private nextNote = 0;
   private noteIdx = 0;
+  private track?: AudioBuffer;
+  private trackLen = 0;
+  private trackTimer = 0;
 
   unlock(): void
   {
@@ -41,6 +70,7 @@ class Synth
       this.startBurner();
       this.applyVolume();
       this.musicTimer = window.setInterval( () => this.scheduleMusic(), 120 );
+      void this.loadTrack();
     }
     // iOS відпускає аудіо лише в обробнику дотику, тому resume викликаємо з кожного жесту
     if ( this.ctx.state === 'suspended' )
@@ -238,9 +268,54 @@ class Synth
     }
   }
 
+  // Справжній трек (assets/audio/music.mp3) вантажиться після першого жесту, щоб не затримувати старт гри.
+  // Поки його немає або він не завантажився, грає синтезована петля
+  private async loadTrack(): Promise<void>
+  {
+    try
+    {
+      const res = await fetch( MUSIC_URL );
+      if ( !res.ok || !this.ctx )
+      {
+        return;
+      }
+      this.track = await this.ctx.decodeAudioData( await res.arrayBuffer() );
+      this.trackLen = audibleLength( this.track );
+      clearInterval( this.musicTimer );
+      this.playTrack( 2 );
+    }
+    catch
+    {
+      // Немає файлу чи браузер не декодує MP3 — лишається синтез
+    }
+  }
+
+  // Трек згенерований, а не написаний під безшовну петлю: кожне коло плавно перетікає в наступне
+  private playTrack( fadeIn: number ): void
+  {
+    const ctx = this.ctx;
+    if ( !ctx || !this.track || !this.musicBus )
+    {
+      return;
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = this.track;
+    const g = ctx.createGain();
+    const t0 = ctx.currentTime;
+    const len = this.trackLen;
+    g.gain.setValueAtTime( 0, t0 );
+    g.gain.linearRampToValueAtTime( TRACK_GAIN, t0 + fadeIn );
+    g.gain.setValueAtTime( TRACK_GAIN, t0 + len - CROSSFADE );
+    g.gain.linearRampToValueAtTime( 0, t0 + len );
+    src.connect( g ).connect( this.musicBus );
+    src.start( t0 );
+    this.trackTimer = window.setTimeout( () => this.playTrack( CROSSFADE ), ( len - CROSSFADE ) * 1000 );
+  }
+
   dispose(): void
   {
     clearInterval( this.musicTimer );
+    clearTimeout( this.trackTimer );
   }
 }
 

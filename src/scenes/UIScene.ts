@@ -960,6 +960,7 @@ export class UIScene extends Phaser.Scene
       c.add( fitText( label( this, 0, -30 * u + i * 44 * u, ( ok ? '✔ ' : '✖ ' ) + r, 26 * u, ok ? '#24804a' : '#a05050', false ), 600 * u ) );
     } );
     let extraY = 70 * u;
+    const late: Phaser.GameObjects.GameObject[] = [];
     if ( info.gained > 0 )
     {
       // Поруч із новими зірками — реклама з винагородою «×2»: ще стільки ж монет у гаманець.
@@ -967,6 +968,7 @@ export class UIScene extends Phaser.Scene
       const offer = !info.doubled && platform.rewardedAvailable();
       const gained = label( this, offer ? -95 * u : 0, extraY, t( 'newStars', info.gained * ( info.doubled ? 2 : 1 ) ), 36 * u, '#ffd23a' );
       c.add( gained );
+      late.push( gained );
       if ( this.popGain )
       {
         // Щойно подвоїли: число монет помітно «підстрибує», щоб винагороду було видно
@@ -981,17 +983,28 @@ export class UIScene extends Phaser.Scene
           onClick: () => void this.doubleCoins( info )
         } );
         c.add( b );
+        late.push( b );
       }
       extraY += 46 * u;
     }
     if ( info.newWorld )
     {
-      c.add( label( this, 0, extraY, t( 'world', info.newWorld ) + ' ✔', 30 * u, '#3a8ee8', false ) );
+      late.push( c.add( label( this, 0, extraY, t( 'world', info.newWorld ) + ' ✔', 30 * u, '#3a8ee8', false ) ).last! );
       extraY += 40 * u;
     }
     if ( info.newSkin )
     {
-      c.add( label( this, 0, extraY, info.newSkin + ' ✔', 30 * u, '#b05ad8', false ) );
+      late.push( c.add( label( this, 0, extraY, info.newSkin + ' ✔', 30 * u, '#b05ad8', false ) ).last! );
+    }
+    // Нагороди вискакують по черзі, коли зірки вже стали на місце
+    if ( animate )
+    {
+      late.forEach( ( o, i ) =>
+      {
+        const t0 = o as unknown as Phaser.GameObjects.Components.Transform;
+        t0.setScale( 0 );
+        this.tweens.add( { targets: o, scale: 1, duration: 320, delay: 1400 + i * 160, ease: 'Back.out' } );
+      } );
     }
     // Ряд кнопок уміщається у внутрішню частину пергаменту: 150 + 150 + 230 і проміжки по 20
     const by = 240 * u;

@@ -2036,3 +2036,13 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: —
 - промпт: Three small round badges standing side by side in a row with even spacing: the left is a round faded brick red wax seal with a simple embossed feather in the middle and soft wavy melted edges, the middle is a round deep dark wine red wax seal with a simple embossed little crown in the middle and soft wavy melted edges, the right is a small ochre yellow five-pointed paper star with a tiny cream sparkle beside it. Front view, each badge centered in its third, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/music_s11.mp3
+- дата: 2026-11-19 17:59
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 11, ціна $0.0111
+- промпт: gentle whimsical instrumental waltz for a cozy hand-painted storybook game about a hot-air balloon mail carrier, soft felt piano melody, warm accordion, light pizzicato strings, celesta and soft glockenspiel accents, calm cheerful and dreamy, 3/4 time, 92 BPM, warm acoustic chamber music, steady gentle mood from start to end
+
+## assets/raw/sfx/click_s11.mp3
+- дата: 2026-11-19 18:06
+- модель: runware mirelo:1@1, 1 с, seed 11, ціна $0.01
+- промпт: a single soft wooden button click, short and crisp, cozy game interface sound

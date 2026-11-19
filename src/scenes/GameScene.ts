@@ -3,7 +3,7 @@ import type { LevelData } from '../core/level.ts';
 import { findLevel } from '../levels/index.ts';
 import {
   createState, step, canBurn, DT, NEUTRAL, MID_OFF, ENV_OFF,
-  EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_STAMP, EV_WIN, type SimState
+  EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_LIFTOFF, EV_STAMP, EV_WIN, type SimState
 } from '../core/sim.ts';
 import { WorldView } from '../ui/worldView.ts';
 import { baseScale } from '../core/art.ts';
@@ -25,6 +25,9 @@ export interface GameInit
 
 export const VIEW_H = 720;
 
+// Мальовані частинки (з assets/trail) замість кодових: p-blob знебарвлений, тож тонується в будь-який колір
+const PAINTED_PARTICLE: Record<string, string> = { dot: 'p-blob', spark: 'p-star' };
+
 export class GameScene extends Phaser.Scene
 {
   lvl!: LevelData;
@@ -37,6 +40,7 @@ export class GameScene extends Phaser.Scene
   view!: WorldView;
   balloon!: BalloonView;
   private trail?: Phaser.GameObjects.Particles.ParticleEmitter;
+  private squashTween?: Phaser.Tweens.Tween;
   private ghost?: Phaser.GameObjects.Graphics;
   private ghostBalloon?: Phaser.GameObjects.Image;
   private acc = 0;
@@ -368,10 +372,16 @@ export class GameScene extends Phaser.Scene
     {
       audio.land( !!( ev & EV_BUMP ) );
       this.dust( this.s.x, this.s.y, ev & EV_BUMP ? 14 : 7 );
+      this.squash( ev & EV_BUMP ? 0.86 : 0.93 );
       if ( ev & EV_BUMP )
       {
         this.cameras.main.shake( 120, 0.004 );
       }
+    }
+    else if ( ev & EV_LIFTOFF )
+    {
+      // Відрив від землі: невеликий клубок пилу з-під кошика
+      this.dust( this.s.x, this.s.y, 5 );
     }
     else if ( ev & EV_BUMP )
     {
@@ -414,7 +424,14 @@ export class GameScene extends Phaser.Scene
       this.time.delayedCall( 500, () =>
       {
         audio.win();
-        this.burst( this.s.x, this.s.y - 60, 'dot', [ 0xff4a4a, 0xffd23a, 0x4ad86a, 0x4aa8ff, 0xa66aff ], 40 );
+        // Конфеті в кольорах акварельної палітри, а з ним — кілька листів: пошту доставлено
+        this.burst( this.s.x, this.s.y - 60, 'dot', [ 0xc8574a, 0xe0b04a, 0x8fae7a, 0x7a9cc0, 0xb88aa8 ], 34 );
+        if ( this.textures.exists( 'p-letter' ) )
+        {
+          this.burst( this.s.x, this.s.y - 60, 'p-letter', [ 0xffffff ], 8, 300, 80 );
+        }
+        // Куля радісно підстрибує на місці
+        this.tweens.add( { targets: this.balloon, y: this.balloon.y - 26, duration: 220, ease: 'Quad.out', yoyo: true } );
       } );
       this.time.delayedCall( 1300, () => this.game.events.emit( 'level-won', this ) );
     }
@@ -453,7 +470,8 @@ export class GameScene extends Phaser.Scene
 
   private dust( x: number, y: number, n: number ): void
   {
-    const em = this.add.particles( x, y, 'soft', {
+    // Мальований клубок із тих самих частинок, що й шлейф «Puffs»; кодовий 'soft' — лише запасний
+    const em = this.add.particles( x, y, this.textures.exists( 'p-puff' ) ? 'p-puff' : 'soft', {
       speedX: { min: -120, max: 120 }, speedY: { min: -40, max: -5 }, lifespan: 600,
       scale: { start: 0.35, end: 0.1 }, alpha: { start: 0.6, end: 0 }, tint: 0xe8dcc0, emitting: false
     } ).setDepth( 11 );
@@ -461,11 +479,23 @@ export class GameScene extends Phaser.Scene
     this.time.delayedCall( 800, () => em.destroy() );
   }
 
-  burst( x: number, y: number, tex: string, tint: number[], n: number, gravity = 300 ): void
+  // Посадка: кошик на мить присідає, оболонка трохи розходиться вшир (точка опори — низ кошика)
+  private squash( k: number ): void
   {
+    this.squashTween?.stop();
+    this.balloon.setScale( 1 );
+    this.squashTween = this.tweens.add( { targets: this.balloon, scaleY: k, scaleX: 1 + ( 1 - k ) * 0.5, duration: 90, ease: 'Quad.out', yoyo: true } );
+  }
+
+  // size — номінальний розмір частинки (як у кодової текстури 32 px), тож мальовані 64 px не виходять удвічі більшими
+  burst( x: number, y: number, tex: string, tint: number[], n: number, gravity = 300, size = 32 ): void
+  {
+    // Кодові кружечки й іскри підміняємо мальованими частинками шлейфу, якщо вони завантажені
+    tex = PAINTED_PARTICLE[ tex ] && this.textures.exists( PAINTED_PARTICLE[ tex ] ) ? PAINTED_PARTICLE[ tex ] : tex;
+    const k = size / ( this.textures.get( tex ).getSourceImage().width || size );
     const em = this.add.particles( x, y, tex, {
       speed: { min: 80, max: 320 }, lifespan: 900, gravityY: gravity, rotate: { min: 0, max: 360 },
-      scale: { start: 0.45, end: 0.1 }, alpha: { start: 1, end: 0 }, tint, emitting: false
+      scale: { start: 0.45 * k, end: 0.1 * k }, alpha: { start: 1, end: 0 }, tint, emitting: false
     } ).setDepth( 21 );
     em.explode( n );
     this.time.delayedCall( 1100, () => em.destroy() );
