@@ -231,6 +231,12 @@ class Synth
     [ 523, 659, 784, 659, 784, 1046 ].forEach( ( f, i ) => this.tone( f, 0.35, 'triangle', 0.18, i * 0.11 ) );
   }
 
+  // Монета долетіла в гаманець: тихий короткий дзвін, кожна наступна трохи вища
+  coin( i: number ): void
+  {
+    this.tone( 1320 + i * 60, 0.09, 'triangle', 0.07 );
+  }
+
   buy(): void
   {
     [ 784, 1046, 1318 ].forEach( ( f, i ) => this.tone( f, 0.2, 'square', 0.07, i * 0.06 ) );

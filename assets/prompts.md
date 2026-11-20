@@ -2046,3 +2046,227 @@
 - дата: 2026-11-19 18:06
 - модель: runware mirelo:1@1, 1 с, seed 11, ціна $0.01
 - промпт: a single soft wooden button click, short and crisp, cozy game interface sound
+
+## assets/raw/coin_s11.png
+- дата: 2026-11-20 15:13
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round old ochre brass coin with a thick raised rim and a simple embossed little hot air balloon in the middle, warm ochre and faded gold tones with soft sepia shading. Front view, the coin centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/coin_s22.png
+- дата: 2026-11-20 15:13
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round old ochre brass coin with a thick raised rim and a simple embossed little hot air balloon in the middle, warm ochre and faded gold tones with soft sepia shading. Front view, the coin centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/coin_s33.png
+- дата: 2026-11-20 15:13
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round old ochre brass coin with a thick raised rim and a simple embossed little hot air balloon in the middle, warm ochre and faded gold tones with soft sepia shading. Front view, the coin centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/coin_s44.png
+- дата: 2026-11-20 15:13
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round old ochre brass coin with a thick raised rim and a simple embossed little hot air balloon in the middle, warm ochre and faded gold tones with soft sepia shading. Front view, the coin centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/mailbox_pair_s11.png
+- дата: 2026-11-20 16:06
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 11, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/raw/mailbox_ref_512.png
+- промпт: Two rural mailboxes on tall wooden posts standing side by side in a row with even spacing: the left is a rounded dusty blue metal mailbox with a large faded brick red flag raised straight up on its side and the little front door closed, the right is the same rounded mailbox painted warm ochre yellow with the large faded brick red flag lowered down flat along its side and the little front door open with a cream envelope peeking out. Front three-quarter view, each mailbox centered in its half, the whole post down to its bottom end in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/mailbox_pair_s22.png
+- дата: 2026-11-20 16:07
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 22, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/raw/mailbox_ref_512.png
+- промпт: Two rural mailboxes on tall wooden posts standing side by side in a row with even spacing: the left is a rounded dusty blue metal mailbox with a large faded brick red flag raised straight up on its side and the little front door closed, the right is the same rounded mailbox painted warm ochre yellow with the large faded brick red flag lowered down flat along its side and the little front door open with a cream envelope peeking out. Front three-quarter view, each mailbox centered in its half, the whole post down to its bottom end in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/mailbox_pair_s33.png
+- дата: 2026-11-20 16:07
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 33, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/raw/mailbox_ref_512.png
+- промпт: Two rural mailboxes on tall wooden posts standing side by side in a row with even spacing: the left is a rounded dusty blue metal mailbox with a large faded brick red flag raised straight up on its side and the little front door closed, the right is the same rounded mailbox painted warm ochre yellow with the large faded brick red flag lowered down flat along its side and the little front door open with a cream envelope peeking out. Front three-quarter view, each mailbox centered in its half, the whole post down to its bottom end in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/mailbox_pair_s44.png
+- дата: 2026-11-20 16:07
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 44, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/raw/mailbox_ref_512.png
+- промпт: Two rural mailboxes on tall wooden posts standing side by side in a row with even spacing: the left is a rounded dusty blue metal mailbox with a large faded brick red flag raised straight up on its side and the little front door closed, the right is the same rounded mailbox painted warm ochre yellow with the large faded brick red flag lowered down flat along its side and the little front door open with a cream envelope peeking out. Front three-quarter view, each mailbox centered in its half, the whole post down to its bottom end in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badge_s11.png
+- дата: 2026-11-20 16:52
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round faded brick red wax seal badge with a bold thick cream exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badge_s22.png
+- дата: 2026-11-20 16:52
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round faded brick red wax seal badge with a bold thick cream exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badge_s33.png
+- дата: 2026-11-20 16:52
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round faded brick red wax seal badge with a bold thick cream exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badge_s44.png
+- дата: 2026-11-20 16:52
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round faded brick red wax seal badge with a bold thick cream exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badgeo_s22.png
+- дата: 2026-11-20 16:57
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round warm ochre yellow wax seal badge with a bold thick dark sepia exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badgeo_s11.png
+- дата: 2026-11-20 16:57
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round warm ochre yellow wax seal badge with a bold thick dark sepia exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badgeo_s33.png
+- дата: 2026-11-20 16:57
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round warm ochre yellow wax seal badge with a bold thick dark sepia exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/badgeo_s44.png
+- дата: 2026-11-20 16:57
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small round warm ochre yellow wax seal badge with a bold thick dark sepia exclamation mark painted in its middle, slightly uneven round edge. Front view, the badge centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/paper_s33.png
+- дата: 2026-11-20 17:04
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A plain empty sheet of warm cream cold-pressed watercolor paper with fine even grain and faint soft fibers, the paper surface fills the entire image edge to edge. Flat front view, even soft light across the whole sheet. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/paper_s44.png
+- дата: 2026-11-20 17:04
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A plain empty sheet of warm cream cold-pressed watercolor paper with fine even grain and faint soft fibers, the paper surface fills the entire image edge to edge. Flat front view, even soft light across the whole sheet. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/paper_s11.png
+- дата: 2026-11-20 17:04
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A plain empty sheet of warm cream cold-pressed watercolor paper with fine even grain and faint soft fibers, the paper surface fills the entire image edge to edge. Flat front view, even soft light across the whole sheet. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/paper_s22.png
+- дата: 2026-11-20 17:04
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A plain empty sheet of warm cream cold-pressed watercolor paper with fine even grain and faint soft fibers, the paper surface fills the entire image edge to edge. Flat front view, even soft light across the whole sheet. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_postmark_s11.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round postal postmark stamp disc of pale warm cream paper with a double thin ring border painted close to its edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_paperdisc_s11.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round disc cut from thick pale warm cream watercolor paper with a torn deckled uneven edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_token_s44.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round flat pale birch wood token with a soft raised rim and a plain smooth empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_postmark_s33.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round postal postmark stamp disc of pale warm cream paper with a double thin ring border painted close to its edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_token_s11.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round flat pale birch wood token with a soft raised rim and a plain smooth empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_paperdisc_s22.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round disc cut from thick pale warm cream watercolor paper with a torn deckled uneven edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_postmark_s44.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round postal postmark stamp disc of pale warm cream paper with a double thin ring border painted close to its edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_token_s22.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round flat pale birch wood token with a soft raised rim and a plain smooth empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_postmark_s22.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round postal postmark stamp disc of pale warm cream paper with a double thin ring border painted close to its edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_token_s33.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round flat pale birch wood token with a soft raised rim and a plain smooth empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_paperdisc_s44.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round disc cut from thick pale warm cream watercolor paper with a torn deckled uneven edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/node_paperdisc_s33.png
+- дата: 2026-11-20 17:08
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round disc cut from thick pale warm cream watercolor paper with a torn deckled uneven edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style

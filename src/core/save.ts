@@ -1,4 +1,5 @@
 import { platform } from '../platform/platform.ts';
+import { track } from '../platform/analytics.ts';
 
 export interface LevelRecord
 {
@@ -12,9 +13,9 @@ export type SkinSlot = 'envelope' | 'basket' | 'trail' | 'pilot';
 
 export interface SaveData
 {
-  v: 1;
+  v: 2;
   levels: Record<string, LevelRecord>;
-  wallet: number;
+  coins: number;
   owned: string[];
   equip: Record<SkinSlot, string>;
   fails: Record<string, number>;
@@ -27,12 +28,49 @@ export interface SaveData
 
 const KEY = 'skypost.save.v1';
 
+// Стара валюта v1 — зірки на витрати; при переході на монети кожна зірка = 10 монет
+const WALLET_TO_COINS = 10;
+
+// Нарахування монет за рівень (стартові числа, ROADMAP п. 2)
+export const COIN_RULES = {
+  firstClear: 10,
+  newStar: 7,
+  replay: 2,
+  mult: { hard: 1.5, super: 2 } as Record<string, number>
+};
+
+// Складові нагороди — для розбивки на екрані результату
+export interface CoinParts
+{
+  first: number;
+  replay: number;
+  stars: number;
+  mult: number;
+  total: number;
+}
+
+// Перше проходження дає базу, кожна наступна нова зірка (газ, марка) — бонус; повтор без нових зірок — дрібниця.
+// Важкі рівні множать суму
+export function coinParts( firstClear: boolean, newStars: number, difficulty?: string ): CoinParts
+{
+  const first = firstClear ? COIN_RULES.firstClear : 0;
+  const stars = ( firstClear ? Math.max( 0, newStars - 1 ) : newStars ) * COIN_RULES.newStar;
+  const replay = !firstClear && newStars === 0 ? COIN_RULES.replay : 0;
+  const mult = COIN_RULES.mult[ difficulty ?? '' ] ?? 1;
+  return { first, replay, stars, mult, total: Math.round( ( first + stars + replay ) * mult ) };
+}
+
+export function coinsFor( firstClear: boolean, newStars: number, difficulty?: string ): number
+{
+  return coinParts( firstClear, newStars, difficulty ).total;
+}
+
 function fresh(): SaveData
 {
   return {
-    v: 1,
+    v: 2,
     levels: {},
-    wallet: 0,
+    coins: 0,
     owned: [ 'env-classic', 'bas-wicker', 'trl-none', 'plt-fox' ],
     equip: { envelope: 'env-classic', basket: 'bas-wicker', trail: 'trl-none', pilot: 'plt-fox' },
     fails: {},
@@ -53,9 +91,15 @@ export function loadSave(): void
     const raw = platform.storage.getItem( KEY );
     if ( raw )
     {
-      const parsed = JSON.parse( raw ) as Partial<SaveData>;
+      const parsed = JSON.parse( raw ) as Partial<SaveData> & { wallet?: number };
       const base = fresh();
-      data = { ...base, ...parsed, equip: { ...base.equip, ...parsed.equip } };
+      const { wallet, ...rest } = parsed;
+      data = { ...base, ...rest, v: 2, equip: { ...base.equip, ...parsed.equip } };
+      if ( typeof wallet === 'number' && typeof parsed.coins !== 'number' )
+      {
+        data.coins = Math.max( 0, Math.round( wallet * WALLET_TO_COINS ) );
+        persist();
+      }
     }
   }
   catch
@@ -96,7 +140,7 @@ export function starsOf( id: string ): number
   return 1 + ( r.gas ? 1 : 0 ) + ( r.stamp ? 1 : 0 );
 }
 
-// «Зібрано всього» рахуємо з рекордів рівнів, а гаманець — окремо, щоб покупки не закривали світи
+// Зірки — лише прогрес (відкриття світів), їх рахуємо з рекордів рівнів; покупки йдуть за монети
 export function totalStars(): number
 {
   let n = 0;
@@ -107,7 +151,7 @@ export function totalStars(): number
   return n;
 }
 
-export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: number ): { gained: number; prev: LevelRecord }
+export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: number, difficulty?: string ): { gained: number; coins: number; parts: CoinParts; prev: LevelRecord }
 {
   const prev = record( id );
   const before = starsOf( id );
@@ -119,10 +163,13 @@ export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: 
   };
   data.levels[ id ] = next;
   const gained = starsOf( id ) - before;
-  data.wallet += gained;
+  const parts = coinParts( !prev.done, gained, difficulty );
+  const coins = parts.total;
+  data.coins += coins;
   data.fails[ id ] = 0;
   persist();
-  return { gained, prev };
+  track( 'level_complete', { level: id, stars: starsOf( id ), new_stars: gained, coins, first_clear: !prev.done, gas_ok: gasOk, stamp_ok: stampOk } );
+  return { gained, coins, parts, prev };
 }
 
 export function addFail( id: string ): number

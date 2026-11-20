@@ -74,6 +74,12 @@ export function queueGameAssets( scene: Phaser.Scene ): void
   {
     load( id, 'assets/world/' + id + '.webp' );
   }
+  // Монета — валюта покупок (зірки лишились тільки для відкриття світів)
+  load( 'coin', 'assets/world/coin.webp' );
+  // Печатка «!» на кнопці магазину, коли вистачає монет на покупку
+  load( 'badge', 'assets/world/badge.webp' );
+  // Кружок рівня на мапі — поштовий штемпель; знебарвлюється в create і тонується за станом рівня
+  load( 'node-src', 'assets/world/node.webp' );
 }
 
 export class BootScene extends Phaser.Scene
@@ -116,6 +122,10 @@ export class BootScene extends Phaser.Scene
     if ( pack )
     {
       this.whiten( 'pk-button', 'pk-btn' );
+    }
+    if ( this.textures.exists( 'node-src' ) )
+    {
+      this.whiten( 'node-src', 'node' );
     }
     // Заливка шкали газу міняє колір за станом (норма, перевитрата, бак майже порожній), тож теж тонується
     if ( this.textures.exists( 'gaugefill' ) )

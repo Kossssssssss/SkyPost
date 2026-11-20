@@ -378,6 +378,17 @@ export function button( scene: Phaser.Scene, x: number, y: number, opts: ButtonO
   return new Button( scene, x, y, opts );
 }
 
+// Напівпрозорий пергамент для підказок, щоб крізь нього було видно світ; тінь прибираємо, бо вона просвічувала б смугою
+export function hintPanel( scene: Phaser.Scene, w: number, h: number ): Phaser.GameObjects.GameObject
+{
+  const p = panel( scene, w, h ) as Phaser.GameObjects.Container | Phaser.GameObjects.Graphics;
+  if ( p instanceof Phaser.GameObjects.Container )
+  {
+    ( p.list[ 0 ] as Phaser.GameObjects.NineSlice ).setVisible( false );
+  }
+  return p.setAlpha( 0.8 );
+}
+
 export function panel( scene: Phaser.Scene, w: number, h: number, color = COLORS.panel, edge = COLORS.panelEdge ): Phaser.GameObjects.GameObject
 {
   if ( scene.textures.exists( 'pk-panel' ) )

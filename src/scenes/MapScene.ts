@@ -3,7 +3,7 @@ import { t, tn, currentLang, type Lang } from '../core/i18n.ts';
 import { save, starsOf, totalStars, record } from '../core/save.ts';
 import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked, maxStars } from '../levels/index.ts';
 import { MECHANIC_TIPS } from '../core/level.ts';
-import { SKINS, skin, trailLook } from '../core/skins.ts';
+import { SKINS, skin, trailLook, canBuySomething } from '../core/skins.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { THEMES } from '../ui/worldView.ts';
 import { audio } from '../core/audio.ts';
@@ -110,12 +110,25 @@ export class MapScene extends Phaser.Scene
     const top = this.add.container( 0, 0 );
     this.root.add( top );
     top.add( this.add.image( m + 30 * u, m + bs / 2, 'star' ).setDisplaySize( 60 * u, 60 * u ) );
-    top.add( label( this, m + 70 * u, m + bs / 2, `${ total } / ${ maxStars() }`, 40 * u ).setOrigin( 0, 0.5 ) );
+    const starsTxt = label( this, m + 70 * u, m + bs / 2, `${ total } / ${ maxStars() }`, 40 * u ).setOrigin( 0, 0.5 );
+    top.add( starsTxt );
+    // Гаманець поруч із зірками: зірки — прогрес, монети — на покупки
+    const coinX = starsTxt.x + starsTxt.width + 50 * u;
+    top.add( this.add.image( coinX, m + bs / 2, 'coin' ).setScale( 64 * u / 256 ) );
+    top.add( label( this, coinX + 38 * u, m + bs / 2, String( save().coins ), 40 * u ).setOrigin( 0, 0.5 ) );
     const shop = button( this, w - m - 150 * u, m + bs / 2, {
-      w: 280 * u, h: bs, text: `${ t( 'shop' ) }  ${ save().wallet }★`, icon: 'i-shop', size: 30 * u,
+      w: 280 * u, h: bs, text: t( 'shop' ), icon: 'i-shop', size: 30 * u,
       onClick: () => this.scene.start( 'shop', { world: this.world } )
     } );
     top.add( shop );
+    // Печатка «!» на куті кнопки, коли монет вистачає хоч на один скін; легенько пульсує, щоб її помітили
+    if ( canBuySomething( save().coins, save().owned ) && this.textures.exists( 'badge' ) )
+    {
+      const bd = this.add.image( 140 * u - 14 * u, -bs / 2 + 10 * u, 'badge' );
+      bd.setScale( 52 * u / bd.height );
+      shop.add( bd );
+      this.tweens.add( { targets: bd, scale: bd.scale * 1.12, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' } );
+    }
     const mute = button( this, w - m - 340 * u, m + bs / 2, {
       w: bs, h: bs, icon: audio.muted ? 'i-mute' : 'i-sound', color: COLORS.blue, dark: COLORS.blueDark,
       onClick: () =>
@@ -181,19 +194,24 @@ export class MapScene extends Phaser.Scene
       const r = Math.min( 62 * u, ( ( x1 - x0 ) / ( count - 1 ) ) * 0.34 );
       const node = this.add.container( p.x, p.y );
       this.root.add( node );
-      const g = this.add.graphics();
-      g.fillStyle( 0x000000, 0.2 );
-      g.fillCircle( 0, 8 * u, r );
-      node.add( g );
       // Важкі рівні — сливові, надважкі — темно-чорнильні, щоб винна печатка над ними не зливалась
       const [ col, dark ] = !open ? [ COLORS.grey, COLORS.greyDark ] : DIFF_COLORS[ lvl.difficulty ?? '' ] ?? [ COLORS.primary, COLORS.primaryDark ];
-      if ( this.textures.exists( 'pk-btn' ) )
+      if ( this.textures.exists( 'node' ) )
+      {
+        // Намальований поштовий штемпель: темніша копія трохи нижче — тінь, зверху штемпель кольору стану
+        const k = ( r * 2 ) / this.textures.get( 'node' ).getSourceImage().height;
+        node.add( this.add.image( 0, 5 * u, 'node' ).setScale( k ).setTint( shade( dark, 0.8 ) ) );
+        node.add( this.add.image( 0, 0, 'node' ).setScale( k ).setTint( col ) );
+      }
+      else if ( this.textures.exists( 'pk-btn' ) )
       {
         node.add( painted( this, r * 2, r * 2 ).setTint( dark ).setY( 5 * u ) );
         node.add( painted( this, r * 2, r * 2 ).setTint( col ) );
       }
       else
       {
+        const g = this.add.graphics();
+        node.add( g );
         g.fillStyle( dark, 1 );
         g.fillCircle( 0, 4 * u, r );
         g.fillStyle( col, 1 );

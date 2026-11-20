@@ -3,6 +3,7 @@ import { t, tn } from '../core/i18n.ts';
 import { save, persist, type SkinSlot } from '../core/save.ts';
 import { skinsOf, skin, trailLook, type Skin } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
+import { track } from '../platform/analytics.ts';
 import { BalloonView, skinFit } from '../ui/balloonView.ts';
 import { button, label, panel, uiScale, fitText, fadeIn, COLORS, inkHex } from '../ui/widgets.ts';
 import { worldPerfect } from '../levels/index.ts';
@@ -66,8 +67,8 @@ export class ShopScene extends Phaser.Scene
     const bs = 84 * u;
     this.root.add( button( this, m + bs / 2, m + bs / 2, { w: bs, h: bs, icon: 'i-back', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.back() } ) );
     this.root.add( label( this, m * 2 + bs, m + bs / 2, t( 'shop' ), 50 * u ).setOrigin( 0, 0.5 ) );
-    this.root.add( this.add.image( w - m - 230 * u, m + bs / 2, 'star' ).setDisplaySize( 60 * u, 60 * u ) );
-    this.root.add( label( this, w - m - 190 * u, m + bs / 2, String( save().wallet ), 44 * u ).setOrigin( 0, 0.5 ) );
+    this.root.add( this.add.image( w - m - 230 * u, m + bs / 2, 'coin' ).setScale( 60 * u / 256 ) );
+    this.root.add( label( this, w - m - 190 * u, m + bs / 2, String( save().coins ), 44 * u ).setOrigin( 0, 0.5 ) );
     this.root.add( label( this, w - m - 230 * u, m + bs + 16 * u, t( 'wallet' ), 20 * u ) );
 
     const leftW = Math.min( w * 0.32, 560 * u );
@@ -264,9 +265,9 @@ export class ShopScene extends Phaser.Scene
     }
     else
     {
-      const afford = sv.wallet >= sk.price;
+      const afford = sv.coins >= sk.price;
       const b = button( this, 0, by, {
-        w: bw, h: 66 * u, text: `${ sk.price } ★`, size: 33 * u,
+        w: bw, h: 66 * u, text: String( sk.price ), icon: 'coin', size: 33 * u,
         color: afford ? COLORS.green : COLORS.grey, dark: afford ? COLORS.greenDark : COLORS.greyDark,
         onClick: () => this.buy( sk )
       } );
@@ -286,14 +287,15 @@ export class ShopScene extends Phaser.Scene
   private buy( sk: Skin ): void
   {
     const sv = save();
-    if ( sv.wallet < sk.price || sv.owned.includes( sk.id ) )
+    if ( sv.coins < sk.price || sv.owned.includes( sk.id ) )
     {
       return;
     }
-    sv.wallet -= sk.price;
+    sv.coins -= sk.price;
     sv.owned.push( sk.id );
     sv.equip[ sk.slot ] = sk.id;
     persist();
+    track( 'skin_purchase', { skin: sk.id, slot: sk.slot, price: sk.price, coins_left: sv.coins } );
     audio.buy();
     this.hovered = undefined;
     this.build();

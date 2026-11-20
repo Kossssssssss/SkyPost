@@ -4,12 +4,12 @@ import { BgScene } from './BgScene.ts';
 import { t, tn, hasText } from '../core/i18n.ts';
 import { groundY, layerBottom, layerIndexAt, windAt } from '../core/level.ts';
 import { MID_OFF } from '../core/sim.ts';
-import { save, persist, applyResult, addFail, record, starsOf, totalStars } from '../core/save.ts';
+import { save, persist, applyResult, addFail, record, starsOf, totalStars, type CoinParts } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
 import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_UNLOCK, worldUnlocked, maxStars } from '../levels/index.ts';
 import { SKINS } from '../core/skins.ts';
-import { button, label, panel, starsRow, uiScale, fitText, fadeIn, popIn, COLORS, inkHex, type Button } from '../ui/widgets.ts';
+import { button, label, panel, hintPanel, starsRow, uiScale, fitText, fadeIn, popIn, COLORS, inkHex, type Button } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import { baseScale } from '../core/art.ts';
 import { Tutorial, type TutStep } from '../ui/tutorial.ts';
@@ -29,6 +29,8 @@ interface ResultInfo
   stampOk: boolean;
   gas: number;
   gained: number;
+  coins: number;
+  parts: CoinParts;
   prevStars: number;
   newSkin?: string;
   newWorld?: number;
@@ -54,7 +56,7 @@ export class UIScene extends Phaser.Scene
   private guideT = 0;
   private letterIcons: Phaser.GameObjects.Image[] = [];
   private card?: Phaser.GameObjects.Container;
-  private tipText?: Phaser.GameObjects.Text;
+  private tip?: Phaser.GameObjects.Container;
   private overlay: Overlay = '';
   private result?: ResultInfo;
   private pointers = new Set<number>();
@@ -66,6 +68,7 @@ export class UIScene extends Phaser.Scene
   private afterMidgame = false;
   // Наступна перебудова екрана результату анімує подвоєні монети
   private popGain = false;
+  private walletNum?: Phaser.GameObjects.Text;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
@@ -92,6 +95,11 @@ export class UIScene extends Phaser.Scene
     this.input.on( 'pointerdown', ( p: Phaser.Input.Pointer, over: Phaser.GameObjects.GameObject[] ) =>
     {
       audio.unlock();
+      // Тап по підказці ховає її, але не забирає тягу: гравець у повітрі
+      if ( this.tip?.getBounds().contains( p.x, p.y ) )
+      {
+        this.hideTip();
+      }
       if ( over.length > 0 || this.overlay || !this.gs || this.busy )
       {
         return;
@@ -203,7 +211,7 @@ export class UIScene extends Phaser.Scene
     this.hud.removeAll( true );
     this.layer.removeAll( true );
     this.card = undefined;
-    this.tipText = undefined;
+    this.tip = undefined;
     this.tut = undefined;
     this.buildHud();
     // Під час навчання картка рівня не потрібна: перший крок сам пояснює, що робити
@@ -313,7 +321,7 @@ export class UIScene extends Phaser.Scene
     const pr = this.panelRect;
     lvl.targets.forEach( ( tg, i ) =>
     {
-      const img = this.add.image( pr.x + pr.w + 18 * u, this.mapY( tg.y - MID_OFF ), 'mailbox' ).setScale( 0.32 * u );
+      const img = this.add.image( pr.x + pr.w + 18 * u, this.mapY( tg.y - MID_OFF ), 'mailbox' ).setScale( 0.16 * u );
       this.hud.add( img );
       if ( lvl.targets.length > 1 )
       {
@@ -323,7 +331,7 @@ export class UIScene extends Phaser.Scene
     this.hud.add( this.add.image( pr.x + pr.w + 18 * u, this.mapY( lvl.stamp.y ), 'stamp' ).setScale( 0.5 * u ).setAlpha( 0.9 ) );
 
     this.guideG = this.add.graphics();
-    this.guideIcon = this.add.image( 0, 0, 'mailbox' ).setScale( 0.42 * u );
+    this.guideIcon = this.add.image( 0, 0, 'mailbox' ).setScale( 0.21 * u );
     this.guideNum = label( this, 0, 0, '', 22 * u );
     this.hud.add( [ this.guideG, this.guideIcon, this.guideNum ] );
 
@@ -741,15 +749,32 @@ export class UIScene extends Phaser.Scene
 
   private showTip( text: string ): void
   {
+    const u = this.u;
     const w = this.scale.width;
     const h = this.scale.height;
-    this.tipText?.destroy();
-    const tx = fitText( label( this, w / 2, h * 0.24, text, 32 * this.u ), w - 40 * this.u );
-    this.tipText = tx;
-    this.layer.add( tx );
-    tx.setAlpha( 0 );
-    this.tweens.add( { targets: tx, alpha: 1, duration: 300, ease: 'Sine.out' } );
-    this.tweens.add( { targets: tx, alpha: 0, delay: 6500, duration: 600, ease: 'Sine.in', onComplete: () => tx.destroy() } );
+    this.tip?.destroy();
+    // Як і бульбашка навчання: сепія на пергаменті, без обведення
+    const tx = label( this, 0, 0, text, 32 * u, inkHex(), false );
+    tx.setWordWrapWidth( Math.min( w * 0.7, 900 * u ) );
+    const c = this.add.container( w / 2, h * 0.24 );
+    c.add( hintPanel( this, tx.width + 110 * u, Math.max( 140 * u, tx.height + 76 * u ) ) );
+    c.add( tx );
+    c.setAlpha( 0 ).setScale( 0.85 );
+    this.layer.add( c );
+    this.tip = c;
+    this.tweens.add( { targets: c, alpha: 1, scale: 1, duration: 320, ease: 'Back.out' } );
+    this.time.delayedCall( 6500, () => this.hideTip( c ) );
+  }
+
+  private hideTip( c = this.tip ): void
+  {
+    if ( !c || c !== this.tip )
+    {
+      return;
+    }
+    this.tip = undefined;
+    this.tweens.killTweensOf( c );
+    this.tweens.add( { targets: c, alpha: 0, y: c.y - 30 * this.u, duration: 300, ease: 'Sine.in', onComplete: () => c.destroy() } );
   }
 
   // ---------- Пауза ----------
@@ -870,7 +895,7 @@ export class UIScene extends Phaser.Scene
     const prevStars = starsOf( lvl.id );
     const gasOk = g.s.gas <= lvl.gasStar + 1e-6;
     const stampOk = g.s.stamp;
-    const res = applyResult( lvl.id, gasOk, stampOk, g.s.gas );
+    const res = applyResult( lvl.id, gasOk, stampOk, g.s.gas, lvl.difficulty );
     if ( this.tutStep !== 'done' || lvl.id === '1-1' )
     {
       this.tutStep = 'done';
@@ -880,7 +905,7 @@ export class UIScene extends Phaser.Scene
         persist();
       }
     }
-    const info: ResultInfo = { delivered: true, gasOk, stampOk, gas: g.s.gas, gained: res.gained, prevStars };
+    const info: ResultInfo = { delivered: true, gasOk, stampOk, gas: g.s.gas, gained: res.gained, coins: res.coins, parts: res.parts, prevStars };
     const f = findLevel( lvl.id )!;
     const special = SKINS.find( ( s ) => s.world === f.world.id );
     if ( special && !save().owned.includes( special.id ) && worldPerfect( f.world.id ) )
@@ -922,7 +947,7 @@ export class UIScene extends Phaser.Scene
     const lvl = this.gs.lvl;
     const c = this.modal( 720 * u, 680 * u, t( 'delivered' ) );
     const flags = [ info.delivered, info.gasOk, info.stampOk ];
-    const stars = starsRow( this, 0, -140 * u, 0, 120 * u, 1.15 );
+    const stars = starsRow( this, 0, -165 * u, 0, 100 * u, 1.15 );
     stars.forEach( ( s, i ) =>
     {
       c.add( s );
@@ -937,7 +962,7 @@ export class UIScene extends Phaser.Scene
             {
               return;
             }
-            s.setTexture( 'star' ).setDisplaySize( 120 * u, 120 * u );
+            s.setTexture( 'star' ).setDisplaySize( 100 * u, 100 * u );
             const sx = s.scaleX;
             s.setScale( 0 );
             this.tweens.add( { targets: s, scale: sx, duration: 320, ease: 'Back.out' } );
@@ -946,7 +971,7 @@ export class UIScene extends Phaser.Scene
         }
         else
         {
-          s.setTexture( 'star' ).setDisplaySize( 120 * u, 120 * u );
+          s.setTexture( 'star' ).setDisplaySize( 100 * u, 100 * u );
         }
       }
     } );
@@ -957,35 +982,80 @@ export class UIScene extends Phaser.Scene
     rows.forEach( ( r, i ) =>
     {
       const ok = i === 0 ? info.gasOk : info.stampOk;
-      c.add( fitText( label( this, 0, -30 * u + i * 44 * u, ( ok ? '✔ ' : '✖ ' ) + r, 26 * u, ok ? '#24804a' : '#a05050', false ), 600 * u ) );
+      c.add( fitText( label( this, 0, -85 * u + i * 36 * u, ( ok ? '✔ ' : '✖ ' ) + r, 24 * u, ok ? '#24804a' : '#a05050', false ), 600 * u ) );
     } );
-    let extraY = 70 * u;
+    let extraY = 146 * u;
     const late: Phaser.GameObjects.GameObject[] = [];
-    if ( info.gained > 0 )
+    // Гаманець угорі праворуч, поруч зі звуком: туди летять монети за рівень
+    const wallet = this.walletBadge();
+    const gainNow = info.coins * ( info.doubled ? 2 : 1 );
+    // Перший показ — гаманець ще без нагороди; щойно подвоїли — без другої порції; інакше вже повний
+    const from = animate ? save().coins - gainNow : this.popGain ? save().coins - info.coins : save().coins;
+    wallet.set( from );
+    let totalAt: { x: number; y: number } | undefined;
+    if ( info.coins > 0 )
     {
-      // Поруч із новими зірками — реклама з винагородою «×2»: ще стільки ж монет у гаманець.
+      // Розбивка сепією: за що саме дали монети, потім підсумок з монетою
+      const p = info.parts;
+      const parts: string[] = [];
+      if ( p.first > 0 )
+      {
+        parts.push( t( 'coinsFirst', p.first ) );
+      }
+      if ( p.replay > 0 )
+      {
+        parts.push( t( 'coinsReplay', p.replay ) );
+      }
+      if ( p.stars > 0 )
+      {
+        parts.push( t( 'coinsStars', p.stars ) );
+      }
+      if ( p.mult > 1 )
+      {
+        parts.push( ( lvl.difficulty === 'super' ? t( 'superLevel' ) : t( 'hardLevel' ) ) + ' ×' + p.mult );
+      }
+      if ( info.doubled )
+      {
+        parts.push( t( 'coinsAd' ) );
+      }
+      // Рядки центруємо в смузі між умовами зірок і підсумком
+      const rowY = 20 * u - ( parts.length - 1 ) * 14 * u;
+      parts.forEach( ( txt, i ) =>
+      {
+        const row = fitText( label( this, 0, rowY + i * 28 * u, txt, 22 * u, inkHex(), false ), 560 * u );
+        c.add( row );
+        late.push( row );
+      } );
+
+      // Поруч із підсумком — реклама з винагородою «×2»: ще стільки ж монет у гаманець.
       // Кнопку показуємо, лише коли реклама справді можлива, і ховаємо після подвоєння
       const offer = !info.doubled && platform.rewardedAvailable();
-      const gained = label( this, offer ? -95 * u : 0, extraY, t( 'newStars', info.gained * ( info.doubled ? 2 : 1 ) ), 36 * u, '#ffd23a' );
+      const totalY = 96 * u;
+      const gained = this.add.container( offer ? -95 * u : 0, totalY );
+      const num = label( this, 0, 0, t( 'coinsTotal', gainNow ), 36 * u, inkHex(), false );
+      const coin = this.add.image( 0, 0, 'coin' ).setScale( 56 * u / 256 );
+      const total = num.width + 8 * u + coin.displayWidth;
+      num.x = -total / 2 + num.width / 2;
+      coin.x = total / 2 - coin.displayWidth / 2;
+      gained.add( [ num, coin ] );
       c.add( gained );
       late.push( gained );
+      totalAt = { x: c.x + gained.x + coin.x, y: c.y + totalY };
       if ( this.popGain )
       {
-        // Щойно подвоїли: число монет помітно «підстрибує», щоб винагороду було видно
-        this.popGain = false;
+        // Щойно подвоїли: підсумок помітно «підстрибує», щоб винагороду було видно
         gained.setScale( 1.6 );
         this.tweens.add( { targets: gained, scale: 1, duration: 420, ease: 'Back.out' } );
       }
       if ( offer )
       {
-        const b = button( this, 105 * u, extraY, {
-          w: 170 * u, h: 64 * u, text: '×2', icon: 'tv', size: 32 * u, color: COLORS.green, dark: COLORS.greenDark,
+        const b = button( this, 125 * u, totalY, {
+          w: 150 * u, h: 60 * u, text: '×2', icon: 'tv', size: 30 * u, color: COLORS.green, dark: COLORS.greenDark,
           onClick: () => void this.doubleCoins( info )
         } );
         c.add( b );
         late.push( b );
       }
-      extraY += 46 * u;
     }
     if ( info.newWorld )
     {
@@ -1006,11 +1076,75 @@ export class UIScene extends Phaser.Scene
         this.tweens.add( { targets: o, scale: 1, duration: 320, delay: 1400 + i * 160, ease: 'Back.out' } );
       } );
     }
+    if ( totalAt && from < save().coins )
+    {
+      // Монети летять з підсумку в гаманець, коли розбивка вже з'явилась
+      const delay = animate ? 1400 + late.length * 160 + 250 : this.popGain ? 350 : 0;
+      this.flyCoins( totalAt, wallet, from, save().coins, delay );
+    }
+    this.popGain = false;
     // Ряд кнопок уміщається у внутрішню частину пергаменту: 150 + 150 + 230 і проміжки по 20
     const by = 240 * u;
     c.add( button( this, -210 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     c.add( button( this, -40 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
     c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
+  }
+
+  // Лічильник монет на пергаментній плашці, угорі праворуч поруч зі звуком
+  private walletBadge(): { set: ( n: number ) => void; at: { x: number; y: number } }
+  {
+    const u = this.u;
+    const w = this.scale.width;
+    const m = 22 * u;
+    const bs = 84 * u;
+    const bw = 190 * u;
+    const bh = 70 * u;
+    const cx = w - m - bs - 24 * u - bw / 2;
+    const cy = m + bs / 2;
+    const box = this.add.container( cx, cy );
+    box.add( panel( this, bw, bh ) );
+    const coin = this.add.image( -bw / 2 + 44 * u, 0, 'coin' ).setScale( 48 * u / 256 );
+    const num = label( this, -bw / 2 + 80 * u, 0, '0', 34 * u, inkHex(), false ).setOrigin( 0, 0.5 );
+    box.add( [ coin, num ] );
+    this.layer.add( box );
+    this.walletNum = num;
+    return { set: ( n: number ) => num.setText( String( n ) ), at: { x: cx + coin.x, y: cy } };
+  }
+
+  // Кілька монет летять дугою в гаманець; кожна долетіла — лічильник докручується, монета дзенькає
+  private flyCoins( from: { x: number; y: number }, wallet: { set: ( n: number ) => void; at: { x: number; y: number } }, start: number, end: number, delay: number ): void
+  {
+    const u = this.u;
+    const n = Phaser.Math.Clamp( Math.round( ( end - start ) / 4 ), 4, 8 );
+    for ( let i = 0; i < n; i++ )
+    {
+      const img = this.add.image( from.x, from.y, 'coin' ).setScale( 40 * u / 256 ).setAlpha( 0 );
+      this.layer.add( img );
+      const mx = ( from.x + wallet.at.x ) / 2 + Phaser.Math.Between( -60, 60 ) * u;
+      const my = Math.min( from.y, wallet.at.y ) - Phaser.Math.Between( 40, 120 ) * u;
+      const path = new Phaser.Curves.QuadraticBezier( new Phaser.Math.Vector2( from.x, from.y ), new Phaser.Math.Vector2( mx, my ), new Phaser.Math.Vector2( wallet.at.x, wallet.at.y ) );
+      const st = { t: 0 };
+      this.tweens.add( {
+        targets: st, t: 1, duration: 620, delay: delay + i * 80, ease: 'Sine.In',
+        onStart: () => img.setAlpha( 1 ),
+        onUpdate: () =>
+        {
+          const pt = path.getPoint( st.t );
+          img.setPosition( pt.x, pt.y ).setScale( ( 40 - st.t * 12 ) * u / 256 );
+        },
+        onComplete: () =>
+        {
+          img.destroy();
+          if ( !this.walletNum?.scene )
+          {
+            return;
+          }
+          wallet.set( Math.round( start + ( end - start ) * ( i + 1 ) / n ) );
+          this.tweens.add( { targets: this.walletNum, scale: { from: 1.25, to: 1 }, duration: 160 } );
+          audio.coin( i );
+        }
+      } );
+    }
   }
 
   private async doubleCoins( info: ResultInfo ): Promise<void>
@@ -1025,7 +1159,7 @@ export class UIScene extends Phaser.Scene
     if ( ok )
     {
       info.doubled = true;
-      save().wallet += info.gained;
+      save().coins += info.coins;
       persist();
       audio.buy();
       this.popGain = true;

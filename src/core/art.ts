@@ -8,7 +8,7 @@ type Draw = ( g: CanvasRenderingContext2D, w: number, h: number ) => void;
 
 // Більша сторона намальованих кодом текстур, під які підібрані масштаби в сценах.
 // Перемальовані версії більші, тож масштаб множимо на це співвідношення
-const BASE_SIZE: Record<string, number> = { letter: 40, gas: 32 };
+const BASE_SIZE: Record<string, number> = { letter: 40, gas: 32, coin: 48 };
 
 export function baseScale( img: Phaser.GameObjects.Image ): number
 {

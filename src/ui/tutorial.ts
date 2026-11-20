@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { GameScene } from '../scenes/GameScene.ts';
 import { ENV_OFF } from '../core/sim.ts';
 import { t, type TextKey } from '../core/i18n.ts';
-import { inkHex, label, panel } from './widgets.ts';
+import { hintPanel, inkHex, label } from './widgets.ts';
 
 // Навчання на першому рівні: по одному короткому кроку, кожен із маркером у світі гри
 export type TutStep = 'hold' | 'release' | 'stamp' | 'land' | 'done';
@@ -65,7 +65,7 @@ export class Tutorial
     tx.setWordWrapWidth( Math.min( w * 0.7, 900 * u ) );
     const c = this.scene.add.container( w / 2, h * 0.27 );
     // Пергамент нижчий за свої кути виглядає рваною смужкою, тож тримаємо мінімальну висоту
-    c.add( panel( this.scene, tx.width + 110 * u, Math.max( 150 * u, tx.height + 80 * u ) ) );
+    c.add( hintPanel( this.scene, tx.width + 110 * u, Math.max( 150 * u, tx.height + 80 * u ) ) );
     c.add( tx );
     c.setAlpha( 0 );
     this.layer.add( c );

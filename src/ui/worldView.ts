@@ -64,6 +64,10 @@ interface Cloud
   layer: number;
 }
 
+
+// 0.8 / RES — старий розмір 96x128, ×1.7 — більша скринька, ×0.5 — нова текстура вдвічі вища
+export const MAILBOX_SCALE = 0.8 / RES * 1.7 * 0.5;
+
 export class WorldView
 {
   private scene: Phaser.Scene;
@@ -117,11 +121,12 @@ export class WorldView
     {
       const m = this.add( scene.add.graphics().setDepth( 6 ) );
       this.markers.push( m );
-      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 14, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( 0.8 / RES ).setDepth( behindGrass ) );
+      // Скринька в 1.7 раза більша за стару (текстура 168x256 замість 96x128), низ стовпчика ховається в траві
+      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 8, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( MAILBOX_SCALE ).setDepth( behindGrass ) );
       this.mailboxes.push( mb );
       if ( lvl.targets.length > 1 )
       {
-        const n = this.add( scene.add.text( mb.x, mb.y - 62, String( i + 1 ), {
+        const n = this.add( scene.add.text( mb.x, mb.y - mb.displayHeight - 16, String( i + 1 ), {
           fontFamily: FONT, fontSize: '22px', fontStyle: 'bold', color: '#ffffff', stroke: inkHex(), strokeThickness: 5
         } ).setOrigin( 0.5 ).setDepth( 7 ) );
         void n;

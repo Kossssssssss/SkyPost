@@ -5,13 +5,14 @@ import {
   createState, step, canBurn, DT, NEUTRAL, MID_OFF, ENV_OFF,
   EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_LIFTOFF, EV_STAMP, EV_WIN, type SimState
 } from '../core/sim.ts';
-import { WorldView } from '../ui/worldView.ts';
+import { WorldView, MAILBOX_SCALE } from '../ui/worldView.ts';
 import { baseScale } from '../core/art.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { save, persist } from '../core/save.ts';
 import { skin, trailLook } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
+import { track } from '../platform/analytics.ts';
 
 export type Phase = 'intro' | 'play' | 'paused' | 'dead' | 'won' | 'editor';
 export type FailReason = '' | 'water' | 'hazard' | 'gas';
@@ -225,6 +226,7 @@ export class GameScene extends Phaser.Scene
     {
       this.phase = 'play';
       platform.gameplayStart();
+      track( 'level_start', { level: this.levelId } );
       this.game.events.emit( 'play-started' );
     }
   }
@@ -400,20 +402,26 @@ export class GameScene extends Phaser.Scene
     {
       const i = this.s.target - 1;
       const mb = this.view.mailboxes[ i ];
+      // Середина скриньки над стовпчиком — туди влітає лист
+      const boxY = mb.displayHeight * 0.75;
       audio.deliver();
       const letter = this.add.image( this.s.x, this.s.y - 30, 'letter' ).setDepth( 20 );
       const lk = baseScale( letter );
       letter.setScale( lk );
       this.tweens.add( {
-        targets: letter, x: mb.x, y: mb.y - 46, scale: 0.6 * lk, duration: 380, ease: 'Quad.inOut',
+        targets: letter, x: mb.x, y: mb.y - boxY, scale: 0.6 * lk, duration: 380, ease: 'Quad.inOut',
         onComplete: () =>
         {
           letter.destroy();
-          this.burst( mb.x, mb.y - 46, 'spark', [ 0xffd23a, 0xffffff ], 12 );
-          this.tweens.add( { targets: mb, scaleY: mb.scaleY * 1.15, duration: 90, yoyo: true } );
+          // Лист у скриньці: прапорець опускається, скринька підстрибує
+          mb.setTexture( 'mailboxDone' );
+          this.burst( mb.x, mb.y - boxY, 'spark', [ 0xffd23a, 0xffffff ], 12 );
+          this.tweens.add( { targets: mb, scaleY: MAILBOX_SCALE * 1.14, scaleX: MAILBOX_SCALE * 0.94, duration: 110, yoyo: true, ease: 'Sine.out' } );
         }
       } );
       this.view.setActiveTarget( this.s.target );
+      // Поки лист летить, скринька ще чекає — прапорець опуститься, коли лист долетить
+      mb.setTexture( 'mailbox' );
       this.game.events.emit( 'deliver', this.s.target );
     }
     if ( ev & EV_WIN )
@@ -450,6 +458,7 @@ export class GameScene extends Phaser.Scene
     this.phase = 'dead';
     this.fail = reason;
     platform.gameplayStop();
+    track( 'level_fail', { level: this.levelId, reason } );
     audio.burner( false );
     const env = skin( save().equip.envelope );
     if ( reason === 'water' )
