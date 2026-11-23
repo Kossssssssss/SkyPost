@@ -23,16 +23,20 @@ interface Bird { x: number; y: number; s: number; ph: number }
 
 const CLOUD_SPEED = [ 0.05, 0.12 ];
 const CLOUD_SIZE = [ 0.11, 0.17 ];
+// Серпанок кольору неба поверх пейзажу на рівні: фон блякне й відступає, тож куля, перешкоди й пошта читаються першими
+const HAZE = 0.38;
 
 // Окрема сцена під грою: небо й далекий план не залежать від зуму ігрової камери
 export class BgScene extends Phaser.Scene
 {
   private sky!: Phaser.GameObjects.Graphics;
+  private haze!: Phaser.GameObjects.Graphics;
   private far?: Phaser.GameObjects.Image;
   private sun!: Phaser.GameObjects.Image;
   // Намальовані промені окремим кільцем під диском: повільно обертаються й ледь дихають
   private sunRays?: Phaser.GameObjects.Image;
   private raysK = 1;
+  private sunK = 1;
   private layers: Layer[] = [];
   private clouds: SkyCloud[] = [];
   private birds: Bird[] = [];
@@ -57,6 +61,7 @@ export class BgScene extends Phaser.Scene
   create(): void
   {
     this.sky = this.add.graphics();
+    this.haze = this.add.graphics().setAlpha( this.scene.isActive( 'game' ) ? HAZE : 0 );
     // Намальоване акварельне сонце: без променів і світіння, приглушена охра. Без пака лишається м'яка пляма
     this.sunRays = pack && this.textures.exists( 'pk-sun_rays' ) ? this.add.image( 0, 0, 'pk-sun_rays' ).setAlpha( 0.9 ) : undefined;
     this.sun = pack && this.textures.exists( 'pk-sun' )
@@ -165,6 +170,7 @@ export class BgScene extends Phaser.Scene
     this.h = h;
     this.cameras.main.setSize( w, h );
     this.sky.clear();
+    this.haze.clear();
     if ( pack )
     {
       // Кілька зупинок градієнта: двоколірний fillGradient не дає заходу сонця
@@ -172,8 +178,11 @@ export class BgScene extends Phaser.Scene
       for ( let i = 0; i < st.length - 1; i++ )
       {
         const y0 = ( h * i ) / ( st.length - 1 );
-        this.sky.fillGradientStyle( st[ i ], st[ i ], st[ i + 1 ], st[ i + 1 ], 1 );
-        this.sky.fillRect( 0, y0, w, h / ( st.length - 1 ) + 1 );
+        for ( const g of [ this.sky, this.haze ] )
+        {
+          g.fillGradientStyle( st[ i ], st[ i ], st[ i + 1 ], st[ i + 1 ], 1 );
+          g.fillRect( 0, y0, w, h / ( st.length - 1 ) + 1 );
+        }
       }
     }
     else
@@ -184,6 +193,7 @@ export class BgScene extends Phaser.Scene
     }
     // Діаметр сонця — 13% меншої сторони екрана (м'яку пляму без пака лишаємо як була)
     const sunK = this.sun.texture.key === 'pk-sun' ? ( Math.min( w, h ) * 0.13 ) / this.sun.width : Math.min( w, h ) / 220;
+    this.sunK = sunK;
     this.sun.setPosition( w * 0.8, h * ( this.sun.texture.key === 'pk-sun' ? 0.22 : 0.16 ) ).setScale( sunK );
     // Радіус диска: 112 px на sun.webp і 155 px на sun_rays.webp, тож промені точно облягають наш диск
     this.raysK = sunK * 112 / 155;
@@ -219,8 +229,6 @@ export class BgScene extends Phaser.Scene
   {
     let d = 1;
     this.sky.setDepth( 0 );
-    this.sunRays?.setDepth( d++ );
-    this.sun.setDepth( d++ );
     const order: ( Phaser.GameObjects.Image | Phaser.GameObjects.Graphics )[] = [];
     for ( const c of this.clouds.filter( ( c ) => c.depth === 0 ) )
     {
@@ -237,6 +245,9 @@ export class BgScene extends Phaser.Scene
       order.push( this.fx );
     }
     order.push( ...this.layers[ 2 ]?.imgs ?? [] );
+    order.push( this.haze );
+    // Сонце над серпанком, бо під ним охра сіріє; на рівні його натомість приглушує власна прозорість
+    order.push( ...( this.sunRays ? [ this.sunRays ] : [] ), this.sun );
     for ( const o of order )
     {
       o.setDepth( d++ );
@@ -263,8 +274,15 @@ export class BgScene extends Phaser.Scene
       this.camY *= 1 - Math.min( 1, dt * 2 );
     }
     this.menuDrop += ( ( menu ? 0.07 : 0 ) - this.menuDrop ) * Math.min( 1, dt * 3 );
+    this.haze.alpha += ( ( menu ? 0 : HAZE ) - this.haze.alpha ) * Math.min( 1, dt * 3 );
+    const sunA = 0.9 - this.haze.alpha;
+    this.sun.setAlpha( sunA );
+    this.sunRays?.setAlpha( sunA * 0.8 );
     // Повний оберт приблизно за 5 хвилин і подих ±3%: небо живе, але не мерехтить
-    this.sunRays?.setRotation( this.t * 0.02 ).setScale( this.raysK * ( 1 + Math.sin( this.t * 0.8 ) * 0.03 ) );
+    // На рівні сонце менше й блідіше: воно не має тягнути погляд від кулі
+    const sunS = 1 - this.haze.alpha * 0.65;
+    this.sun.setScale( this.sunK * sunS );
+    this.sunRays?.setRotation( this.t * 0.02 ).setScale( this.raysK * sunS * ( 1 + Math.sin( this.t * 0.8 ) * 0.03 ) );
     for ( const l of this.layers )
     {
       this.placeLayer( l );
@@ -272,6 +290,8 @@ export class BgScene extends Phaser.Scene
     for ( const c of this.clouds )
     {
       this.placeCloud( c );
+      // Хмари світлі й під серпанком лишаються яскравими плямами, тож на рівні ще й прозоріші
+      c.img.setAlpha( ( c.depth ? 0.92 : 0.7 ) * ( 1 - this.haze.alpha ) );
     }
     const fx = this.fx!;
     fx.clear();

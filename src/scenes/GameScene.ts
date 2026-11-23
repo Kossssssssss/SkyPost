@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { LevelData } from '../core/level.ts';
 import { findLevel } from '../levels/index.ts';
 import {
-  createState, step, canBurn, DT, NEUTRAL, MID_OFF, ENV_OFF,
+  createState, step, canBurn, hazardPos, DT, NEUTRAL, MID_OFF, ENV_OFF,
   EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_LIFTOFF, EV_STAMP, EV_WIN, type SimState
 } from '../core/sim.ts';
 import { WorldView, MAILBOX_SCALE } from '../ui/worldView.ts';
@@ -29,6 +29,16 @@ export const VIEW_H = 720;
 // Мальовані частинки (з assets/trail) замість кодових: p-blob знебарвлений, тож тонується в будь-який колір
 const PAINTED_PARTICLE: Record<string, string> = { dot: 'p-blob', spark: 'p-star' };
 
+// Удар об перешкоду: світ на мить сповільнюється до SLOW_K, тримається так, а за останні SLOW_RAMP с плавно повертається
+const SLOW_TIME = 0.4;
+const SLOW_RAMP = 0.25;
+const SLOW_K = 0.5;
+// Пір'я з птаха: коричнювате в ластівки, біле в чайки
+const FEATHER_TINT: Record<string, number[]> = {
+  bird: [ 0xffe8cc, 0xf4d4ac, 0xfff6ea ],
+  gull: [ 0xffffff, 0xf0f0f0, 0xdfe4e8 ]
+};
+
 export class GameScene extends Phaser.Scene
 {
   lvl!: LevelData;
@@ -45,6 +55,8 @@ export class GameScene extends Phaser.Scene
   private ghost?: Phaser.GameObjects.Graphics;
   private ghostBalloon?: Phaser.GameObjects.Image;
   private acc = 0;
+  private slowT = 0;
+  private slowEmitters: Phaser.GameObjects.Particles.ParticleEmitter[] = [];
   private pointerBurn = false;
   private keyBurn = false;
   private stuck = 0;
@@ -71,6 +83,8 @@ export class GameScene extends Phaser.Scene
     this.phase = 'intro';
     this.fail = '';
     this.acc = 0;
+    this.slowT = 0;
+    this.slowEmitters = [];
     this.stuck = 0;
     this.pointerBurn = false;
     this.keyBurn = false;
@@ -84,6 +98,8 @@ export class GameScene extends Phaser.Scene
     this.lvl = structuredClone( found.level );
     save().lastLevel = this.levelId;
     audio.music( 'level' );
+    // Годинник і твіни сцени живуть між рестартами, тож скидаємо сповільнення після удару
+    this.setSlow( 1 );
     persist();
 
     this.buildWorld();
@@ -280,6 +296,11 @@ export class GameScene extends Phaser.Scene
   update( _time: number, delta: number ): void
   {
     const dt = Math.min( delta, 100 ) / 1000;
+    if ( this.slowT > 0 )
+    {
+      this.slowT = Math.max( 0, this.slowT - dt );
+      this.setSlow( this.slowT > SLOW_RAMP ? SLOW_K : Phaser.Math.Linear( 1, SLOW_K, this.slowT / SLOW_RAMP ) );
+    }
     if ( this.phase === 'editor' )
     {
       this.editorHook?.update( dt );
@@ -472,10 +493,80 @@ export class GameScene extends Phaser.Scene
     {
       audio.pop();
       this.cameras.main.shake( 220, 0.008 );
-      this.burst( this.s.x, this.s.y - ENV_OFF, 'dot', env.colors.slice( 0, 3 ), 30 );
+      this.hazardHit( env.colors.slice( 0, 3 ) );
       this.tweens.add( { targets: this.balloon, y: this.balloon.y + 120, angle: 40, alpha: 0, duration: 800, ease: 'Quad.in' } );
     }
     this.time.delayedCall( reason === 'gas' ? 200 : 900, () => this.game.events.emit( 'level-failed', this ) );
+  }
+
+  // Удар об перешкоду: спалах у точці зіткнення, клаптики оболонки, пір'я з птаха, птах відлітає, світ на мить сповільнюється
+  private hazardHit( envColors: number[] ): void
+  {
+    const ex = this.s.x;
+    const ey = this.s.y - ENV_OFF;
+    // Симуляція не каже, у що саме врізались, тож беремо найближчу перешкоду
+    let hit = -1;
+    let best = Infinity;
+    let hp = { x: ex, y: ey };
+    this.lvl.hazards.forEach( ( _h, i ) =>
+    {
+      const p = hazardPos( this.lvl, i, this.s.t );
+      const d = ( p.x - ex ) ** 2 + ( p.y - ey ) ** 2;
+      if ( d < best )
+      {
+        best = d;
+        hit = i;
+        hp = p;
+      }
+    } );
+    const kind = hit >= 0 ? this.lvl.hazards[ hit ].kind : '';
+    const cx = ( ex + hp.x ) / 2;
+    const cy = ( ey + hp.y ) / 2;
+    const flash = this.add.image( cx, cy, 'soft' ).setTint( 0xfff4dc ).setBlendMode( Phaser.BlendModes.ADD ).setDepth( 22 ).setScale( 0.6 ).setAlpha( 0.6 );
+    this.tweens.add( { targets: flash, scale: 1.6, alpha: 0, duration: 220, ease: 'Quad.out', onComplete: () => flash.destroy() } );
+    this.slowEmitters.push( this.burst( ex, ey, 'dot', envColors, 30 ) );
+    if ( FEATHER_TINT[ kind ] )
+    {
+      this.slowEmitters.push( this.feathers( cx, cy, FEATHER_TINT[ kind ] ) );
+      this.view.knockHazard( hit, hp.x >= ex ? 1 : -1 );
+    }
+    this.slowT = SLOW_TIME;
+    this.setSlow( SLOW_K );
+  }
+
+  // Пір'їнки розлітаються вбік, а тоді повільно опускаються, гойдаючись і крутячись
+  private feathers( x: number, y: number, tint: number[] ): Phaser.GameObjects.Particles.ParticleEmitter
+  {
+    const tex = this.textures.exists( 'p-feather' ) ? 'p-feather' : 'dot';
+    const k = 22 / ( this.textures.get( tex ).getSourceImage().width || 22 );
+    const em = this.add.particles( x, y, tex, {
+      speedX: { min: -170, max: 170 }, speedY: { min: -80, max: 30 }, gravityY: 140, maxVelocityY: 75,
+      accelerationX: { onEmit: () => 0, onUpdate: ( p: Phaser.GameObjects.Particles.Particle, _k: string, t: number ) => Math.sin( t * 16 + p.angle * 0.05 ) * 240 },
+      rotate: { onEmit: () => Math.random() * 360, onUpdate: ( _p: Phaser.GameObjects.Particles.Particle, _k: string, _t: number, v: number ) => v + 3 },
+      lifespan: { min: 1300, max: 1900 }, scale: { min: 0.8 * k, max: 1.15 * k }, alpha: { start: 0.95, end: 0, ease: 'Cubic.in' },
+      tint, emitting: false
+    } ).setDepth( 21 );
+    em.explode( 12 );
+    this.time.delayedCall( 2100, () => em.destroy() );
+    return em;
+  }
+
+  // Сповільнення світу: годинник сцени, твіни й частинки удару
+  private setSlow( k: number ): void
+  {
+    this.time.timeScale = k;
+    this.tweens.timeScale = k;
+    for ( const em of this.slowEmitters )
+    {
+      if ( em.active )
+      {
+        em.timeScale = k;
+      }
+    }
+    if ( k === 1 )
+    {
+      this.slowEmitters = [];
+    }
   }
 
   private dust( x: number, y: number, n: number ): void
@@ -498,7 +589,7 @@ export class GameScene extends Phaser.Scene
   }
 
   // size — номінальний розмір частинки (як у кодової текстури 32 px), тож мальовані 64 px не виходять удвічі більшими
-  burst( x: number, y: number, tex: string, tint: number[], n: number, gravity = 300, size = 32 ): void
+  burst( x: number, y: number, tex: string, tint: number[], n: number, gravity = 300, size = 32 ): Phaser.GameObjects.Particles.ParticleEmitter
   {
     // Кодові кружечки й іскри підміняємо мальованими частинками шлейфу, якщо вони завантажені
     tex = PAINTED_PARTICLE[ tex ] && this.textures.exists( PAINTED_PARTICLE[ tex ] ) ? PAINTED_PARTICLE[ tex ] : tex;
@@ -509,6 +600,7 @@ export class GameScene extends Phaser.Scene
     } ).setDepth( 21 );
     em.explode( n );
     this.time.delayedCall( 1100, () => em.destroy() );
+    return em;
   }
 
   private targetCam(): { x: number; y: number }

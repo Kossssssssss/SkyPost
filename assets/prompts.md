@@ -2330,3 +2330,59 @@
 - дата: 2026-11-23 12:04
 - модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 53, ціна $0.0111
 - промпт: unhurried minimalist chamber instrumental for a hand-painted hot-air balloon game, 84 BPM, felt piano repeating arpeggio ostinato, light staccato violins and viola, soft flute and clarinet melody in gentle dialogue, warm sustained cello harmony, soft woodblock tick on the beat, steady and attentive, calm concentration with quiet purpose, bright major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/wind_s11.png
+- дата: 2026-11-23 12:30
+- модель: runware flux-2-klein-9b-kv, 1536x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single gentle gust of wind drawn as a long horizontal swirl: two or three thin flowing parallel curved strokes that taper at the left end and roll into one small spiral curl at the right end, pale cream and soft white watercolor wash with a thin uneven sepia ink line, airy and light. Side view, the swirl centered and stretching across most of the width, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/wind_s22.png
+- дата: 2026-11-23 12:30
+- модель: runware flux-2-klein-9b-kv, 1536x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single gentle gust of wind drawn as a long horizontal swirl: two or three thin flowing parallel curved strokes that taper at the left end and roll into one small spiral curl at the right end, pale cream and soft white watercolor wash with a thin uneven sepia ink line, airy and light. Side view, the swirl centered and stretching across most of the width, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/wind_s33.png
+- дата: 2026-11-23 12:30
+- модель: runware flux-2-klein-9b-kv, 1536x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single gentle gust of wind drawn as a long horizontal swirl: two or three thin flowing parallel curved strokes that taper at the left end and roll into one small spiral curl at the right end, pale cream and soft white watercolor wash with a thin uneven sepia ink line, airy and light. Side view, the swirl centered and stretching across most of the width, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/wind_s44.png
+- дата: 2026-11-23 12:31
+- модель: runware flux-2-klein-9b-kv, 1536x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single gentle gust of wind drawn as a long horizontal swirl: two or three thin flowing parallel curved strokes that taper at the left end and roll into one small spiral curl at the right end, pale cream and soft white watercolor wash with a thin uneven sepia ink line, airy and light. Side view, the swirl centered and stretching across most of the width, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/layerline_s11.png
+- дата: 2026-11-23 16:43
+- модель: runware flux-2-klein-9b-kv, 2048x384, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin hand-drawn horizontal ink line with gentle uneven waves, like a contour line on an old hand-drawn map, a continuous sepia pencil stroke that varies slightly in thickness with a faint pale cream watercolor wash along it, stretching straight across the whole image from the very left edge to the very right edge at the vertical center. Side view, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/layerline_s44.png
+- дата: 2026-11-23 16:43
+- модель: runware flux-2-klein-9b-kv, 2048x384, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin hand-drawn horizontal ink line with gentle uneven waves, like a contour line on an old hand-drawn map, a continuous sepia pencil stroke that varies slightly in thickness with a faint pale cream watercolor wash along it, stretching straight across the whole image from the very left edge to the very right edge at the vertical center. Side view, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/layerline_s33.png
+- дата: 2026-11-23 16:43
+- модель: runware flux-2-klein-9b-kv, 2048x384, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin hand-drawn horizontal ink line with gentle uneven waves, like a contour line on an old hand-drawn map, a continuous sepia pencil stroke that varies slightly in thickness with a faint pale cream watercolor wash along it, stretching straight across the whole image from the very left edge to the very right edge at the vertical center. Side view, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/layerline_s22.png
+- дата: 2026-11-23 16:44
+- модель: runware flux-2-klein-9b-kv, 2048x384, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin hand-drawn horizontal ink line with gentle uneven waves, like a contour line on an old hand-drawn map, a continuous sepia pencil stroke that varies slightly in thickness with a faint pale cream watercolor wash along it, stretching straight across the whole image from the very left edge to the very right edge at the vertical center. Side view, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style

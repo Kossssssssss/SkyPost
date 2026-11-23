@@ -3,7 +3,7 @@ import { groundY, layerBottom, windAt, type LevelData, type Theme } from '../cor
 import { hazardPos } from '../core/sim.ts';
 import { RES } from '../core/art.ts';
 import { FONT, inkHex } from './widgets.ts';
-import { cloudKey, pack } from './pack.ts';
+import { pack } from './pack.ts';
 
 // Смуги ground_<тема>.webp і water_<тема>.webp у рівні: висота в одиницях рівня і де на картинці (частка висоти)
 // трава переходить у землю (у води — гребені в суцільну воду). Ця межа стає на лінію ґрунту, трава стирчить над нею.
@@ -51,18 +51,30 @@ export const THEMES: Record<Theme, ThemeStyle> = {
   night: { skyTop: 0x0a1030, skyBottom: 0x2a3060, ground: 0x202030, groundTop: 0x303048, body: 0x303048, bodyDark: 0x202030, top: 0x404060, far: 'bg-meadow' }
 };
 
-interface Streak
+// Межа шарів вітру — тонкий білий пунктир
+const DASH_STEP = 30;
+const DASH_LEN = 16;
+const DASH_H = 2;
+const DASH_ALPHA = 0.45;
+
+// Листок, пір'їнка чи сніжинка, яку несе вітер свого шару: видно, куди й як сильно дме
+interface Drifter
 {
   img: Phaser.GameObjects.Image;
   layer: number;
   speedK: number;
+  baseY: number;
+  phase: number;
+  amp: number;
+  spin: number;
 }
 
-interface Cloud
-{
-  img: Phaser.GameObjects.Image;
-  layer: number;
-}
+// Що несе вітер у кожній темі (мальовані партикли шлейфу)
+const DRIFT_TEX: Partial<Record<Theme, string[]>> = {
+  meadow: [ 'p-leaf', 'p-leaf', 'p-flower' ],
+  sea: [ 'p-feather' ],
+  mountain: [ 'p-snow' ]
+};
 
 
 // 0.8 / RES — старий розмір 96x128, ×1.7 — більша скринька, ×0.5 — нова текстура вдвічі вища
@@ -73,9 +85,10 @@ export class WorldView
   private scene: Phaser.Scene;
   private lvl: LevelData;
   private objects: Phaser.GameObjects.GameObject[] = [];
-  private streaks: Streak[] = [];
-  private clouds: Cloud[] = [];
+  private drifters: Drifter[] = [];
   private hazards: Phaser.GameObjects.Image[] = [];
+  // Перешкоди, у які врізалась куля: їх веде твін відльоту, а не маршрут
+  private knocked = new Set<number>();
   private motes: Phaser.GameObjects.Image[] = [];
   private water?: Phaser.GameObjects.Graphics;
   // Намальована вода: копії смуги, що повільно гойдаються
@@ -98,7 +111,6 @@ export class WorldView
     const th = THEMES[ lvl.theme ];
     this.buildLayers();
     this.buildUpdrafts();
-    this.buildClouds();
 
     // Будинок стоїть на лінії ґрунту (лише трохи нижче, щоб не висів) і малюється поверх ґрунту (depth 5);
     // його низ і так ховає передня трава. Глибше не садимо: інакше над травою видно лише дах.
@@ -180,66 +192,39 @@ export class WorldView
   private buildLayers(): void
   {
     const lvl = this.lvl;
-    const band = this.add( this.scene.add.graphics().setDepth( 0 ) );
+    const dashes = this.add( this.scene.add.graphics().setDepth( 0.5 ) );
+    dashes.fillStyle( 0xffffff, DASH_ALPHA );
     lvl.layers.forEach( ( l, i ) =>
     {
       const y0 = l.top;
       const y1 = layerBottom( lvl, i );
-      const col = l.wind > 0 ? 0xfff0c0 : l.wind < 0 ? 0xc0e0ff : 0xffffff;
-      band.fillStyle( col, i % 2 ? 0.1 : 0.05 );
-      // Смуги шарів виходять за край рівня на запас камери, інакше на краю видно шов
-      band.fillRect( -400, y0, lvl.width + 800, y1 - y0 );
+      const area = lvl.width * ( y1 - y0 );
+      const windy = Math.abs( l.wind ) >= 1 || !!l.gust;
       if ( i > 0 )
       {
-        band.fillStyle( 0xffffff, 0.35 );
-        for ( let x = -396; x < lvl.width + 400; x += 36 )
+        for ( let x = -400; x < lvl.width + 400; x += DASH_STEP )
         {
-          band.fillRect( x, y0 - 1, 18, 2 );
+          dashes.fillRect( x, y0 - DASH_H / 2, DASH_LEN, DASH_H );
         }
       }
-      const area = lvl.width * ( y1 - y0 );
-      const n = Math.abs( l.wind ) < 1 && !l.gust ? 0 : Math.round( area / 26000 );
-      for ( let k = 0; k < n; k++ )
+      const drift = ( DRIFT_TEX[ lvl.theme ] ?? [ 'p-leaf' ] ).filter( ( k ) => this.scene.textures.exists( k ) );
+      const nd = !windy || !drift.length ? 0 : Math.max( 2, Math.round( area / 145000 ) );
+      for ( let k = 0; k < nd; k++ )
       {
-        const img = this.add( this.scene.add.image(
-          Math.random() * lvl.width, Phaser.Math.Between( y0 + 10, y1 - 10 ), 'streak' ).setDepth( 1 ) );
-        img.setAlpha( 0.25 + Math.random() * 0.3 );
-        img.setScale( 0.6 + Math.random() * 0.9, 1 );
-        this.streaks.push( { img, layer: i, speedK: 1.3 + Math.random() * 0.8 } );
+        const baseY = Phaser.Math.Between( y0 + 20, y1 - 20 );
+        const img = this.add( this.scene.add.image( Math.random() * lvl.width, baseY, Phaser.Utils.Array.GetRandom( drift ) )
+          .setScale( 0.24 + Math.random() * 0.08 ).setAlpha( 0.5 ).setRotation( Math.random() * Math.PI * 2 ).setDepth( 1.1 ) );
+        this.drifters.push( { img, layer: i, baseY, speedK: 0.85 + Math.random() * 0.35, phase: Math.random() * Math.PI * 2,
+          amp: 6 + Math.random() * 10, spin: ( Math.random() < 0.5 ? -1 : 1 ) * ( 0.6 + Math.random() ) } );
       }
-      if ( n === 0 )
+      if ( !windy )
       {
         for ( let k = 0; k < Math.round( area / 40000 ); k++ )
         {
           const m = this.add( this.scene.add.image( Math.random() * lvl.width, Phaser.Math.Between( y0 + 10, y1 - 10 ), 'dot' )
-            .setScale( 0.12 ).setAlpha( 0.5 ).setDepth( 1 ) );
+            .setScale( 0.12 ).setAlpha( 0.3 ).setDepth( 1 ) );
           this.motes.push( m );
         }
-      }
-    } );
-  }
-
-  private buildClouds(): void
-  {
-    const lvl = this.lvl;
-    lvl.layers.forEach( ( l, i ) =>
-    {
-      const y0 = l.top;
-      const y1 = layerBottom( lvl, i );
-      if ( y1 - y0 < 90 )
-      {
-        return;
-      }
-      const n = Math.max( 1, Math.round( lvl.width / 900 ) );
-      for ( let k = 0; k < n; k++ )
-      {
-        const img = this.add( this.scene.add.image(
-          ( k + Math.random() * 0.8 ) * ( lvl.width / n ), Phaser.Math.Between( y0 + 30, Math.max( y0 + 31, y1 - 40 ) ), cloudKey( ( k + i ) % 3 ) ).setDepth( 1 ) );
-        const s = 0.45 + Math.random() * 0.4;
-        // Хмари пакета більші за процедурні, тож зводимо їх до тієї ж ширини
-        img.setScale( pack ? ( s * 260 ) / img.width : s );
-        img.setAlpha( 0.75 );
-        this.clouds.push( { img, layer: i } );
       }
     } );
   }
@@ -499,38 +484,36 @@ export class WorldView
     }
   }
 
+  // Декор, що вилетів за край, переносимо на протилежний край за межами того, що бачить камера,
+  // інакше на широкому екрані видно, як він з'являється й зникає біля країв рівня
+  private wrapX( img: Phaser.GameObjects.Image, left: number, right: number ): void
+  {
+    const half = img.displayWidth / 2 + 10;
+    if ( img.x - half > right )
+    {
+      img.x = left - half;
+    }
+    else if ( img.x + half < left )
+    {
+      img.x = right + half;
+    }
+  }
+
   update( t: number, dt: number ): void
   {
     const lvl = this.lvl;
-    for ( const s of this.streaks )
+    const view = this.scene.cameras.main.worldView;
+    const left = Math.min( 0, view.x );
+    const right = Math.max( lvl.width, view.right );
+    // Предмети летять зі швидкістю вітру, гойдаються вгору-вниз і крутяться тим швидше, чим сильніше дме
+    for ( const d of this.drifters )
     {
-      const l = lvl.layers[ s.layer ];
-      const w = windAt( lvl, ( l.top + layerBottom( lvl, s.layer ) ) / 2, t );
-      s.img.x += w * s.speedK * dt;
-      s.img.flipX = w < 0;
-      if ( s.img.x > lvl.width + 60 )
-      {
-        s.img.x = -60;
-      }
-      else if ( s.img.x < -60 )
-      {
-        s.img.x = lvl.width + 60;
-      }
-    }
-    for ( const c of this.clouds )
-    {
-      const l = lvl.layers[ c.layer ];
-      const w = windAt( lvl, ( l.top + layerBottom( lvl, c.layer ) ) / 2, t );
-      c.img.x += w * 0.9 * dt;
-      const half = c.img.displayWidth / 2;
-      if ( c.img.x > lvl.width + half )
-      {
-        c.img.x = -half;
-      }
-      else if ( c.img.x < -half )
-      {
-        c.img.x = lvl.width + half;
-      }
+      const l = lvl.layers[ d.layer ];
+      const w = windAt( lvl, ( l.top + layerBottom( lvl, d.layer ) ) / 2, t );
+      d.img.x += w * d.speedK * dt;
+      d.img.y = d.baseY + Math.sin( t * 1.4 + d.phase ) * d.amp;
+      d.img.rotation += ( 0.3 + Math.abs( w ) / 60 ) * d.spin * dt;
+      this.wrapX( d.img, left, right );
     }
     for ( let i = 0; i < this.motes.length; i++ )
     {
@@ -540,6 +523,10 @@ export class WorldView
     }
     lvl.hazards.forEach( ( h, i ) =>
     {
+      if ( this.knocked.has( i ) )
+      {
+        return;
+      }
       const p = hazardPos( lvl, i, t );
       const img = this.hazards[ i ];
       const prevX = img.x;
@@ -610,6 +597,25 @@ export class WorldView
     this.stampGlow.setVisible( false );
   }
 
+  // Птах, у якого врізалась куля, перекидається й відлітає геть від неї (dir — убік від кулі: -1 чи 1)
+  knockHazard( i: number, dir: number ): void
+  {
+    const img = this.hazards[ i ];
+    if ( !img || this.knocked.has( i ) )
+    {
+      return;
+    }
+    this.knocked.add( i );
+    const tw = this.scene.tweens;
+    tw.add( { targets: img, x: img.x + dir * 190, duration: 900, ease: 'Quad.out' } );
+    tw.chain( { targets: img, tweens: [
+      { y: '-=70', duration: 300, ease: 'Quad.out' },
+      { y: '+=330', duration: 700, ease: 'Quad.in' }
+    ] } );
+    tw.add( { targets: img, angle: dir * 540, duration: 1100, ease: 'Quad.out' } );
+    tw.add( { targets: img, alpha: 0, delay: 600, duration: 500 } );
+  }
+
   destroy(): void
   {
     for ( const o of this.objects )
@@ -617,9 +623,9 @@ export class WorldView
       o.destroy();
     }
     this.objects = [];
-    this.streaks = [];
-    this.clouds = [];
+    this.drifters = [];
     this.hazards = [];
+    this.knocked.clear();
     this.motes = [];
     this.mailboxes = [];
     this.markers = [];
