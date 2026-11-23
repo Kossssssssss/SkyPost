@@ -65,7 +65,7 @@ export class ShopScene extends Phaser.Scene
 
     const m = 22 * u;
     const bs = 84 * u;
-    this.root.add( button( this, m + bs / 2, m + bs / 2, { w: bs, h: bs, icon: 'i-back', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.back() } ) );
+    this.root.add( button( this, m + bs / 2, m + bs / 2, { w: bs, h: bs, icon: this.textures.exists( 'i-ret' ) ? 'i-ret' : 'i-back', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.back() } ) );
     this.root.add( label( this, m * 2 + bs, m + bs / 2, t( 'shop' ), 50 * u ).setOrigin( 0, 0.5 ) );
     this.root.add( this.add.image( w - m - 230 * u, m + bs / 2, 'coin' ).setScale( 60 * u / 256 ) );
     this.root.add( label( this, w - m - 190 * u, m + bs / 2, String( save().coins ), 44 * u ).setOrigin( 0, 0.5 ) );

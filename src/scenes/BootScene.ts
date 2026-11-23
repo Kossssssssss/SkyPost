@@ -6,7 +6,7 @@ import { pack, packLayers } from '../ui/pack.ts';
 import { TRAIL_PARTICLES } from '../core/skins.ts';
 import { findLevel } from '../levels/index.ts';
 
-const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'shop', 'route' ];
+const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'shop', 'route', 'ret' ];
 // Скіни, вже перемальовані в акварельному стилі: текстури того ж розміру, що й намальовані кодом.
 // Префікс id (env-, bas-) збігається з префіксом ключа текстури (env:, bas:)
 const PAINTED_SKINS = [ 'env-classic', 'env-sky', 'env-sunset', 'env-polka', 'env-checker', 'env-patch', 'env-bloom', 'env-light', 'env-aurora', 'env-airmail',
