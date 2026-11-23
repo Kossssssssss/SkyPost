@@ -2270,3 +2270,63 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: —
 - промпт: A single round disc cut from thick pale warm cream watercolor paper with a torn deckled uneven edge and a plain empty center. Top-down front view, the disc centered and filling most of the frame with a small margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/music_level_a.mp3
+- дата: 2026-11-23 11:47
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 21, ціна $0.0111
+- промпт: focused instrumental storybook adventure music for a cozy hand-painted game about a hot-air balloon mail carrier, steady 4/4 pulse, 112 BPM, crisp pizzicato strings ostinato, staccato felt piano chords, light brushed snare and soft kick on every beat, glockenspiel melody, warm accordion accents, determined and attentive, clockwork precision, bright major key, steady even energy from start to end, warm acoustic chamber music
+
+## assets/raw/music_level_b.mp3
+- дата: 2026-11-23 11:47
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 22, ціна $0.0111
+- промпт: light storybook march for a cozy hand-painted game about a hot-air balloon mail carrier, instrumental, 4/4 time, 108 BPM, crisp snare drum pattern, staccato clarinet and bassoon melody, pizzicato strings, warm accordion chords, glockenspiel accents, purposeful and focused, careful and confident, major key, steady even energy from start to end, warm acoustic chamber music
+
+## assets/raw/music_level_c.mp3
+- дата: 2026-11-23 11:47
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 23, ціна $0.0111
+- промпт: curious focused instrumental music for a cozy hand-painted game about a hot-air balloon mail carrier, 4/4 time, 116 BPM, ticking woodblock and soft tom pulse, driving staccato string ostinato, marimba and celesta arpeggios, felt piano melody, gentle suspense resolving into hopeful phrases, attentive and precise, steady even energy from start to end, warm acoustic chamber music
+
+## assets/raw/music_level_d.mp3
+- дата: 2026-11-23 11:57
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 31, ціна $0.0111
+- промпт: hypnotic minimalist instrumental for a hand-painted puzzle-like flying game, 120 BPM, interlocking marimba and vibraphone patterns in constant eighth notes, gently shifting phrases, soft pulsing upright bass, light shaker, felt piano repeating motif, deep concentration and calm focus, precise and clean, bright major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_e.mp3
+- дата: 2026-11-23 11:57
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 32, ціна $0.0111
+- промпт: breezy folk adventure instrumental for a hand-painted game about a hot-air balloon mail carrier, 6/8 jig rhythm, 120 BPM, rhythmic strummed acoustic guitar, frame drum and bodhran pulse, nimble fiddle melody, tin whistle answers, plucked mandolin, wind and forward momentum, lively and alert, major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_f.mp3
+- дата: 2026-11-23 11:57
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 33, ціна $0.0111
+- промпт: warm folktronica instrumental for a hand-painted flying game, 100 BPM, crisp soft electronic beat with tight kick and snappy rim, round warm bass, plucked kalimba and ukulele riff, glockenspiel sparkles, gentle filtered synth pad, head-nodding groove, focused and attentive, playful and steady, major key, steady even energy from start to end
+
+## assets/raw/music_level_g.mp3
+- дата: 2026-11-23 12:00
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 41, ціна $0.0111
+- промпт: unhurried minimalist instrumental for a hand-painted hot-air balloon game, 84 BPM, interlocking marimba and vibraphone patterns, gently shifting phrases, soft walking upright bass, light shaker on the beat, felt piano repeating motif, steady and attentive, calm concentration with quiet purpose, bright major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_h.mp3
+- дата: 2026-11-23 12:00
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 42, ціна $0.0111
+- промпт: gentle folk instrumental for a hand-painted game about a hot-air balloon mail carrier, slow lilting 6/8 rhythm, 66 BPM, fingerpicked acoustic guitar, soft frame drum pulse, warm fiddle melody, tin whistle answers, plucked mandolin, floating on the wind with quiet purpose, attentive and hopeful, major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_i.mp3
+- дата: 2026-11-23 12:00
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 43, ціна $0.0111
+- промпт: warm downtempo folktronica instrumental for a hand-painted hot-air balloon game, 82 BPM, soft laid-back electronic beat with tight kick and gentle rim clicks, round warm bass, plucked kalimba and ukulele riff, glockenspiel sparkles, soft filtered pad, steady head-nodding groove, focused and attentive, unhurried, major key, steady even energy from start to end
+
+## assets/raw/music_level_j.mp3
+- дата: 2026-11-23 12:03
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 51, ціна $0.0111
+- промпт: unhurried minimalist instrumental for a hand-painted hot-air balloon game, 84 BPM, tuned percussion ensemble only, interlocking marimba patterns, soft vibraphone chords, celesta and music box melody, delicate glockenspiel accents, light shaker on the beat, warm low marimba register carrying the harmony, steady and attentive, calm concentration with quiet purpose, bright major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_k.mp3
+- дата: 2026-11-23 12:03
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 52, ціна $0.0111
+- промпт: unhurried minimalist instrumental for a hand-painted hot-air balloon game, 84 BPM, plucked strings ensemble, interlocking concert harp arpeggios, fingerpicked nylon-string guitar ostinato, kalimba repeating motif, soft hand drum on the beat, gentle shaker, warm and airy, steady and attentive, calm concentration with quiet purpose, bright major key, steady even energy from start to end, warm acoustic recording
+
+## assets/raw/music_level_l.mp3
+- дата: 2026-11-23 12:04
+- модель: runware runware:ace-step@v1.5-xl-base, 90 с, seed 53, ціна $0.0111
+- промпт: unhurried minimalist chamber instrumental for a hand-painted hot-air balloon game, 84 BPM, felt piano repeating arpeggio ostinato, light staccato violins and viola, soft flute and clarinet melody in gentle dialogue, warm sustained cello harmony, soft woodblock tick on the beat, steady and attentive, calm concentration with quiet purpose, bright major key, steady even energy from start to end, warm acoustic recording

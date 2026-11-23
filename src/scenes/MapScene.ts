@@ -41,6 +41,7 @@ export class MapScene extends Phaser.Scene
   create(): void
   {
     this.root = this.add.container( 0, 0 );
+    audio.music( 'map' );
     this.scale.on( 'resize', this.build, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
     this.input.keyboard!.on( 'keydown-LEFT', () => this.flip( -1 ) );

@@ -83,6 +83,7 @@ export class GameScene extends Phaser.Scene
     // Копія, щоб редактор і рестарти не псували дані модуля
     this.lvl = structuredClone( found.level );
     save().lastLevel = this.levelId;
+    audio.music( 'level' );
     persist();
 
     this.buildWorld();
