@@ -90,6 +90,10 @@ export class WorldView
   // Перешкоди, у які врізалась куля: їх веде твін відльоту, а не маршрут
   private knocked = new Set<number>();
   private motes: Phaser.GameObjects.Image[] = [];
+  // Погода теми (п. 47): бризки біля води на морі, легкий сніг у горах
+  private spray?: Phaser.GameObjects.Particles.ParticleEmitter;
+  private sprayIn = 0;
+  private weatherT = 0;
   private water?: Phaser.GameObjects.Graphics;
   // Намальована вода: копії смуги, що повільно гойдаються
   private waterImgs: { img: Phaser.GameObjects.Image; x: number; y: number }[] = [];
@@ -110,6 +114,7 @@ export class WorldView
     this.lvl = lvl;
     const th = THEMES[ lvl.theme ];
     this.buildLayers();
+    this.buildWeather();
     this.buildUpdrafts();
 
     // Будинок стоїть на лінії ґрунту (лише трохи нижче, щоб не висів) і малюється поверх ґрунту (depth 5);
@@ -208,7 +213,9 @@ export class WorldView
         }
       }
       const drift = ( DRIFT_TEX[ lvl.theme ] ?? [ 'p-leaf' ] ).filter( ( k ) => this.scene.textures.exists( k ) );
-      const nd = !windy || !drift.length ? 0 : Math.max( 2, Math.round( area / 145000 ) );
+      // У горах падає ще й сніг, тож пухнастих сніжинок, що летять із вітром, менше
+      const dk = lvl.theme === 'mountain' ? 0.6 : 1;
+      const nd = !windy || !drift.length ? 0 : Math.max( lvl.theme === 'mountain' ? 1 : 2, Math.round( area * dk / 145000 ) );
       for ( let k = 0; k < nd; k++ )
       {
         const baseY = Phaser.Math.Between( y0 + 20, y1 - 20 );
@@ -499,12 +506,67 @@ export class WorldView
     }
   }
 
+  // Погода на весь рівень. Частинки народжуються в тій частині світу, яку зараз бачить камера (worldView — живий прямокутник)
+  private buildWeather(): void
+  {
+    const lvl = this.lvl;
+    const view = this.scene.cameras.main.worldView;
+    type P = Phaser.GameObjects.Particles.Particle;
+    if ( lvl.theme === 'mountain' && this.scene.textures.exists( 'p-snow' ) )
+    {
+      // Дрібні рідкі сніжинки повільно падають і зносяться вітром свого шару; з'являються й гаснуть м'яко, без різкого краю
+      this.add( this.scene.add.particles( 0, 0, 'p-snow', {
+        x: { onEmit: () => view.x + Math.random() * view.width },
+        y: { onEmit: () => view.y + Math.random() * view.height },
+        speedY: { min: 18, max: 42 }, speedX: { min: -8, max: 8 },
+        accelerationX: { onEmit: () => 0, onUpdate: ( p: P ) => ( windAt( lvl, p.y, this.weatherT ) * 0.5 - p.velocityX ) * 1.5 },
+        rotate: { min: 0, max: 360 }, scale: { min: 9 / 64, max: 16 / 64 },
+        alpha: { onEmit: () => 0, onUpdate: ( _p: P, _k: string, t: number ) => Math.sin( t * Math.PI ) * 0.75 },
+        lifespan: { min: 3500, max: 5500 }, frequency: 80
+      } ).setDepth( 1.2 ) );
+    }
+    if ( lvl.water && this.scene.textures.exists( 'p-blob' ) )
+    {
+      const k = 1 / 64;
+      this.spray = this.add( this.scene.add.particles( 0, 0, 'p-blob', {
+        speedX: { min: -55, max: 55 }, speedY: { min: -230, max: -100 }, gravityY: 420,
+        scale: { start: 16 * k, end: 7 * k }, alpha: { start: 0.9, end: 0 }, lifespan: { min: 500, max: 800 },
+        tint: [ 0xffffff, 0xe6f4ff, 0xcfe6f2 ], emitting: false
+      } ).setDepth( FRONT_DEPTH + 0.1 ) );
+    }
+  }
+
+  // Бризки хвиль: раз на 0.5–1.4 с маленький сплеск у випадковому місці води в кадрі (не на острові)
+  private updateSpray( dt: number, view: Phaser.Geom.Rectangle ): void
+  {
+    if ( !this.spray )
+    {
+      return;
+    }
+    this.sprayIn -= dt;
+    if ( this.sprayIn > 0 )
+    {
+      return;
+    }
+    this.sprayIn = 0.5 + Math.random() * 0.9;
+    const gy = groundY( this.lvl );
+    const x = view.x + Math.random() * view.width;
+    if ( this.lvl.blocks.some( ( b ) => x >= b.x - 10 && x <= b.x + b.w + 10 && b.y + b.h >= gy - 1 ) )
+    {
+      return;
+    }
+    // Гребінь намальованої хвилі трохи вище лінії води
+    this.spray.explode( 6 + Math.floor( Math.random() * 5 ), x, gy - 18 );
+  }
+
   update( t: number, dt: number ): void
   {
+    this.weatherT = t;
     const lvl = this.lvl;
     const view = this.scene.cameras.main.worldView;
     const left = Math.min( 0, view.x );
     const right = Math.max( lvl.width, view.right );
+    this.updateSpray( dt, view );
     // Предмети летять зі швидкістю вітру, гойдаються вгору-вниз і крутяться тим швидше, чим сильніше дме
     for ( const d of this.drifters )
     {
