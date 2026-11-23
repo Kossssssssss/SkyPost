@@ -17,3 +17,6 @@ npm-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Сирі генерації й скачані кандидати звуків (у гру йдуть лише оброблені файли з public/)
+assets/raw/
