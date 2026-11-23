@@ -372,7 +372,8 @@ export class WorldView
       const hh = onGround ? h + 60 : h;
       const s = Math.min( BLOCK_SCALE, ( w * 0.9 ) / ( art.left + art.right ), ( hh * 0.9 ) / ( art.top + art.bottom ) );
       const top = y - art.lift * s;
-      this.add( this.scene.add.nineslice( x, top, key, undefined, w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
+      // Кадр '__BASE' явно: без нього Phaser бере «перший кадр» текстури, а ним після першого блока стає смуга трави front-*
+      this.add( this.scene.add.nineslice( x, top, key, '__BASE', w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
         .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ) );
       // Трава, що стирчить над блоком, — ще й перед кулею (смуга лише з верхнього краю текстури, без тягнутої середини).
       // Сніговій шапці гір (lift 10) це не потрібно
