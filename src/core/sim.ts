@@ -2,11 +2,13 @@ import { groundY, moverOffset, windAt, type LevelData, type Rect } from './level
 
 export const DT = 1 / 60;
 
-export const HEAT_UP = 0.55;
-export const COOL = 0.22;
+// Нагрів і остигання прискорені в однаковій пропорції (було 0.55 / 0.22): куля швидше відгукується й після підгріву
+// зупиняється за ~2.3 с замість 3.5, а газу на зависання й підйом іде стільки ж (частка часу з пальником та сама)
+export const HEAT_UP = 0.9;
+export const COOL = 0.36;
 export const NEUTRAL = 0.45;
 export const LIFT = 230;
-export const V_DRAG = 0.9;
+export const V_DRAG = 1.1;
 export const WIND_FOLLOW = 1.1;
 export const GROUND_FRICTION = 6;
 
@@ -27,6 +29,8 @@ export const EV_BUMP = 32;
 export const EV_LIFTOFF = 64;
 
 const SETTLE_TIME = 0.35;
+// Допуск посадки: кошик може стати трохи за краєм зони скриньки, і посадка все одно зараховується (без магніту)
+export const LAND_TOL = 12;
 
 export interface SimState
 {
@@ -192,7 +196,7 @@ export function onTarget( lvl: LevelData, s: SimState ): boolean
   {
     return false;
   }
-  return Math.abs( s.x - tg.x ) <= tg.w / 2 && Math.abs( s.y - tg.y ) < 4;
+  return Math.abs( s.x - tg.x ) <= tg.w / 2 + LAND_TOL && Math.abs( s.y - tg.y ) < 4;
 }
 
 export function step( lvl: LevelData, s: SimState, burn: boolean, bonusFuel = 0 ): number
