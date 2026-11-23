@@ -1066,6 +1066,15 @@ export class UIScene extends Phaser.Scene
     {
       late.push( c.add( label( this, 0, extraY, info.newSkin + ' ✔', 30 * u, '#b05ad8', false ) ).last! );
     }
+    // Свято: перші ★★★ — хлопавки з листів, щойно стала третя зірка; новий світ — дощ із листів, коли вискакує «Світ N»
+    if ( animate && info.prevStars < 3 && starsOf( lvl.id ) === 3 )
+    {
+      this.time.delayedCall( 350 + 2 * 330 + 120, () => this.confetti( false ) );
+    }
+    if ( animate && info.newWorld )
+    {
+      this.time.delayedCall( 1500, () => this.confetti( true ) );
+    }
     // Нагороди вискакують по черзі, коли зірки вже стали на місце
     if ( animate )
     {
@@ -1088,6 +1097,52 @@ export class UIScene extends Phaser.Scene
     c.add( button( this, -210 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     c.add( button( this, -40 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
     c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
+  }
+
+  // Конфеті з мальованих конвертиків і зірочок. Хлопавки (rain = false) стріляють із верхніх кутів до центру,
+  // дощ (rain = true) сиплеться з усієї ширини верху. Частинки гальмують, а тоді повільно падають, гойдаючись і крутячись
+  private confetti( rain: boolean ): void
+  {
+    const u = this.u;
+    const w = this.scale.width;
+    const letter = this.textures.exists( 'p-letter' ) ? 'p-letter' : 'dot';
+    const star = this.textures.exists( 'p-star' ) ? 'p-star' : letter;
+    type P = Phaser.GameObjects.Particles.Particle;
+    const spray = ( tex: string, size: number, tint: number[], n: number, x: number | { min: number; max: number },
+      y: number | { min: number; max: number }, speedX: { min: number; max: number }, speedY: { min: number; max: number } ) =>
+    {
+      const k = size * u / ( this.textures.get( tex ).getSourceImage().width || size );
+      const em = this.add.particles( 0, 0, tex, {
+        x, y, speedX, speedY,
+        // Опір повітря гасить розгін, тож частинка падає не швидше ~160 px/с; синус гойдає її з боку в бік
+        accelerationX: { onEmit: () => 0, onUpdate: ( p: P, _k: string, t: number ) => -p.velocityX * 1.1 + Math.sin( t * 14 + p.angle * 0.05 ) * 160 * u },
+        accelerationY: { onEmit: () => 0, onUpdate: ( p: P ) => 380 * u - p.velocityY * 2.4 },
+        rotate: { onEmit: () => Math.random() * 360, onUpdate: ( _p: P, _k: string, _t: number, v: number ) => v + 3 },
+        lifespan: { min: 2400, max: 3300 }, scale: { min: 0.8 * k, max: 1.15 * k }, alpha: { start: 1, end: 0, ease: 'Cubic.in' },
+        tint, emitting: false
+      } ).setDepth( 20 );
+      em.explode( n );
+      this.time.delayedCall( 3500, () => em.destroy() );
+    };
+    const letters = [ 0xfff6e6, 0xffe2b0, 0xffc4ae, 0xcfe0f4 ];
+    const gold = [ 0xffe07a, 0xfff0b0 ];
+    if ( rain )
+    {
+      const x = { min: 0, max: w };
+      const y = { min: -260 * u, max: -30 * u };
+      spray( letter, 46, letters, 55, x, y, { min: -80 * u, max: 80 * u }, { min: 0, max: 160 * u } );
+      spray( star, 30, gold, 15, x, y, { min: -80 * u, max: 80 * u }, { min: 0, max: 160 * u } );
+      return;
+    }
+    for ( const side of [ -1, 1 ] )
+    {
+      const x0 = side < 0 ? w * 0.03 : w * 0.97;
+      const x = { min: x0 - 20 * u, max: x0 + 20 * u };
+      const y = this.scale.height * 0.1;
+      const sx = side < 0 ? { min: 500 * u, max: 1500 * u } : { min: -1500 * u, max: -500 * u };
+      spray( letter, 46, letters, 16, x, y, sx, { min: -420 * u, max: 80 * u } );
+      spray( star, 30, gold, 4, x, y, sx, { min: -420 * u, max: 80 * u } );
+    }
   }
 
   // Лічильник монет на пергаментній плашці, угорі праворуч поруч зі звуком
