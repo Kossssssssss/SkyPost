@@ -69,7 +69,6 @@ export class ShopScene extends Phaser.Scene
     this.root.add( label( this, m * 2 + bs, m + bs / 2, t( 'shop' ), 50 * u ).setOrigin( 0, 0.5 ) );
     this.root.add( this.add.image( w - m - 230 * u, m + bs / 2, 'coin' ).setScale( 60 * u / 256 ) );
     this.root.add( label( this, w - m - 190 * u, m + bs / 2, String( save().coins ), 44 * u ).setOrigin( 0, 0.5 ) );
-    this.root.add( label( this, w - m - 230 * u, m + bs + 16 * u, t( 'wallet' ), 20 * u ) );
 
     const leftW = Math.min( w * 0.32, 560 * u );
     const pc = this.add.container( m + leftW / 2, h * 0.56 );

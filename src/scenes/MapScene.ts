@@ -156,7 +156,7 @@ export class MapScene extends Phaser.Scene
     }
     if ( this.world < maxW )
     {
-      this.root.add( button( this, w - m - bs * 0.6 - 10 * u, h / 2, { w: bs * 1.2, h: bs * 1.2, icon: 'i-fwd', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( 1 ) } ) );
+      this.root.add( button( this, w - m - bs * 0.6 - 10 * u, h / 2, { w: bs * 1.2, h: bs * 1.2, icon: 'i-back', flipIcon: true, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.flip( 1 ) } ) );
     }
 
     const unlocked = wd ? worldUnlocked( wd.id ) : false;

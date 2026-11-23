@@ -124,6 +124,8 @@ export interface ButtonOpts
   text?: string;
   icon?: string;
   iconScale?: number;
+  // Дзеркалити іконку (стрілка «вперед» — та сама, що «назад», перевернута)
+  flipIcon?: boolean;
   color?: number;
   dark?: number;
   size?: number;
@@ -165,7 +167,7 @@ export class Button extends Phaser.GameObjects.Container
     {
       // Тінь — той самий диск, затемнений, як у паперової панелі
       this.discShadow = scene.add.image( 3, 7, opts.icon! ).setTint( 0x000000 ).setAlpha( 0.18 );
-      this.discShadow.setScale( Math.min( opts.w, opts.h ) / this.discShadow.width );
+      this.discShadow.setScale( Math.min( opts.w, opts.h ) / this.discShadow.width ).setFlipX( !!opts.flipIcon );
       this.add( this.discShadow );
     }
     else if ( scene.textures.exists( 'pk-btn' ) )
@@ -176,7 +178,7 @@ export class Button extends Phaser.GameObjects.Container
     }
     if ( opts.icon )
     {
-      this.ico = scene.add.image( 0, 0, opts.icon );
+      this.ico = scene.add.image( 0, 0, opts.icon ).setFlipX( !!opts.flipIcon );
       // Намальовані іконки 48 px, згенеровані більші: зводимо до того самого екранного розміру
       const base = opts.icon.startsWith( 'i-' ) ? 48 / this.ico.width : baseScale( this.ico );
       this.ico.setScale( this.disc ? Math.min( opts.h, opts.w ) / this.ico.width : base * ( opts.iconScale ?? 1 ) * Math.min( opts.h, opts.w ) / 72 );
