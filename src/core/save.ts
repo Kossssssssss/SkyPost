@@ -20,7 +20,8 @@ export interface SaveData
   equip: Record<SkinSlot, string>;
   fails: Record<string, number>;
   levelsSinceAd: number;
-  muted: boolean;
+  // Звукові ефекти й музика вимикаються окремо
+  sfx: boolean;
   music: boolean;
   seenTips: string[];
   lastLevel: string;
@@ -75,7 +76,7 @@ function fresh(): SaveData
     equip: { envelope: 'env-classic', basket: 'bas-wicker', trail: 'trl-none', pilot: 'plt-fox' },
     fails: {},
     levelsSinceAd: 0,
-    muted: false,
+    sfx: true,
     music: true,
     seenTips: [],
     lastLevel: '1-1'
@@ -91,10 +92,16 @@ export function loadSave(): void
     const raw = platform.storage.getItem( KEY );
     if ( raw )
     {
-      const parsed = JSON.parse( raw ) as Partial<SaveData> & { wallet?: number };
+      const parsed = JSON.parse( raw ) as Partial<SaveData> & { wallet?: number; muted?: boolean };
       const base = fresh();
-      const { wallet, ...rest } = parsed;
+      const { wallet, muted, ...rest } = parsed;
       data = { ...base, ...rest, v: 2, equip: { ...base.equip, ...parsed.equip } };
+      // Старий єдиний вимикач глушив усе — переносимо його в обидва нові
+      if ( muted && typeof parsed.sfx !== 'boolean' )
+      {
+        data.sfx = false;
+        data.music = false;
+      }
       if ( typeof wallet === 'number' && typeof parsed.coins !== 'number' )
       {
         data.coins = Math.max( 0, Math.round( wallet * WALLET_TO_COINS ) );

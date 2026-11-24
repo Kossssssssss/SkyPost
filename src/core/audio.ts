@@ -111,14 +111,15 @@ class Synth
     }
   }
 
-  get muted(): boolean
+  // Портал або реклама глушать усе, незалежно від вимикачів гравця
+  private get silenced(): boolean
   {
-    return save().muted || platform.platformMuted() || this.adMuted;
+    return platform.platformMuted() || this.adMuted;
   }
 
-  toggleMute(): void
+  toggleSfx(): void
   {
-    save().muted = !save().muted;
+    save().sfx = !save().sfx;
     persist();
     this.applyVolume();
   }
@@ -138,11 +139,12 @@ class Synth
 
   applyVolume(): void
   {
-    if ( !this.ctx || !this.master || !this.musicBus )
+    if ( !this.ctx || !this.master || !this.sfx || !this.musicBus )
     {
       return;
     }
-    this.master.gain.setTargetAtTime( this.muted ? 0 : 0.8, this.ctx.currentTime, 0.05 );
+    this.master.gain.setTargetAtTime( this.silenced ? 0 : 0.8, this.ctx.currentTime, 0.05 );
+    this.sfx.gain.setTargetAtTime( save().sfx ? 1 : 0, this.ctx.currentTime, 0.05 );
     this.musicBus.gain.setTargetAtTime( save().music ? 0.32 : 0, this.ctx.currentTime, 0.1 );
   }
 

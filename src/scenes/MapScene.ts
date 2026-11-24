@@ -131,15 +131,25 @@ export class MapScene extends Phaser.Scene
       this.tweens.add( { targets: bd, scale: bd.scale * 1.12, duration: 650, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' } );
     }
     const mute = button( this, w - m - 340 * u, m + bs / 2, {
-      w: bs, h: bs, icon: audio.muted ? 'i-mute' : 'i-sound', color: COLORS.blue, dark: COLORS.blueDark,
+      w: bs, h: bs, icon: save().sfx ? 'i-sound' : 'i-mute', color: COLORS.blue, dark: COLORS.blueDark,
       onClick: () =>
       {
-        audio.toggleMute();
-        mute.ico?.setTexture( audio.muted ? 'i-mute' : 'i-sound' );
+        audio.toggleSfx();
+        mute.ico?.setTexture( save().sfx ? 'i-sound' : 'i-mute' );
       }
     } );
     top.add( mute );
-    const lang = button( this, w - m - 454 * u, m + bs / 2, {
+    // Музика вимикається окремо від ефектів: нота / перекреслена нота, як динамік поруч
+    const mus = button( this, w - m - 436 * u, m + bs / 2, {
+      w: bs, h: bs, icon: save().music ? 'i-music' : 'i-musicoff', color: COLORS.blue, dark: COLORS.blueDark,
+      onClick: () =>
+      {
+        audio.toggleMusic();
+        mus.ico?.setTexture( save().music ? 'i-music' : 'i-musicoff' );
+      }
+    } );
+    top.add( mus );
+    const lang = button( this, w - m - 550 * u, m + bs / 2, {
       w: 120 * u, h: bs, text: LANG_CODES[ currentLang() ], size: 30 * u, color: COLORS.blue, dark: COLORS.blueDark,
       onClick: () => this.scene.start( 'lang', { world: this.world } )
     } );

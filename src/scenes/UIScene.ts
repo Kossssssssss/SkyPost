@@ -258,11 +258,11 @@ export class UIScene extends Phaser.Scene
     this.hud.add( name );
 
     const muteBtn = button( this, w - m - bs / 2, m + bs / 2, {
-      w: bs, h: bs, icon: audio.muted ? 'i-mute' : 'i-sound', color: COLORS.blue, dark: COLORS.blueDark,
+      w: bs, h: bs, icon: save().sfx ? 'i-sound' : 'i-mute', color: COLORS.blue, dark: COLORS.blueDark,
       onClick: () =>
       {
-        audio.toggleMute();
-        muteBtn.ico?.setTexture( audio.muted ? 'i-mute' : 'i-sound' );
+        audio.toggleSfx();
+        muteBtn.ico?.setTexture( save().sfx ? 'i-sound' : 'i-mute' );
       }
     } );
     this.hud.add( muteBtn );
@@ -836,10 +836,11 @@ export class UIScene extends Phaser.Scene
     c.add( button( this, 0, 28 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
     c.add( button( this, -105 * u, 131 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     const mus = button( this, 105 * u, 131 * u, {
-      w: 190 * u, h: bh, icon: 'i-music', color: save().music ? COLORS.blue : COLORS.grey, dark: save().music ? COLORS.blueDark : COLORS.greyDark,
+      w: 190 * u, h: bh, icon: save().music ? 'i-music' : 'i-musicoff', color: save().music ? COLORS.blue : COLORS.grey, dark: save().music ? COLORS.blueDark : COLORS.greyDark,
       onClick: () =>
       {
         audio.toggleMusic();
+        mus.ico?.setTexture( save().music ? 'i-music' : 'i-musicoff' );
         mus.setColor( save().music ? COLORS.blue : COLORS.grey, save().music ? COLORS.blueDark : COLORS.greyDark );
       }
     } );

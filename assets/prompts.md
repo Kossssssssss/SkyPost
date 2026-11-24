@@ -2442,3 +2442,59 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: —
 - промпт: A simple icon of a straight horizontal arrow pointing to the left, a long thick straight shaft with a bold pointed arrowhead at the left end, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff_s44.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small cross mark beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff_s11.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small cross mark beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff_s22.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small cross mark beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff_s33.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small cross mark beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff2_s11.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small diagonal x mark made of two crossing slanted strokes beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff2_s33.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small diagonal x mark made of two crossing slanted strokes beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff2_s44.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small diagonal x mark made of two crossing slanted strokes beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/icon_musicoff2_s22.png
+- дата: 2026-11-24 07:16
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/i_music_ref_512.png
+- промпт: A simple icon of a double musical note with two joined stems and a small diagonal x mark made of two crossing slanted strokes beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
