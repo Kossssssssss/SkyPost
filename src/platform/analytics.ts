@@ -8,6 +8,7 @@
 // - exit / back: гравець сховав або закрив вкладку — де саме (place), скільки там пробув, на якому рівні й наскільки далеко;
 // - level_start / level_fail / level_complete / level_quit: номер спроби, час, пройдена частина маршруту.
 import { version } from '../../package.json';
+import { crashCrumb, setCrashContext } from './crash.ts';
 
 export type Params = Record<string, string | number | boolean>;
 type Sdk = typeof import( 'bytebrew-web-sdk' ).ByteBrew;
@@ -130,6 +131,7 @@ export function initAnalytics(): void
   store.sessions++;
   keep();
   listen();
+  setCrashContext( where );
   const forced = new URLSearchParams( location.search ).has( 'bb' );
   if ( !APP_ID || !SDK_KEY || ( import.meta.env.DEV && !forced ) )
   {
@@ -175,6 +177,7 @@ export function track( name: string, params?: Params ): void
   {
     console.debug( '[bb]', name, params ?? '' );
   }
+  crashCrumb( name, params );
   if ( !enabled )
   {
     return;

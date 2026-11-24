@@ -11,10 +11,12 @@
     "solve": "node tools/solve.ts"
   },
   "dependencies": {
+    "@sentry/browser": "11.11.0",
     "bytebrew-web-sdk": "1.0.1",
     "phaser": "4.2.1"
   },
   "devDependencies": {
+    "@sentry/vite-plugin": "11.11.0",
     "@types/node": "24.19.2",
     "typescript": "6.0.3",
     "vite": "8.3.5"

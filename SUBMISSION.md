@@ -20,20 +20,21 @@
 
 ## Кроки подачі
 
-1. `npm run build`, потім заархівувати вміст `dist/` (не саму папку) у `sky-post.zip`.
-2. Перевірити локально з SDK: `npm run preview` і відкрити `http://localhost:4173/?useLocalSdk=true`. Замість реклами має з'явитися оверлей SDK.
-3. Перевірити в CrazyGames QA Tool (Developer Portal → Upload → Preview): старт, рівень, реклама між рівнями, реклама з винагородою, mute порталу.
-4. Developer Portal → **Submit game**:
+1. Підняти `version` у `package.json` (наприклад, `0.1.0` → `0.1.1`; нові рівні чи механіки — `0.2.0`). Збірка завантажує source maps у Sentry під цю версію, а гра шле її в Sentry й ByteBrew, тож у кожної подачі має бути своя. Інакше помилки різних збірок зіллються в одну версію: не видно, яка подача їх принесла і чи спрацювало виправлення.
+2. `npm run build` (у виводі має бути `Successfully uploaded source maps to Sentry`, а в `dist/` — жодного `.map`), потім заархівувати вміст `dist/` (не саму папку) у `sky-post.zip`.
+3. Перевірити локально з SDK: `npm run preview` і відкрити `http://localhost:4173/?useLocalSdk=true`. Замість реклами має з'явитися оверлей SDK.
+4. Перевірити в CrazyGames QA Tool (Developer Portal → Upload → Preview): старт, рівень, реклама між рівнями, реклама з винагородою, mute порталу.
+5. Developer Portal → **Submit game**:
    - Назва: Sky Post. Категорія: Casual або Puzzle. Теги: balloon, wind, physics, one-button, delivery.
    - Орієнтація: **Landscape** (лише її). Платформи: Desktop + Mobile. Саме це поле вмикає на телефонах їхню підказку «поверніть пристрій».
    - Увімкнути **Progress Save**, інакше `SDK.data` вимкнений.
    - Тип інтеграції: Full (SDK, реклама, gameplay-події).
-5. Обкладинки з `art/`: `cover-1920x1080.jpg` (16:9), `cover-800x1200.jpg` (2:3) і `cover-800x800.jpg` (1:1). Тексту на них немає, назву можна додати поверх.
-6. Відео-прев'ю (обов'язкове): 15–20 секунд, 1080p 16:9 і 2:3, без звуку й прискорення, перший кадр — обкладинка. Записати проходження 1-4 або 2-5 з маркою, без курсора миші.
-7. Опис:
+6. Обкладинки з `art/`: `cover-1920x1080.jpg` (16:9), `cover-800x1200.jpg` (2:3) і `cover-800x800.jpg` (1:1). Тексту на них немає, назву можна додати поверх.
+7. Відео-прев'ю (обов'язкове): 15–20 секунд, 1080p 16:9 і 2:3, без звуку й прискорення, перший кадр — обкладинка. Записати проходження 1-4 або 2-5 з маркою, без курсора миші.
+8. Опис:
    - EN: *Fly the mail by hot-air balloon! Hold to heat, release to sink — the wind blows a different way at every height. Land on the mailbox, save gas and grab the stamp for three stars.*
    - Керування: Hold mouse / touch / Space — heat the balloon.
-8. Після Basic Launch дивитися метрики (playtime, retention D1). Реклама на CrazyGames вмикається лише після Full Launch.
+9. Після Basic Launch дивитися метрики (playtime, retention D1). Реклама на CrazyGames вмикається лише після Full Launch.
 
 ## Перед подачею перевірити вручну
 

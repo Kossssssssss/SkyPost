@@ -2,6 +2,7 @@
 // Під APK через Capacitor достатньо додати ще одну реалізацію Ads (AdMob).
 
 import { gameStartParams, initAnalytics, milestone, track } from './analytics.ts';
+import { crashTag } from './crash.ts';
 
 export type AdKind = 'midgame' | 'rewarded';
 
@@ -352,6 +353,7 @@ export async function initPlatform(): Promise<void>
     }
   }
   await platform.init();
+  crashTag( 'platform', platform.name );
   initAnalytics();
   track( 'game_start', { platform: platform.name, locale: platform.locale() ?? navigator.language, ...gameStartParams() } );
   milestone( 'f01_open', { platform: platform.name } );

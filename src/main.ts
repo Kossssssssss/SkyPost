@@ -14,9 +14,11 @@ import { LangScene } from './scenes/LangScene.ts';
 import { audio } from './core/audio.ts';
 import { fullscreenOnFirstTap } from './platform/fullscreen.ts';
 import { loadGameFont } from './ui/font.ts';
+import { initCrash } from './platform/crash.ts';
 
 async function start(): Promise<void>
 {
+  initCrash();
   // SDK порталу не тримає екран завантаження: він вантажиться паралельно, а LoadScene дочекається його перед файлами гри
   const data = gameDataReady();
   await loadGameFont();

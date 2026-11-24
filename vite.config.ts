@@ -1,4 +1,6 @@
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig, loadEnv, type Plugin } from 'vite';
+import { sentryVitePlugin } from '@sentry/vite-plugin';
+import pkg from './package.json' with { type: 'json' };
 import { writeFileSync, mkdirSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 
@@ -72,13 +74,37 @@ function levelSaver(): Plugin
   };
 }
 
-export default defineConfig( {
-  base: './',
-  plugins: [ levelSaver() ],
-  build: {
-    target: 'es2022',
-    assetsInlineLimit: 0,
-    chunkSizeWarningLimit: 2000
-  },
-  server: { port: 5180 }
+// Source maps для Sentry: лише коли в .env.local є SENTRY_AUTH_TOKEN, SENTRY_ORG і SENTRY_PROJECT.
+// Плагін завантажує їх у Sentry під версію з package.json і видаляє з dist, щоб вони не йшли на портал
+function sentryMaps( mode: string ): Plugin[] | null
+{
+  const env = loadEnv( mode, import.meta.dirname, 'SENTRY_' );
+  if ( !env.SENTRY_AUTH_TOKEN || !env.SENTRY_ORG || !env.SENTRY_PROJECT )
+  {
+    return null;
+  }
+  return sentryVitePlugin( {
+    authToken: env.SENTRY_AUTH_TOKEN,
+    org: env.SENTRY_ORG,
+    project: env.SENTRY_PROJECT,
+    release: { name: pkg.version },
+    sourcemaps: { filesToDeleteAfterUpload: [ './dist/**/*.map' ] },
+    telemetry: false
+  } );
+}
+
+export default defineConfig( ( { mode } ) =>
+{
+  const maps = sentryMaps( mode );
+  return {
+    base: './',
+    plugins: [ levelSaver(), ...( maps ?? [] ) ],
+    build: {
+      target: 'es2022',
+      sourcemap: maps ? 'hidden' : false,
+      assetsInlineLimit: 0,
+      chunkSizeWarningLimit: 2000
+    },
+    server: { port: 5180 }
+  };
 } );
