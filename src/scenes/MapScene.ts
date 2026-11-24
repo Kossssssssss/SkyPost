@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { t, tn, currentLang, type Lang } from '../core/i18n.ts';
 import { save, starsOf, totalStars, record } from '../core/save.ts';
-import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked, maxStars } from '../levels/index.ts';
+import { WORLDS, FUTURE_WORLDS, WORLD_UNLOCK, levelUnlocked, worldUnlocked } from '../levels/index.ts';
 import { MECHANIC_TIPS } from '../core/level.ts';
 import { SKINS, skin, trailLook, canBuySomething } from '../core/skins.ts';
 import { BalloonView } from '../ui/balloonView.ts';
@@ -111,7 +111,7 @@ export class MapScene extends Phaser.Scene
     const top = this.add.container( 0, 0 );
     this.root.add( top );
     top.add( this.add.image( m + 30 * u, m + bs / 2, 'star' ).setDisplaySize( 60 * u, 60 * u ) );
-    const starsTxt = label( this, m + 70 * u, m + bs / 2, `${ total } / ${ maxStars() }`, 40 * u ).setOrigin( 0, 0.5 );
+    const starsTxt = label( this, m + 70 * u, m + bs / 2, `${ total }`, 40 * u ).setOrigin( 0, 0.5 );
     top.add( starsTxt );
     // Гаманець поруч із зірками: зірки — прогрес, монети — на покупки
     const coinX = starsTxt.x + starsTxt.width + 50 * u;
