@@ -16,8 +16,14 @@ export interface LayerSpec
 
 interface ThemeArt
 {
-  // Префікс файлів шарів: '' для лук, 'sea-' і 'mountain-' для інших тем
+  // Префікс файлів шарів: '' для лук, 'sea-', 'mountain-', 'storm-', 'night-' для інших тем
   prefix: string;
+  // Своє небо (зупинки градієнта згори вниз), тонування хмар і шарів, світило; без них — денне небо пака й сонце
+  sky?: number[];
+  cloudTint?: number;
+  layerTint?: number;
+  // 'pk-sun', 'pk-moon' або '' — без світила (гроза)
+  sun?: string;
   ground: number;
   groundTop: number;
   body: number;
@@ -44,7 +50,7 @@ export interface PackStyle
   greenDark: number;
   panel: number;
   panelEdge: number;
-  themes: Record<'meadow' | 'sea' | 'mountain', ThemeArt>;
+  themes: Record<Theme, ThemeArt>;
 }
 
 const L = ( scroll: number, bottom: number, height: number, alpha = 1 ): LayerSpec => ( { scroll, bottom, height, alpha } );
@@ -66,6 +72,18 @@ export const WATERCOLOR: PackStyle = {
     mountain: {
       prefix: 'mountain-', ground: 0x5f6672, groundTop: 0x92a37e, body: 0x8e93a6, bodyDark: 0x6c7184, top: 0xf4f6fa,
       far: L( 0.05, 0.8, 0.36 ), mid: L( 0.15, 0.87, 0.34 ), near: L( 0.34, 1.03, 0.38 )
+    },
+    // Гроза: мокрі пагорби під сірим низьким небом, сонця не видно
+    storm: {
+      prefix: 'storm-', ground: 0x4a3c2e, groundTop: 0x6f8466, body: 0x6a6e70, bodyDark: 0x4c5052, top: 0x7e9470,
+      sky: [ 0x6f7a8e, 0xa3abb6, 0xd6d3c8 ], cloudTint: 0x9aa0ac, sun: '',
+      far: L( 0.06, 0.84, 0.28 ), mid: L( 0.16, 0.93, 0.32 ), near: L( 0.34, 1.02, 0.26 )
+    },
+    // Ніч: містечко під місяцем; видно все, як удень, темніє лише картинка
+    night: {
+      prefix: 'night-', ground: 0x2e2a36, groundTop: 0x6c7488, body: 0x8a6a64, bodyDark: 0x5e4a4a, top: 0x5a6274,
+      sky: [ 0x1e2a4a, 0x34466e, 0x66749a ], cloudTint: 0x7480a4, layerTint: 0xaab4d8, sun: 'pk-moon',
+      far: L( 0.06, 0.84, 0.26 ), mid: L( 0.16, 0.93, 0.26 ), near: L( 0.34, 1.03, 0.3 )
     }
   }
 };
@@ -74,8 +92,7 @@ export let pack: PackStyle | null = null;
 
 export function themeArt( theme: Theme ): ThemeArt
 {
-  const th = pack!.themes;
-  return theme === 'sea' || theme === 'mountain' ? th[ theme ] : th.meadow;
+  return pack!.themes[ theme ] ?? pack!.themes.meadow;
 }
 
 // Акварель — основний стиль; ?pack=0 повертає старий процедурний вигляд для порівняння
@@ -93,9 +110,10 @@ export function choosePack(): void
   } );
   for ( const [ name, th ] of Object.entries( THEMES ) )
   {
-    th.skyTop = pack.sky[ 0 ];
-    th.skyBottom = pack.sky[ pack.sky.length - 1 ];
     const art = themeArt( name as Theme );
+    const sky = art.sky ?? pack.sky;
+    th.skyTop = sky[ 0 ];
+    th.skyBottom = sky[ sky.length - 1 ];
     Object.assign( th, { ground: art.ground, groundTop: art.groundTop, body: art.body, bodyDark: art.bodyDark, top: art.top } );
   }
 }

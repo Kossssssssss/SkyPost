@@ -12,6 +12,9 @@ const GROUND_ART: Record<string, { height: number; surface: number }> = {
   meadow: { height: 90, surface: 0.44 },
   sea: { height: 80, surface: 0.29 },
   mountain: { height: 85, surface: 0.42 },
+  storm: { height: 85, surface: 0.4 },
+  // Бруківка: предмети стоять на її верхній площині, а не під нею
+  night: { height: 90, surface: 0.12 },
   water: { height: 90, surface: 0.2 }
 };
 
@@ -20,8 +23,13 @@ const GROUND_ART: Record<string, { height: number; surface: number }> = {
 const BLOCK_ART: Record<string, { left: number; right: number; top: number; bottom: number; lift: number }> = {
   meadow: { left: 30, right: 30, top: 80, bottom: 30, lift: 60 },
   sea: { left: 30, right: 30, top: 90, bottom: 30, lift: 70 },
-  mountain: { left: 30, right: 30, top: 150, bottom: 70, lift: 10 }
+  mountain: { left: 30, right: 30, top: 150, bottom: 70, lift: 10 },
+  storm: { left: 30, right: 30, top: 80, bottom: 50, lift: 55 },
+  // Цегляна стіна під черепицею: дах звисає з боків, кам'яна основа знизу. lift < 30 — черепиця не лізе поперед кулі
+  night: { left: 45, right: 45, top: 90, bottom: 60, lift: 28 }
 };
+// Уночі денна цегла надто тепла й світла — притінюємо її в тон шарів фону
+const BLOCK_TINT: Partial<Record<Theme, number>> = { night: 0xb8c0dc };
 // Маяк (lighthouse.webp): ліхтар зверху й основа знизу не тягнуться; тіло вежі посередині 116 px завширшки
 const LIGHTHOUSE_ART = { top: 215, bottom: 80, body: 116, sink: 30 };
 // Блок нормального розміру показуємо в половину текстури; дрібні — дрібніше, щоб кути не налазили один на одного
@@ -73,7 +81,9 @@ interface Drifter
 const DRIFT_TEX: Partial<Record<Theme, string[]>> = {
   meadow: [ 'p-leaf', 'p-leaf', 'p-flower' ],
   sea: [ 'p-feather' ],
-  mountain: [ 'p-snow' ]
+  mountain: [ 'p-snow' ],
+  storm: [ 'p-leaf' ],
+  night: [ 'p-leaf' ]
 };
 
 
@@ -366,7 +376,7 @@ export class WorldView
       const top = y - art.lift * s;
       // Кадр '__BASE' явно: без нього Phaser бере «перший кадр» текстури, а ним після першого блока стає смуга трави front-*
       this.add( this.scene.add.nineslice( x, top, key, '__BASE', w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
-        .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ) );
+        .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ).setTint( BLOCK_TINT[ this.lvl.theme ] ?? 0xffffff ) );
       // Трава, що стирчить над блоком, — ще й перед кулею (смуга лише з верхнього краю текстури, без тягнутої середини).
       // Сніговій шапці гір (lift 10) це не потрібно
       if ( art.lift >= 30 )
@@ -523,6 +533,34 @@ export class WorldView
         rotate: { min: 0, max: 360 }, scale: { min: 9 / 64, max: 16 / 64 },
         alpha: { onEmit: () => 0, onUpdate: ( _p: P, _k: string, t: number ) => Math.sin( t * Math.PI ) * 0.75 },
         lifespan: { min: 3500, max: 5500 }, frequency: 80
+      } ).setDepth( 1.2 ) );
+    }
+    if ( lvl.theme === 'storm' && this.scene.textures.exists( 'p-rain' ) )
+    {
+      // Косий дощ: краплі падають швидко й зносяться вітром свого шару; кожна повернута вздовж свого руху.
+      // На p-rain голова краплі внизу ліворуч, тобто текстура «летить» під кутом ~121°
+      this.add( this.scene.add.particles( 0, 0, 'p-rain', {
+        x: { onEmit: () => view.x - 100 + Math.random() * ( view.width + 200 ) },
+        y: { onEmit: () => view.y - 40 + Math.random() * view.height * 0.5 },
+        speedY: { min: 520, max: 680 }, speedX: { min: -150, max: -110 },
+        accelerationX: { onEmit: () => 0, onUpdate: ( p: P ) => ( windAt( lvl, p.y, this.weatherT ) * 2 - 130 - p.velocityX ) * 2 },
+        rotate: { onEmit: () => 0, onUpdate: ( p: P ) => Phaser.Math.RadToDeg( Math.atan2( p.velocityY, p.velocityX ) ) - 121 },
+        scale: { min: 26 / 64, max: 34 / 64 },
+        alpha: { onEmit: () => 0, onUpdate: ( _p: P, _k: string, t: number ) => Math.min( 1, t * 6, ( 1 - t ) * 6 ) * 0.75 },
+        lifespan: { min: 900, max: 1300 }, frequency: 14
+      } ).setDepth( 1.2 ) );
+    }
+    if ( lvl.theme === 'night' && this.scene.textures.exists( 'p-firefly' ) )
+    {
+      // Світлячки повільно блукають над землею й то спалахують, то гаснуть
+      const gy = groundY( lvl );
+      this.add( this.scene.add.particles( 0, 0, 'p-firefly', {
+        x: { onEmit: () => view.x + Math.random() * view.width },
+        y: { onEmit: () => gy - 20 - Math.random() * 160 },
+        speedX: { min: -14, max: 14 }, speedY: { min: -8, max: 8 },
+        scale: { min: 28 / 96, max: 36 / 96 },
+        alpha: { onEmit: () => 0, onUpdate: ( p: P, _k: string, t: number ) => Math.min( 1, Math.sin( t * Math.PI ) * 2 ) * ( 0.7 + 0.3 * Math.sin( t * 18 + p.x ) ) },
+        lifespan: { min: 4000, max: 7000 }, frequency: 300
       } ).setDepth( 1.2 ) );
     }
     if ( lvl.water && this.scene.textures.exists( 'p-blob' ) )

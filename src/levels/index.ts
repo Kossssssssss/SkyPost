@@ -3,11 +3,13 @@ import { record, starsOf, totalStars } from '../core/save.ts';
 import world1 from './world1.json';
 import world2 from './world2.json';
 import world3 from './world3.json';
+import world4 from './world4.json';
+import world5 from './world5.json';
 
-export const WORLDS: WorldData[] = [ world1 as WorldData, world2 as WorldData, world3 as WorldData ];
+export const WORLDS: WorldData[] = [ world1 as WorldData, world2 as WorldData, world3 as WorldData, world4 as WorldData, world5 as WorldData ];
 
-// Світи 4–5 вийдуть оновленням, на карті показуємо їх як «скоро»
-export const FUTURE_WORLDS = [ { id: 4, name: 'Thunder Peaks' }, { id: 5, name: 'Night City' } ];
+// Світи, які вийдуть оновленням: на карті вони «скоро». Зараз таких немає
+export const FUTURE_WORLDS: { id: number; name: string }[] = [];
 
 export const WORLD_UNLOCK = [ 0, 10, 26, 44, 64 ];
 

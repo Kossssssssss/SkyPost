@@ -25,6 +25,9 @@ const CLOUD_SPEED = [ 0.05, 0.12 ];
 const CLOUD_SIZE = [ 0.11, 0.17 ];
 // Серпанок кольору неба поверх пейзажу на рівні: фон блякне й відступає, тож куля, перешкоди й пошта читаються першими
 const HAZE = 0.38;
+// Далека блискавка в грозу: раз на 7–16 с за дальніми пагорбами, з коротким мерехтінням і світлішим небом
+const BOLT_GAP = [ 7, 16 ];
+const BOLT_LIFE = 0.6;
 
 // Окрема сцена під грою: небо й далекий план не залежать від зуму ігрової камери
 export class BgScene extends Phaser.Scene
@@ -41,6 +44,10 @@ export class BgScene extends Phaser.Scene
   private clouds: SkyCloud[] = [];
   private birds: Bird[] = [];
   private fx?: Phaser.GameObjects.Graphics;
+  private bolt?: Phaser.GameObjects.Image;
+  private flash?: Phaser.GameObjects.Graphics;
+  private boltIn = 3;
+  private boltT = BOLT_LIFE;
   private theme: Theme = 'meadow';
   private w = 0;
   private h = 0;
@@ -100,7 +107,12 @@ export class BgScene extends Phaser.Scene
     {
       this.layers.push( { name, spec: themeArt( this.theme )[ name ], key: '', imgs: [] } );
     };
+    this.flash = this.add.graphics().setAlpha( 0 );
     cloud( 0 );
+    if ( this.textures.exists( 'pk-lightning' ) )
+    {
+      this.bolt = this.add.image( 0, 0, 'pk-lightning' ).setOrigin( 0.5, 0 ).setAlpha( 0 );
+    }
     layer( 'far' );
     cloud( 1 );
     layer( 'mid' );
@@ -129,6 +141,22 @@ export class BgScene extends Phaser.Scene
       l.imgs.forEach( ( img ) => img.destroy() );
       l.imgs = [];
     }
+    for ( const c of this.clouds )
+    {
+      c.img.setTint( art.cloudTint ?? 0xffffff );
+    }
+    // Світило теми: сонце, місяць або нічого (гроза); промені — лише в сонця
+    const sunKey = art.sun ?? 'pk-sun';
+    const shown = sunKey !== '' && this.textures.exists( sunKey );
+    if ( shown && this.sun.texture.key !== sunKey )
+    {
+      this.sun.setTexture( sunKey );
+    }
+    this.sun.setVisible( shown );
+    this.sunRays?.setVisible( shown && sunKey === 'pk-sun' );
+    this.boltT = BOLT_LIFE;
+    this.bolt?.setAlpha( 0 );
+    this.flash?.setAlpha( 0 );
   }
 
   // Chrome на Android фарбує системну панель навігації під грою кольором фону сторінки,
@@ -174,7 +202,7 @@ export class BgScene extends Phaser.Scene
     if ( pack )
     {
       // Кілька зупинок градієнта: двоколірний fillGradient не дає заходу сонця
-      const st = pack.sky;
+      const st = themeArt( this.theme ).sky ?? pack.sky;
       for ( let i = 0; i < st.length - 1; i++ )
       {
         const y0 = ( h * i ) / ( st.length - 1 );
@@ -192,9 +220,12 @@ export class BgScene extends Phaser.Scene
       this.sky.fillRect( 0, 0, w, h );
     }
     // Діаметр сонця — 13% меншої сторони екрана (м'яку пляму без пака лишаємо як була)
-    const sunK = this.sun.texture.key === 'pk-sun' ? ( Math.min( w, h ) * 0.13 ) / this.sun.width : Math.min( w, h ) / 220;
+    const painted = this.sun.texture.key.startsWith( 'pk-' );
+    const sunK = painted ? ( Math.min( w, h ) * 0.13 ) / this.sun.width : Math.min( w, h ) / 220;
     this.sunK = sunK;
-    this.sun.setPosition( w * 0.8, h * ( this.sun.texture.key === 'pk-sun' ? 0.22 : 0.16 ) ).setScale( sunK );
+    this.sun.setPosition( w * 0.8, h * ( painted ? 0.22 : 0.16 ) ).setScale( sunK );
+    // Спалах блискавки — бліде небо поверх градієнта, під хмарами й пагорбами
+    this.flash?.clear().fillStyle( 0xeef0f6, 1 ).fillRect( 0, 0, w, h );
     // Радіус диска: 112 px на sun.webp і 155 px на sun_rays.webp, тож промені точно облягають наш диск
     this.raysK = sunK * 112 / 155;
     this.sunRays?.setPosition( this.sun.x, this.sun.y ).setScale( this.raysK );
@@ -205,7 +236,7 @@ export class BgScene extends Phaser.Scene
       const n = Math.ceil( w / ( tex.width * k ) ) + 2;
       while ( l.imgs.length < n )
       {
-        const img = this.add.image( 0, 0, l.key ).setOrigin( 0, 1 ).setAlpha( l.spec.alpha );
+        const img = this.add.image( 0, 0, l.key ).setOrigin( 0, 1 ).setAlpha( l.spec.alpha ).setTint( themeArt( this.theme ).layerTint ?? 0xffffff );
         img.setDepth( 0 );
         l.imgs.push( img );
       }
@@ -230,9 +261,17 @@ export class BgScene extends Phaser.Scene
     let d = 1;
     this.sky.setDepth( 0 );
     const order: ( Phaser.GameObjects.Image | Phaser.GameObjects.Graphics )[] = [];
+    if ( this.flash )
+    {
+      order.push( this.flash );
+    }
     for ( const c of this.clouds.filter( ( c ) => c.depth === 0 ) )
     {
       order.push( c.img );
+    }
+    if ( this.bolt )
+    {
+      order.push( this.bolt );
     }
     order.push( ...this.layers[ 0 ]?.imgs ?? [] );
     for ( const c of this.clouds.filter( ( c ) => c.depth === 1 ) )
@@ -296,7 +335,36 @@ export class BgScene extends Phaser.Scene
     const fx = this.fx!;
     fx.clear();
     // Декоративних рисок вітру тут немає: вони летіли завжди справа наліво й плутали з реальним вітром
-    this.drawBirds( fx, dt );
+    // Уночі птахи сплять
+    if ( this.theme !== 'night' )
+    {
+      this.drawBirds( fx, dt );
+    }
+    this.updateBolt( dt );
+  }
+
+  // Удар: яскраво, мить темніше, ще раз яскраво й повільне згасання
+  private updateBolt( dt: number ): void
+  {
+    if ( !this.bolt || this.theme !== 'storm' )
+    {
+      return;
+    }
+    this.boltIn -= dt;
+    if ( this.boltIn <= 0 )
+    {
+      this.boltIn = Phaser.Math.FloatBetween( BOLT_GAP[ 0 ], BOLT_GAP[ 1 ] );
+      this.boltT = 0;
+      const far = this.layers[ 0 ];
+      const top = far?.imgs[ 0 ] ? far.imgs[ 0 ].y - far.imgs[ 0 ].displayHeight * 0.6 : this.h * 0.6;
+      this.bolt.setPosition( this.w * Phaser.Math.FloatBetween( 0.1, 0.9 ), this.h * 0.1 ).setFlipX( Math.random() < 0.5 );
+      this.bolt.setScale( Math.max( 0.1, top - this.bolt.y ) / this.bolt.height );
+    }
+    this.boltT += dt;
+    const t = this.boltT;
+    const a = t < 0.06 ? 0.9 : t < 0.12 ? 0.25 : t < 0.18 ? 0.8 : Math.max( 0, 0.8 * ( 1 - ( t - 0.18 ) / ( BOLT_LIFE - 0.18 ) ) );
+    this.bolt.setAlpha( a );
+    this.flash!.setAlpha( a * 0.3 );
   }
 
   // Дзеркальне тайлінгування: кожна друга копія віддзеркалена, тож шов між копіями не видно

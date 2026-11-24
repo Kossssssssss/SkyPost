@@ -918,7 +918,7 @@ export class UIScene extends Phaser.Scene
     const after = totalStars();
     WORLD_UNLOCK.forEach( ( need, i ) =>
     {
-      if ( i > 0 && before < need && after >= need && i < 3 )
+      if ( i > 0 && before < need && after >= need )
       {
         info.newWorld = i + 1;
       }

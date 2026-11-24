@@ -2498,3 +2498,479 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: assets/ref/i_music_ref_512.png
 - промпт: A simple icon of a double musical note with two joined stems and a small diagonal x mark made of two crossing slanted strokes beside it on the right, drawn with a thick sepia ink brush stroke and a light warm watercolor wash, inside a small round disc of torn cream paper, front view, centered, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_near_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a near low wet meadow hill in deep sage green on a dark stormy overcast day, short grass bent by the wind, a simple wooden fence and a few small dark bushes, smooth simple calm shapes, the hill fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_mid_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of rolling wet hills in dark sage green and muted olive on a dark stormy overcast day, patchwork fields with dark hedgerows, a small farmhouse with a faded brick red roof and a few dark wind bent trees, smooth simple calm shapes, the hills fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_far_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of distant low rolling hills in dark slate blue and muted grey green on a dark stormy overcast day, smooth simple calm shapes, the hills fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_ground_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of wet meadow ground on a dark stormy overcast day: a low even fringe of short simple dark sage green grass along the top with a few small puddles, below it a thick layer of dark brown muddy earth with small rounded stones, the short grass span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the grass edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_near_s22.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a near low wet meadow hill in deep sage green on a dark stormy overcast day, short grass bent by the wind, a simple wooden fence and a few small dark bushes, smooth simple calm shapes, the hill fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_mid_s22.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of rolling wet hills in dark sage green and muted olive on a dark stormy overcast day, patchwork fields with dark hedgerows, a small farmhouse with a faded brick red roof and a few dark wind bent trees, smooth simple calm shapes, the hills fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_far_s22.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of distant low rolling hills in dark slate blue and muted grey green on a dark stormy overcast day, smooth simple calm shapes, the hills fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_ground_s22.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of wet meadow ground on a dark stormy overcast day: a low even fringe of short simple dark sage green grass along the top with a few small puddles, below it a thick layer of dark brown muddy earth with small rounded stones, the short grass span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the grass edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_near_s33.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a near low wet meadow hill in deep sage green on a dark stormy overcast day, short grass bent by the wind, a simple wooden fence and a few small dark bushes, smooth simple calm shapes, the hill fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_mid_s33.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of rolling wet hills in dark sage green and muted olive on a dark stormy overcast day, patchwork fields with dark hedgerows, a small farmhouse with a faded brick red roof and a few dark wind bent trees, smooth simple calm shapes, the hills fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_far_s33.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of distant low rolling hills in dark slate blue and muted grey green on a dark stormy overcast day, smooth simple calm shapes, the hills fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_ground_s33.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of wet meadow ground on a dark stormy overcast day: a low even fringe of short simple dark sage green grass along the top with a few small puddles, below it a thick layer of dark brown muddy earth with small rounded stones, the short grass span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the grass edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_near_s44.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a near low wet meadow hill in deep sage green on a dark stormy overcast day, short grass bent by the wind, a simple wooden fence and a few small dark bushes, smooth simple calm shapes, the hill fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_mid_s44.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of rolling wet hills in dark sage green and muted olive on a dark stormy overcast day, patchwork fields with dark hedgerows, a small farmhouse with a faded brick red roof and a few dark wind bent trees, smooth simple calm shapes, the hills fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_far_s44.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of distant low rolling hills in dark slate blue and muted grey green on a dark stormy overcast day, smooth simple calm shapes, the hills fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_ground_s44.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00195
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of wet meadow ground on a dark stormy overcast day: a low even fringe of short simple dark sage green grass along the top with a few small puddles, below it a thick layer of dark brown muddy earth with small rounded stones, the short grass span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the grass edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_water_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of choppy river water on a dark stormy overcast day: a wavy top edge of small choppy waves in slate blue and grey teal with thin cream foam crests, deeper dark slate blue water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_block_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of dark wet earth and mossy grey stone like a cut cliff, seen straight from the front, straight vertical sides and a flat top, dark brown earth and slate grey stones with patches of moss, a low even fringe of short simple dark sage green grass along the top edge slightly overhanging, a few small water drops along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_far_s11.png
+- дата: 2026-11-24 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a distant old town skyline at night in deep indigo and dark dusty blue, simple rooftops, a church spire and chimneys, a few tiny warm ochre lit windows, smooth simple calm shapes, the town fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_mid_s11.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a row of old town houses at night in deep dusty blue and dark slate, pitched tiled roofs, brick chimneys, small warm ochre lit windows, smooth simple calm shapes, the houses fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_water_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of choppy river water on a dark stormy overcast day: a wavy top edge of small choppy waves in slate blue and grey teal with thin cream foam crests, deeper dark slate blue water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_block_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of dark wet earth and mossy grey stone like a cut cliff, seen straight from the front, straight vertical sides and a flat top, dark brown earth and slate grey stones with patches of moss, a low even fringe of short simple dark sage green grass along the top edge slightly overhanging, a few small water drops along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_mid_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a row of old town houses at night in deep dusty blue and dark slate, pitched tiled roofs, brick chimneys, small warm ochre lit windows, smooth simple calm shapes, the houses fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_water_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of choppy river water on a dark stormy overcast day: a wavy top edge of small choppy waves in slate blue and grey teal with thin cream foam crests, deeper dark slate blue water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_far_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a distant old town skyline at night in deep indigo and dark dusty blue, simple rooftops, a church spire and chimneys, a few tiny warm ochre lit windows, smooth simple calm shapes, the town fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_block_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of dark wet earth and mossy grey stone like a cut cliff, seen straight from the front, straight vertical sides and a flat top, dark brown earth and slate grey stones with patches of moss, a low even fringe of short simple dark sage green grass along the top edge slightly overhanging, a few small water drops along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_mid_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a row of old town houses at night in deep dusty blue and dark slate, pitched tiled roofs, brick chimneys, small warm ochre lit windows, smooth simple calm shapes, the houses fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_far_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a distant old town skyline at night in deep indigo and dark dusty blue, simple rooftops, a church spire and chimneys, a few tiny warm ochre lit windows, smooth simple calm shapes, the town fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_water_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of choppy river water on a dark stormy overcast day: a wavy top edge of small choppy waves in slate blue and grey teal with thin cream foam crests, deeper dark slate blue water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/storm_block_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of dark wet earth and mossy grey stone like a cut cliff, seen straight from the front, straight vertical sides and a flat top, dark brown earth and slate grey stones with patches of moss, a low even fringe of short simple dark sage green grass along the top edge slightly overhanging, a few small water drops along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_mid_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a row of old town houses at night in deep dusty blue and dark slate, pitched tiled roofs, brick chimneys, small warm ochre lit windows, smooth simple calm shapes, the houses fill the lower two thirds of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_far_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of a distant old town skyline at night in deep indigo and dark dusty blue, simple rooftops, a church spire and chimneys, a few tiny warm ochre lit windows, smooth simple calm shapes, the town fills the lower half of the image and spans the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_ground_s11.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of an old town street at night: a top edge of grey blue cobblestone pavement with a low stone curb, below it a thick layer of dark brown earth with small rounded stones, all in deep dusty blue night colors, the cobblestones span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the cobblestones edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_near_s11.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of near old town rooftops at night in dark indigo and dusty blue grey, tiled roofs, chimneys and a few dark trees between the houses, a couple of warm ochre lit windows, smooth simple calm shapes, the rooftops fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_water_s11.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of calm town canal water at night: a gentle wavy top edge of small soft waves in deep indigo and dark dusty blue with thin cream ripple lines and small warm ochre reflections of lamps, deeper indigo water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_block_s11.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of an old brick wall at night, seen straight from the front, straight vertical sides and a flat top, faded brick red and dusty blue bricks in dim night colors, a row of dark slate roof tiles along the top edge slightly overhanging, a strip of grey stone foundation along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_ground_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of an old town street at night: a top edge of grey blue cobblestone pavement with a low stone curb, below it a thick layer of dark brown earth with small rounded stones, all in deep dusty blue night colors, the cobblestones span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the cobblestones edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_block_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of an old brick wall at night, seen straight from the front, straight vertical sides and a flat top, faded brick red and dusty blue bricks in dim night colors, a row of dark slate roof tiles along the top edge slightly overhanging, a strip of grey stone foundation along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_water_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of calm town canal water at night: a gentle wavy top edge of small soft waves in deep indigo and dark dusty blue with thin cream ripple lines and small warm ochre reflections of lamps, deeper indigo water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_near_s22.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of near old town rooftops at night in dark indigo and dusty blue grey, tiled roofs, chimneys and a few dark trees between the houses, a couple of warm ochre lit windows, smooth simple calm shapes, the rooftops fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_ground_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of an old town street at night: a top edge of grey blue cobblestone pavement with a low stone curb, below it a thick layer of dark brown earth with small rounded stones, all in deep dusty blue night colors, the cobblestones span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the cobblestones edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_block_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of an old brick wall at night, seen straight from the front, straight vertical sides and a flat top, faded brick red and dusty blue bricks in dim night colors, a row of dark slate roof tiles along the top edge slightly overhanging, a strip of grey stone foundation along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_near_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of near old town rooftops at night in dark indigo and dusty blue grey, tiled roofs, chimneys and a few dark trees between the houses, a couple of warm ochre lit windows, smooth simple calm shapes, the rooftops fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_water_s33.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of calm town canal water at night: a gentle wavy top edge of small soft waves in deep indigo and dark dusty blue with thin cream ripple lines and small warm ochre reflections of lamps, deeper indigo water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_ground_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view cross-section strip of an old town street at night: a top edge of grey blue cobblestone pavement with a low stone curb, below it a thick layer of dark brown earth with small rounded stones, all in deep dusty blue night colors, the cobblestones span the full width from the left edge to the right edge, the earth fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the cobblestones edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_block_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall rectangular block of an old brick wall at night, seen straight from the front, straight vertical sides and a flat top, faded brick red and dusty blue bricks in dim night colors, a row of dark slate roof tiles along the top edge slightly overhanging, a strip of grey stone foundation along the bottom edge, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_near_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A wide side view panorama of near old town rooftops at night in dark indigo and dusty blue grey, tiled roofs, chimneys and a few dark trees between the houses, a couple of warm ochre lit windows, smooth simple calm shapes, the rooftops fill the lower half of the image and span the full width from the left edge to the right edge, the flat solid pure magenta background fills the entire sky above edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/night_water_s44.png
+- дата: 2026-11-24 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x512, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A long side view strip of calm town canal water at night: a gentle wavy top edge of small soft waves in deep indigo and dark dusty blue with thin cream ripple lines and small warm ochre reflections of lamps, deeper indigo water below with soft horizontal brush strokes, the water span the full width from the left edge to the right edge and fills the lower three quarters of the image down to the bottom edge, the flat solid pure magenta background fills the thin area above the waves edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/lightning_s11.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall narrow jagged lightning bolt with two small side forks, pale cream and soft ochre yellow with a thin sepia ink outline, vertical, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/moon_s11.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round pale cream full moon with a few soft dusty blue grey craters, a simple flat round disc, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/firefly_s11.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small firefly bug seen from the side, tiny translucent wings, a dark brown body and a large round pale lemon yellow lit tail with a soft pale yellow halo around it, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/raindrop_s11.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 11, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin slanted streak of a falling rain drop, narrow tapering stroke, pale dusty blue with a thin sepia ink outline, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/lightning_s22.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall narrow jagged lightning bolt with two small side forks, pale cream and soft ochre yellow with a thin sepia ink outline, vertical, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/moon_s22.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round pale cream full moon with a few soft dusty blue grey craters, a simple flat round disc, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/raindrop_s22.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin slanted streak of a falling rain drop, narrow tapering stroke, pale dusty blue with a thin sepia ink outline, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/firefly_s22.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 22, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small firefly bug seen from the side, tiny translucent wings, a dark brown body and a large round pale lemon yellow lit tail with a soft pale yellow halo around it, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/lightning_s33.png
+- дата: 2026-11-24 12:11
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall narrow jagged lightning bolt with two small side forks, pale cream and soft ochre yellow with a thin sepia ink outline, vertical, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/moon_s33.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round pale cream full moon with a few soft dusty blue grey craters, a simple flat round disc, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/raindrop_s33.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin slanted streak of a falling rain drop, narrow tapering stroke, pale dusty blue with a thin sepia ink outline, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/firefly_s33.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 33, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small firefly bug seen from the side, tiny translucent wings, a dark brown body and a large round pale lemon yellow lit tail with a soft pale yellow halo around it, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/lightning_s44.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single tall narrow jagged lightning bolt with two small side forks, pale cream and soft ochre yellow with a thin sepia ink outline, vertical, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/moon_s44.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single round pale cream full moon with a few soft dusty blue grey craters, a simple flat round disc, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/firefly_s44.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single small firefly bug seen from the side, tiny translucent wings, a dark brown body and a large round pale lemon yellow lit tail with a soft pale yellow halo around it, centered, full object in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/raindrop_s44.png
+- дата: 2026-11-24 12:12
+- модель: runware flux-2-klein-9b-kv, 1024x1024, seed 44, ціна $0.00104
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: —
+- промпт: A single long thin slanted streak of a falling rain drop, narrow tapering stroke, pale dusty blue with a thin sepia ink outline, centered, full object in frame with margin, the flat solid pure magenta background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/envrow45_s11.png
+- дата: 2026-11-24 13:17
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 11, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: Two hot air balloons standing side by side in a row with even spacing, each with a small wicker basket hanging on ropes and a tiny brass burner: the left envelope dark slate blue grey painted with bold ochre yellow zigzag lightning stripes running around it, the right envelope deep indigo blue painted with small cream stars and one pale cream crescent moon, front view, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/envrow45_s33.png
+- дата: 2026-11-24 13:17
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 33, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: Two hot air balloons standing side by side in a row with even spacing, each with a small wicker basket hanging on ropes and a tiny brass burner: the left envelope dark slate blue grey painted with bold ochre yellow zigzag lightning stripes running around it, the right envelope deep indigo blue painted with small cream stars and one pale cream crescent moon, front view, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/envrow45_s22.png
+- дата: 2026-11-24 13:17
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 22, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: Two hot air balloons standing side by side in a row with even spacing, each with a small wicker basket hanging on ropes and a tiny brass burner: the left envelope dark slate blue grey painted with bold ochre yellow zigzag lightning stripes running around it, the right envelope deep indigo blue painted with small cream stars and one pale cream crescent moon, front view, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/envrow45_s44.png
+- дата: 2026-11-24 13:17
+- модель: runware flux-2-klein-9b-kv, 2048x1024, seed 44, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: Two hot air balloons standing side by side in a row with even spacing, each with a small wicker basket hanging on ropes and a tiny brass burner: the left envelope dark slate blue grey painted with bold ochre yellow zigzag lightning stripes running around it, the right envelope deep indigo blue painted with small cream stars and one pale cream crescent moon, front view, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style

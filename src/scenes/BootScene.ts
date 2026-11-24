@@ -9,7 +9,7 @@ import { findLevel } from '../levels/index.ts';
 const ICONS = [ 'pause', 'play', 'retry', 'map', 'next', 'back', 'fwd', 'sound', 'mute', 'music', 'musicoff', 'shop', 'route', 'ret' ];
 // Скіни, вже перемальовані в акварельному стилі: текстури того ж розміру, що й намальовані кодом.
 // Префікс id (env-, bas-) збігається з префіксом ключа текстури (env:, bas:)
-const PAINTED_SKINS = [ 'env-classic', 'env-sky', 'env-sunset', 'env-polka', 'env-checker', 'env-patch', 'env-bloom', 'env-light', 'env-aurora', 'env-airmail',
+const PAINTED_SKINS = [ 'env-classic', 'env-sky', 'env-sunset', 'env-polka', 'env-checker', 'env-patch', 'env-bloom', 'env-light', 'env-aurora', 'env-thunder', 'env-starry', 'env-airmail',
   'bas-wicker', 'bas-blue', 'bas-crate', 'bas-flower', 'bas-gold', 'bas-barrel', 'bas-airmail', 'bas-picnic', 'bas-tin', 'bas-quilt',
   'plt-fox', 'plt-cat', 'plt-owl', 'plt-frog', 'plt-bunny', 'plt-hedgehog', 'plt-bear', 'plt-raccoon', 'plt-mouse', 'plt-penguin' ];
 // Перемальовані об'єкти світу. Будинок: ширина та сама, що в намальованого кодом, висота за пропорціями малюнка.
@@ -22,9 +22,14 @@ const PAINTED_CLOUDS = [ 'cloud_bank', 'cloud_puff', 'cloud_wisp' ];
 // Ці малюнки світу бере ще екран завантаження, тож вони у WebP: важать у 5–6 разів менше за PNG
 const WEBP_WORLD = new Set( [ 'flame', 'flame1', 'flame2', 'bird0', 'bird1', 'letter', 'gaugefill', 'sun', 'sun_rays', ...PAINTED_CLOUDS ] );
 // Шари пейзажу, перемальовані акварельним пайплайном (scripts/key_layer.py), лежать у WebP
-const PACK_WEBP = new Set( [ 'far', 'mid', 'near', 'sea-far', 'sea-mid', 'sea-near', 'mountain-far', 'mountain-mid', 'mountain-near' ] );
+const PACK_WEBP = new Set( [ 'far', 'mid', 'near', 'sea-far', 'sea-mid', 'sea-near', 'mountain-far', 'mountain-mid', 'mountain-near',
+  'storm-far', 'storm-mid', 'storm-near', 'night-far', 'night-mid', 'night-near' ] );
 // Намальовані смуги землі й води, блоки й маяк для worldView
-const GROUND_FILES = [ 'ground_meadow', 'ground_sea', 'ground_mountain', 'water_sea', 'block_meadow', 'block_sea', 'block_mountain', 'lighthouse' ];
+// Місяць (замість сонця вночі) і далека блискавка (гроза) — теж тут: беруться як pk-moon і pk-lightning
+const GROUND_FILES = [ 'ground_meadow', 'ground_sea', 'ground_mountain', 'water_sea', 'block_meadow', 'block_sea', 'block_mountain', 'lighthouse',
+  'ground_storm', 'water_storm', 'block_storm', 'ground_night', 'water_night', 'block_night', 'moon', 'lightning' ];
+// Погода тем: косий дощ (гроза) і світлячки (ніч)
+const WEATHER_PARTICLES = [ 'p-rain', 'p-firefly' ];
 export const worldUrl = ( id: string ): string => 'assets/world/' + id + ( WEBP_WORLD.has( id ) ? '.webp' : '.png' );
 
 // Черга файлів гри. Ключі, які екран завантаження вже взяв для себе (полум'я, птах, хмари), не вантажимо вдруге
@@ -57,7 +62,7 @@ export function queueGameAssets( scene: Phaser.Scene ): void
   {
     load( 'pk-' + id, 'assets/balloon/' + id + '.png' );
   }
-  for ( const id of TRAIL_PARTICLES )
+  for ( const id of [ ...TRAIL_PARTICLES, ...WEATHER_PARTICLES ] )
   {
     load( id, 'assets/trail/' + id + '.png' );
   }

@@ -27,6 +27,8 @@ export const SKINS: Skin[] = [
   { id: 'env-bloom', slot: 'envelope', name: 'Bloom', price: 0, world: 1, style: 'bloom', colors: [ 0xffd6e8, 0xff6fa8, 0xffe14a ] },
   { id: 'env-light', slot: 'envelope', name: 'Lighthouse', price: 0, world: 2, style: 'rings', colors: [ 0xffffff, 0xd8332a ] },
   { id: 'env-aurora', slot: 'envelope', name: 'Aurora', price: 0, world: 3, style: 'aurora', colors: [ 0x1a2a6a, 0x3affc8, 0xb06aff ] },
+  { id: 'env-thunder', slot: 'envelope', name: 'Thunder', price: 0, world: 4, style: 'stripes', colors: [ 0x4a5260, 0xe0a83a ] },
+  { id: 'env-starry', slot: 'envelope', name: 'Starry Night', price: 0, world: 5, style: 'dots', colors: [ 0x2a2e6a, 0xf3e6cc ] },
 
   { id: 'bas-wicker', slot: 'basket', name: 'Wicker', price: 0, colors: [ 0xa8723a, 0x6e4422 ] },
   { id: 'bas-blue', slot: 'basket', name: 'Painted', price: 30, colors: [ 0x3a6ee8, 0x22408e ] },
