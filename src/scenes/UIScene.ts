@@ -45,6 +45,7 @@ export class UIScene extends Phaser.Scene
   private layer!: Phaser.GameObjects.Container;
   private windG!: Phaser.GameObjects.Graphics;
   private windMarker!: Phaser.GameObjects.Image;
+  private windNums: Phaser.GameObjects.Text[] = [];
   private altScale?: Phaser.GameObjects.Image;
   private gasG!: Phaser.GameObjects.Graphics;
   private gasFill?: Phaser.GameObjects.Image;
@@ -316,6 +317,13 @@ export class UIScene extends Phaser.Scene
     }
     this.windG = this.add.graphics();
     this.hud.add( this.windG );
+    // Сила вітру числом під стрілкою кожного шару (з поривами змінюється наживо)
+    this.windNums = lvl.layers.map( () =>
+    {
+      const tx = label( this, 0, 0, '', 20 * u, this.textures.exists( 'altscale' ) ? '#3b2f2a' : '#ffffff', !this.textures.exists( 'altscale' ) );
+      this.hud.add( tx );
+      return tx;
+    } );
     this.windMarker = this.add.image( 0, 0, 'env:' + save().equip.envelope ).setScale( 0.32 * u );
     this.hud.add( this.windMarker );
     const pr = this.panelRect;
@@ -400,6 +408,12 @@ export class UIScene extends Phaser.Scene
       const wind = windAt( lvl, ( l.top + layerBottom( lvl, i ) ) / 2, s.t );
       const cy = ( y0 + y1 ) / 2;
       const cx = pr.x + pr.w / 2;
+      const num = this.windNums[ i ];
+      if ( num )
+      {
+        const th0 = Math.min( 12 * u, Math.max( 5 * u, ( y1 - y0 ) * 0.18 ) );
+        num.setText( String( Math.round( Math.abs( wind ) ) ) ).setPosition( cx, cy + th0 * 1.4 + 13 * u );
+      }
       if ( Math.abs( wind ) < 3 )
       {
         g.fillStyle( 0xd0d8e8, 1 );
