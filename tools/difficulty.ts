@@ -14,8 +14,10 @@ import { createState, step, cloneState, type SimState } from '../src/core/sim.ts
 const args = process.argv.slice( 2 );
 const files = args.filter( ( a ) => a.startsWith( 'world' ) );
 const only = args.find( ( a ) => /^\d+-\d+$/.test( a ) );
-// Частка рішень навмання: уважний гравець і новачок
-const QS = [ 0.1, 0.25 ];
+// Частка рішень навмання: уважний гравець і новачок. Інші значення: --q 0.3,0.5.
+// Після спрощення фізики (п. 14–15) при 10–40% майже всі рівні дають 100%, тож рахуємо 50% і 60%
+const qArg = args[ args.indexOf( '--q' ) + 1 ];
+const QS = args.includes( '--q' ) && qArg ? qArg.split( ',' ).map( Number ) : [ 0.5, 0.6 ];
 // Стани, у які куля потрапляє пізніше, вважаємо програшем: гравець здався
 const MAX_T = 150;
 
