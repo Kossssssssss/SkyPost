@@ -7,6 +7,7 @@ import { MID_OFF } from '../core/sim.ts';
 import { save, persist, applyResult, addFail, record, starsOf, totalStars, type CoinParts } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
+import { milestone, setPlace, track } from '../platform/analytics.ts';
 import { findLevel, nextLevelId, levelUnlocked, worldPerfect, allLevels, WORLD_UNLOCK, worldUnlocked, maxStars } from '../levels/index.ts';
 import { SKINS } from '../core/skins.ts';
 import { button, label, panel, hintPanel, starsRow, uiScale, fitText, fadeIn, popIn, COLORS, inkHex, type Button } from '../ui/widgets.ts';
@@ -72,6 +73,8 @@ export class UIScene extends Phaser.Scene
   private walletNum?: Phaser.GameObjects.Text;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
+  // Уже показані кнопки винагороди за спробу (стан симуляції новий на кожну спробу)
+  private offers = new WeakMap<object, Set<string>>();
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
   private windPulse = 0;
   // Наступне вікно чи картка щойно відкриваються й мають виринути плавно; перебудова при зміні розміру — без анімації
@@ -651,7 +654,7 @@ export class UIScene extends Phaser.Scene
     const offer = free || !this.afterMidgame;
     if ( offer && lvl.hint && !this.gs.hint )
     {
-      btns.push( this.rewardButton( t( 'showRoute' ), 'i-route', free, fails, () =>
+      btns.push( this.rewardButton( 'card_route', t( 'showRoute' ), 'i-route', free, fails, () =>
       {
         this.gs.showHint();
         this.rebuild();
@@ -659,7 +662,7 @@ export class UIScene extends Phaser.Scene
     }
     if ( offer && lvl.fuel !== undefined && this.gs.bonusFuel === 0 )
     {
-      btns.push( this.rewardButton( t( 'plusGas' ), 'gas', free, fails, () =>
+      btns.push( this.rewardButton( 'card_gas', t( 'plusGas' ), 'gas', free, fails, () =>
       {
         this.gs.bonusFuel = lvl.fuel! * 0.5;
         this.rebuild();
@@ -690,11 +693,28 @@ export class UIScene extends Phaser.Scene
   }
 
   // Кнопка винагороди: реклама, якщо доступна; інакше безрекламна альтернатива — безкоштовно після кількох спроб
-  private rewardButton( text: string, icon: string, free: boolean, fails: number, grant: () => void ): Button
+  // Показ кнопки винагороди — раз на спробу й місце (кнопки перемальовуються при rebuild і resize).
+  // via: ad — за рекламу, free — безкоштовно, none — реклами немає, а безкоштовно ще не можна
+  private offerShown( placement: string, via: string ): void
+  {
+    const s = this.gs.s;
+    const seen = this.offers.get( s ) ?? new Set<string>();
+    this.offers.set( s, seen );
+    if ( seen.has( placement ) )
+    {
+      return;
+    }
+    seen.add( placement );
+    track( 'ad_offer', { placement, via, level: this.gs.levelId, attempt: this.gs.attempt } );
+  }
+
+  // placement — назва місця кнопки для аналітики
+  private rewardButton( placement: string, text: string, icon: string, free: boolean, fails: number, grant: () => void ): Button
   {
     const u = this.u;
     const adsOk = platform.rewardedAvailable();
     // Довгі підписи йдуть у два рядки, щоб влізти в кнопку без дрібного шрифту
+    this.offerShown( placement, free ? 'free' : adsOk ? 'ad' : 'none' );
     const caption = free ? text + '\n' + t( 'free' ) : adsOk ? text : t( 'freeAfter', FREE_AFTER - fails );
     const b = button( this, 0, 0, {
       w: 250 * u, h: 76 * u, text: caption, icon: free || !adsOk ? icon : 'tv', size: ( adsOk && !free ? 26 : 20 ) * u,
@@ -707,6 +727,7 @@ export class UIScene extends Phaser.Scene
         }
         if ( free )
         {
+          track( 'reward', { placement, via: 'free', level: this.gs.levelId } );
           grant();
           return;
         }
@@ -715,10 +736,11 @@ export class UIScene extends Phaser.Scene
           return;
         }
         this.busy = true;
-        const ok = await platform.rewarded();
+        const ok = await platform.rewarded( placement );
         this.busy = false;
         if ( ok )
         {
+          track( 'reward', { placement, via: 'ad', level: this.gs.levelId } );
           grant();
         }
         else if ( !platform.rewardedAvailable() )
@@ -885,7 +907,7 @@ export class UIScene extends Phaser.Scene
     const lvl = g.lvl;
     if ( lvl.hint && !g.hint )
     {
-      const rb = this.rewardButton( t( 'showRoute' ), 'i-route', fails >= FREE_AFTER, fails, () =>
+      const rb = this.rewardButton( 'fail_route', t( 'showRoute' ), 'i-route', fails >= FREE_AFTER, fails, () =>
       {
         g.hint = true;
         this.restart();
@@ -910,7 +932,7 @@ export class UIScene extends Phaser.Scene
     const prevStars = starsOf( lvl.id );
     const gasOk = g.s.gas <= lvl.gasStar + 1e-6;
     const stampOk = g.s.stamp;
-    const res = applyResult( lvl.id, gasOk, stampOk, g.s.gas, lvl.difficulty );
+    const res = applyResult( lvl.id, gasOk, stampOk, g.s.gas, lvl.difficulty, g.stats() );
     if ( this.tutStep !== 'done' || lvl.id === '1-1' )
     {
       this.tutStep = 'done';
@@ -937,6 +959,10 @@ export class UIScene extends Phaser.Scene
         info.newWorld = i + 1;
       }
     } );
+    if ( info.newWorld )
+    {
+      milestone( 'm_world' + info.newWorld, { stars: after } );
+    }
     if ( info.newSkin || info.newWorld || ( prevStars < 3 && starsOf( lvl.id ) === 3 ) )
     {
       platform.happytime();
@@ -1064,6 +1090,7 @@ export class UIScene extends Phaser.Scene
       }
       if ( offer )
       {
+        this.offerShown( 'result_x2', 'ad' );
         const b = button( this, 125 * u, totalY, {
           w: 150 * u, h: 60 * u, text: '×2', icon: 'tv', size: 30 * u, color: COLORS.green, dark: COLORS.greenDark,
           onClick: () => void this.doubleCoins( info )
@@ -1224,10 +1251,11 @@ export class UIScene extends Phaser.Scene
       return;
     }
     this.busy = true;
-    const ok = await platform.rewarded();
+    const ok = await platform.rewarded( 'result_x2' );
     this.busy = false;
     if ( ok )
     {
+      track( 'reward', { placement: 'result_x2', via: 'ad', level: this.gs.levelId, coins: info.coins } );
       info.doubled = true;
       save().coins += info.coins;
       persist();
@@ -1249,6 +1277,8 @@ export class UIScene extends Phaser.Scene
   {
     this.overlay = 'final';
     this.pointers.clear();
+    setPlace( 'final' );
+    milestone( 'm_game_complete', { stars: totalStars() } );
     platform.happytime();
     this.layer.removeAll( true );
     this.pop = true;
@@ -1279,6 +1309,7 @@ export class UIScene extends Phaser.Scene
     {
       return;
     }
+    this.trackQuit( 'restart' );
     this.overlay = '';
     this.gs.restartLevel( this.gs.levelId, keep );
   }
@@ -1316,12 +1347,24 @@ export class UIScene extends Phaser.Scene
     }
   }
 
+  // Гравець кинув незавершену спробу: перезапуск посеред польоту або вихід на карту (зокрема після програшу)
+  private trackQuit( action: 'restart' | 'map' ): void
+  {
+    const p = this.gs?.phase;
+    if ( !p || p === 'won' || p === 'editor' || ( action === 'restart' && p === 'dead' ) )
+    {
+      return;
+    }
+    track( 'level_quit', { ...this.gs.stats(), action, phase: p } );
+  }
+
   private toMap( world?: number ): void
   {
     if ( this.busy )
     {
       return;
     }
+    this.trackQuit( 'map' );
     this.overlay = '';
     this.afterMidgame = false;
     platform.gameplayStop();

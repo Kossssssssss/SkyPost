@@ -3,6 +3,7 @@ import { queueGameAssets, worldUrl } from './BootScene.ts';
 import { FONT } from '../ui/widgets.ts';
 import { currentLang, type Lang } from '../core/i18n.ts';
 import { gameDataReady } from '../core/startup.ts';
+import { track } from '../platform/analytics.ts';
 
 // Розміри макета: гра в режимі EXPAND, тож одна сторона екрана завжди дорівнює базовій, а інша не менша
 const BW = 1920;
@@ -89,6 +90,7 @@ export class LoadScene extends Phaser.Scene
     // Тепер решта гри, з відсотками на смузі
     this.load.on( 'progress', ( p: number ) => { this.target = p; } );
     this.load.once( 'complete', () => { this.target = 1; } );
+    this.load.on( 'loaderror', ( f: Phaser.Loader.File ) => track( 'load_error', { key: f.key, url: String( f.url ).slice( -80 ) } ) );
     // Файли гри ставимо в чергу, щойно готові SDK, сейв і мова (мова могла змінитися — перемальовуємо підказку)
     void gameDataReady().then( () =>
     {

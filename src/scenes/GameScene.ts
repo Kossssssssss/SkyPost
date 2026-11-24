@@ -12,7 +12,7 @@ import { save, persist } from '../core/save.ts';
 import { skin, trailLook } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
-import { track } from '../platform/analytics.ts';
+import { milestone, nextAttempt, setPlace, track, type Params } from '../platform/analytics.ts';
 
 export type Phase = 'intro' | 'play' | 'paused' | 'dead' | 'won' | 'editor';
 export type FailReason = '' | 'water' | 'hazard' | 'gas';
@@ -64,6 +64,8 @@ export class GameScene extends Phaser.Scene
   private camY = 0;
   private ghostT = 0;
   burning = false;
+  // Номер спроби на цьому рівні за весь час гри; 0 — політ ще не почався
+  attempt = 0;
   editorHook?: { update( dt: number ): void };
 
   constructor()
@@ -89,6 +91,7 @@ export class GameScene extends Phaser.Scene
     this.pointerBurn = false;
     this.keyBurn = false;
     this.burning = false;
+    this.attempt = 0;
   }
 
   create(): void
@@ -101,6 +104,7 @@ export class GameScene extends Phaser.Scene
     // Годинник і твіни сцени живуть між рестартами, тож скидаємо сповільнення після удару
     this.setSlow( 1 );
     persist();
+    setPlace( 'level', () => ( { ...this.stats(), phase: this.phase } ) );
 
     this.buildWorld();
     this.cameras.main.setBackgroundColor( 'rgba(0,0,0,0)' );
@@ -243,7 +247,9 @@ export class GameScene extends Phaser.Scene
     {
       this.phase = 'play';
       platform.gameplayStart();
-      track( 'level_start', { level: this.levelId } );
+      this.attempt = nextAttempt( this.levelId );
+      track( 'level_start', { level: this.levelId, world: this.levelId.split( '-' )[ 0 ], attempt: this.attempt, hint: this.hint, bonus_gas: this.bonusFuel > 0 } );
+      milestone( 'f03_first_burn', { level: this.levelId } );
       this.game.events.emit( 'play-started' );
     }
   }
@@ -276,6 +282,24 @@ export class GameScene extends Phaser.Scene
       this.keyBurn = false;
       platform.gameplayStart();
     }
+  }
+
+  // Подробиці поточної спроби для аналітики: час польоту, пройдена частина маршруту до останньої скриньки, доставлені листи
+  stats(): Params
+  {
+    const lvl = this.lvl;
+    const s = this.s;
+    const end = Math.max( ...lvl.targets.map( ( t ) => t.x + t.w / 2 ) );
+    const progress = Phaser.Math.Clamp( ( s.x - lvl.start.x ) / Math.max( 1, end - lvl.start.x ), 0, 1 );
+    return {
+      level: this.levelId,
+      world: this.levelId.split( '-' )[ 0 ],
+      attempt: this.attempt,
+      sec: Math.round( s.t ),
+      progress: Math.round( progress * 100 ),
+      letters: s.target + '/' + lvl.targets.length,
+      gas: Math.round( s.gas * 10 ) / 10
+    };
   }
 
   restartLevel( levelId = this.levelId, keep = true ): void
@@ -445,6 +469,7 @@ export class GameScene extends Phaser.Scene
       // Поки лист летить, скринька ще чекає — прапорець опуститься, коли лист долетить
       mb.setTexture( 'mailbox' );
       this.game.events.emit( 'deliver', this.s.target );
+      milestone( 'f04_first_letter', { level: this.levelId } );
     }
     if ( ev & EV_WIN )
     {
@@ -480,7 +505,7 @@ export class GameScene extends Phaser.Scene
     this.phase = 'dead';
     this.fail = reason;
     platform.gameplayStop();
-    track( 'level_fail', { level: this.levelId, reason } );
+    track( 'level_fail', { ...this.stats(), reason } );
     audio.burner( false );
     const env = skin( save().equip.envelope );
     if ( reason === 'water' )

@@ -1,5 +1,5 @@
 import { platform } from '../platform/platform.ts';
-import { track } from '../platform/analytics.ts';
+import { cleared, setClears, setCoins, track, type Params } from '../platform/analytics.ts';
 
 export interface LevelRecord
 {
@@ -113,6 +113,13 @@ export function loadSave(): void
   {
     data = fresh();
   }
+  setClears( clearedCount() );
+  setCoins( data.coins );
+}
+
+function clearedCount(): number
+{
+  return Object.values( data.levels ).filter( ( r ) => r.done ).length;
 }
 
 export function save(): SaveData
@@ -122,6 +129,7 @@ export function save(): SaveData
 
 export function persist(): void
 {
+  setCoins( data.coins );
   try
   {
     platform.storage.setItem( KEY, JSON.stringify( data ) );
@@ -158,7 +166,8 @@ export function totalStars(): number
   return n;
 }
 
-export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: number, difficulty?: string ): { gained: number; coins: number; parts: CoinParts; prev: LevelRecord }
+// stats — подробиці спроби для аналітики (спроба, час, рівень)
+export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: number, difficulty?: string, stats?: Params ): { gained: number; coins: number; parts: CoinParts; prev: LevelRecord }
 {
   const prev = record( id );
   const before = starsOf( id );
@@ -175,7 +184,11 @@ export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: 
   data.coins += coins;
   data.fails[ id ] = 0;
   persist();
-  track( 'level_complete', { level: id, stars: starsOf( id ), new_stars: gained, coins, first_clear: !prev.done, gas_ok: gasOk, stamp_ok: stampOk } );
+  track( 'level_complete', { ...stats, level: id, stars: starsOf( id ), new_stars: gained, coins, first_clear: !prev.done, gas_ok: gasOk, stamp_ok: stampOk, difficulty: difficulty ?? 'normal' } );
+  if ( !prev.done )
+  {
+    cleared( clearedCount(), id );
+  }
   return { gained, coins, parts, prev };
 }
 

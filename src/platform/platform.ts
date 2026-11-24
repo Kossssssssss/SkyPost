@@ -1,7 +1,7 @@
 // Єдина точка доступу до платформи: реклама, події гри, сховище, mute від порталу.
 // Під APK через Capacitor достатньо додати ще одну реалізацію Ads (AdMob).
 
-import { initAnalytics, track } from './analytics.ts';
+import { gameStartParams, initAnalytics, milestone, track } from './analytics.ts';
 
 export type AdKind = 'midgame' | 'rewarded';
 
@@ -19,7 +19,8 @@ export interface Ads
   rewardedAvailable(): boolean;
   // true, якщо реклама справді показалась
   midgame(): Promise<boolean>;
-  rewarded(): Promise<boolean>;
+  // placement — звідки запит (card_route, card_gas, fail_route, result_x2), для аналітики
+  rewarded( placement: string ): Promise<boolean>;
   gameplayStart(): void;
   gameplayStop(): void;
   loadingStart(): void;
@@ -90,7 +91,7 @@ class StubAds implements Ads
     return import.meta.env.DEV ? this.fake( 'Midgame ad (stub)' ) : Promise.resolve( false );
   }
 
-  rewarded(): Promise<boolean>
+  rewarded( _placement: string ): Promise<boolean>
   {
     return this.fake( 'Rewarded ad (stub)' );
   }
@@ -194,15 +195,15 @@ class CrazyGamesAds implements Ads
 
   midgame(): Promise<boolean>
   {
-    return this.request( 'midgame' );
+    return this.request( 'midgame', 'next_level' );
   }
 
-  rewarded(): Promise<boolean>
+  rewarded( placement: string ): Promise<boolean>
   {
-    return this.request( 'rewarded' );
+    return this.request( 'rewarded', placement );
   }
 
-  private request( kind: AdKind ): Promise<boolean>
+  private request( kind: AdKind, placement: string ): Promise<boolean>
   {
     if ( this.busy )
     {
@@ -215,7 +216,7 @@ class CrazyGamesAds implements Ads
       const done = ( ok: boolean, error = '' ) =>
       {
         this.busy = false;
-        track( 'ad', { kind, result: ok ? 'shown' : error || 'failed' } );
+        track( 'ad', { kind, placement, result: ok ? 'shown' : error || 'failed' } );
         if ( started )
         {
           adHooks.onAdEnd();
@@ -352,7 +353,8 @@ export async function initPlatform(): Promise<void>
   }
   await platform.init();
   initAnalytics();
-  track( 'game_start', { platform: platform.name, locale: platform.locale() ?? navigator.language } );
+  track( 'game_start', { platform: platform.name, locale: platform.locale() ?? navigator.language, ...gameStartParams() } );
+  milestone( 'f01_open', { platform: platform.name } );
   // Завантаження вже йде (екран завантаження показаний раніше за SDK), тож повідомляємо одразу
   platform.loadingStart();
 }

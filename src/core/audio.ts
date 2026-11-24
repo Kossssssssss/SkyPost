@@ -1,5 +1,6 @@
 import { platform } from '../platform/platform.ts';
 import { save, persist } from './save.ts';
+import { track } from '../platform/analytics.ts';
 
 // Спокійний вальс — на мапі, в магазині й меню; зібраніший трек — під час польоту.
 // end — де закінчується повна гучність: після неї генератор затухає, і коло там провисало б
@@ -121,6 +122,7 @@ class Synth
   {
     save().sfx = !save().sfx;
     persist();
+    track( 'setting', { sfx: save().sfx } );
     this.applyVolume();
   }
 
@@ -128,6 +130,7 @@ class Synth
   {
     save().music = !save().music;
     persist();
+    track( 'setting', { music: save().music } );
     this.applyVolume();
   }
 

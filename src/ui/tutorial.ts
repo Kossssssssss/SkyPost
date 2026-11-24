@@ -3,9 +3,13 @@ import type { GameScene } from '../scenes/GameScene.ts';
 import { ENV_OFF } from '../core/sim.ts';
 import { t, type TextKey } from '../core/i18n.ts';
 import { hintPanel, inkHex, label } from './widgets.ts';
+import { milestone } from '../platform/analytics.ts';
 
 // Навчання на першому рівні: по одному короткому кроку, кожен із маркером у світі гри
 export type TutStep = 'hold' | 'release' | 'stamp' | 'land' | 'done';
+
+// Кроки для аналітики: номер у назві, щоб воронка навчання йшла по порядку (stamp буває пропущено)
+const STEP_NO: Record<TutStep, number> = { hold: 1, release: 2, stamp: 3, land: 4, done: 5 };
 
 const TEXT: Record<Exclude<TutStep, 'done'>, TextKey> = {
   hold: 'tut_hold',
@@ -32,6 +36,7 @@ export class Tutorial
     this.layer = layer;
     this.u = u;
     this.step = step;
+    this.report();
     this.g = scene.add.graphics();
     layer.add( this.g );
     this.showText();
@@ -46,7 +51,14 @@ export class Tutorial
   private go( step: TutStep ): void
   {
     this.step = step;
+    this.report();
     this.showText();
+  }
+
+  // Раз на гравця: до якого кроку навчання він дійшов
+  private report(): void
+  {
+    milestone( `t${ STEP_NO[ this.step ] }_${ this.step }` );
   }
 
   private showText(): void

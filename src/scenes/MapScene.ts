@@ -7,6 +7,7 @@ import { SKINS, skin, trailLook, canBuySomething } from '../core/skins.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { THEMES } from '../ui/worldView.ts';
 import { audio } from '../core/audio.ts';
+import { milestone, setPlace } from '../platform/analytics.ts';
 import { button, label, panel, painted, starsRow, uiScale, fitText, fadeIn, shade, COLORS, inkHex } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import type { BgScene } from './BgScene.ts';
@@ -40,6 +41,8 @@ export class MapScene extends Phaser.Scene
 
   create(): void
   {
+    setPlace( 'map', () => ( { world: this.world } ) );
+    milestone( 'm_map' );
     this.root = this.add.container( 0, 0 );
     audio.music( 'map' );
     this.scale.on( 'resize', this.build, this );

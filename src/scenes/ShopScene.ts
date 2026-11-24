@@ -3,7 +3,7 @@ import { t, tn } from '../core/i18n.ts';
 import { save, persist, type SkinSlot } from '../core/save.ts';
 import { skinsOf, skin, trailLook, type Skin } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
-import { track } from '../platform/analytics.ts';
+import { milestone, setPlace, track } from '../platform/analytics.ts';
 import { BalloonView, skinFit } from '../ui/balloonView.ts';
 import { button, label, panel, uiScale, fitText, fadeIn, COLORS, inkHex } from '../ui/widgets.ts';
 import { worldPerfect } from '../levels/index.ts';
@@ -32,6 +32,8 @@ export class ShopScene extends Phaser.Scene
 
   create(): void
   {
+    setPlace( 'shop' );
+    milestone( 'm_shop', { coins: save().coins } );
     this.root = this.add.container( 0, 0 );
     this.scale.on( 'resize', this.build, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
@@ -295,6 +297,7 @@ export class ShopScene extends Phaser.Scene
     sv.equip[ sk.slot ] = sk.id;
     persist();
     track( 'skin_purchase', { skin: sk.id, slot: sk.slot, price: sk.price, coins_left: sv.coins } );
+    milestone( 'm_first_purchase', { skin: sk.id, price: sk.price } );
     audio.buy();
     this.hovered = undefined;
     this.build();
