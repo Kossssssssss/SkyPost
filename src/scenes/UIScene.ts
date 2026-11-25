@@ -249,11 +249,21 @@ export class UIScene extends Phaser.Scene
     if ( this.tutStep !== 'done' && !this.overlay )
     {
       this.tut = new Tutorial( this, this.layer, this.u, this.tutStep );
+      // Без картки рівень грабельний одразу, тож «гра почалась» — уже зараз, а не на першому жарі:
+      // за першою gameplayStart CrazyGames рахує час завантаження
+      if ( this.gs.phase === 'intro' )
+      {
+        platform.gameplayStart();
+      }
     }
     else if ( this.gs.phase === 'intro' && !this.gs.resumed )
     {
       // З чекпойнта картки немає: бонуси й опис рівня — для старту з початку
       this.buildCard();
+    }
+    else if ( this.gs.phase === 'intro' && !this.overlay )
+    {
+      platform.gameplayStart();
     }
     if ( this.overlay === 'pause' )
     {
