@@ -1,4 +1,5 @@
 import { groundY, moverOffset, windAt, type LevelData, type Rect } from './level.ts';
+import { blockShape } from './shapes.ts';
 
 export const DT = 1 / 60;
 
@@ -260,8 +261,24 @@ export function step( lvl: LevelData, s: SimState, burn: boolean, bonusFuel = 0 
 
   for ( const b of lvl.blocks )
   {
-    ev |= resolveEnvelope( s, b );
-    ev |= resolveBasket( s, b );
+    // Маяк — стос смуг за силуетом картинки, інакше куля впирається в повітря біля шпиля
+    const shape = blockShape( lvl, b );
+    if ( !shape )
+    {
+      ev |= resolveEnvelope( s, b );
+      ev |= resolveBasket( s, b );
+      continue;
+    }
+    // Попередня перевірка: куля (оболонка й кошик) далеко від рамки маяка — смуги не перебираємо
+    if ( s.x + ENV_R < shape.x0 || s.x - ENV_R > shape.x1 || s.y < shape.y0 || s.y - TOP_OFF > shape.y1 )
+    {
+      continue;
+    }
+    for ( const r of shape.rects )
+    {
+      ev |= resolveEnvelope( s, r );
+      ev |= resolveBasket( s, r );
+    }
   }
 
   const gy = groundY( lvl );

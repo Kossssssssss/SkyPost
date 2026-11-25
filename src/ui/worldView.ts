@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { groundY, layerBottom, windAt, type LevelData, type Theme } from '../core/level.ts';
 import { hazardPos } from '../core/sim.ts';
+import { LIGHTHOUSE_ART, isLighthouse, lighthouseLayout } from '../core/shapes.ts';
 import { RES } from '../core/art.ts';
 import { FONT, inkHex } from './widgets.ts';
 import { pack } from './pack.ts';
@@ -19,23 +20,26 @@ const GROUND_ART: Record<string, { height: number; surface: number }> = {
 };
 
 // Намальовані блоки (block_<тема>.webp) як NineSlice: кути й краї (трава, сніг, бурульки) не тягнуться.
-// Відступи — у пікселях текстури; lift — скільки текстури (трава/сніг) стирчить над верхом блока
-const BLOCK_ART: Record<string, { left: number; right: number; top: number; bottom: number; lift: number }> = {
-  meadow: { left: 30, right: 30, top: 80, bottom: 30, lift: 60 },
-  sea: { left: 30, right: 30, top: 90, bottom: 30, lift: 70 },
-  mountain: { left: 30, right: 30, top: 150, bottom: 70, lift: 10 },
-  storm: { left: 30, right: 30, top: 80, bottom: 50, lift: 55 },
-  // Цегляна стіна під черепицею: дах звисає з боків, кам'яна основа знизу. lift < 30 — черепиця не лізе поперед кулі
-  night: { left: 45, right: 45, top: 90, bottom: 60, lift: 28 }
+// Відступи — у пікселях текстури; lift — скільки текстури (трава/сніг) стирчить над верхом блока.
+// il / ir — прозорі поля текстури зліва й справа від тіла блока (медіана по рядках): на них малюнок розширюємо,
+// щоб видима стіна стояла рівно на межі колайдера, а не на 4–12 px усередині (куля «билась об повітря»)
+const BLOCK_ART: Record<string, { left: number; right: number; top: number; bottom: number; lift: number; il: number; ir: number }> = {
+  meadow: { left: 30, right: 30, top: 80, bottom: 30, lift: 60, il: 14, ir: 11 },
+  sea: { left: 30, right: 30, top: 90, bottom: 30, lift: 70, il: 8, ir: 20 },
+  mountain: { left: 30, right: 30, top: 150, bottom: 70, lift: 10, il: 14, ir: 12 },
+  storm: { left: 30, right: 30, top: 80, bottom: 50, lift: 55, il: 15, ir: 24 },
+  // Цегляна стіна під черепицею: дах звисає з боків, кам'яна основа знизу. lift < 30 — черепиця не лізе поперед кулі.
+  // Поля менші за відступ стіни (21 / 24): компроміс, щоб і стіна, і звис даху були близько до межі
+  night: { left: 45, right: 45, top: 90, bottom: 60, lift: 28, il: 15, ir: 17 }
 };
 // Уночі денна цегла надто тепла й світла — притінюємо її в тон шарів фону
 const BLOCK_TINT: Partial<Record<Theme, number>> = { night: 0xb8c0dc };
-// Маяк (lighthouse.webp): ліхтар зверху й основа знизу не тягнуться; тіло вежі посередині 116 px завширшки
-const LIGHTHOUSE_ART = { top: 215, bottom: 80, body: 116, sink: 30 };
 // Блок нормального розміру показуємо в половину текстури; дрібні — дрібніше, щоб кути не налазили один на одного
 const BLOCK_SCALE = 0.5;
 // Передній шар трави: над кулею (10) і шлейфом, але під пилом і вибухами (11+)
 const FRONT_DEPTH = 10.5;
+// Світло зони посадки: над передньою травою (10.5), дощем (10.6) і кулею (10), нижче за ефекти доставки (20+)
+const PAD_DEPTH = 15;
 // Скільки одиниць рівня трави над поверхнею стоїть перед кулею (кошик — 18): решта стебел лишається позаду
 const FRONT_GRASS = 12;
 
@@ -113,8 +117,8 @@ export class WorldView
   stampGlow: Phaser.GameObjects.Image;
   // Місце посадки поточного листа: стовп світла, ореол над майданчиком і іскри, що підіймаються з нього
   private padBeam!: Phaser.GameObjects.Image;
-  private padHalo!: Phaser.GameObjects.Image;
-  private padBand!: Phaser.GameObjects.Image;
+  private padEdgeL!: Phaser.GameObjects.Image;
+  private padEdgeR!: Phaser.GameObjects.Image;
   private padSparks?: Phaser.GameObjects.Particles.ParticleEmitter;
   private padZone = new Phaser.Geom.Rectangle( 0, 0, 1, 1 );
 
@@ -159,12 +163,15 @@ export class WorldView
         void n;
       }
     } );
-    // Світло — позаду трави, як будинок: низ ховає блок, а стебла лишаються перед ним
-    this.padBeam = this.add( scene.add.image( 0, 0, 'soft' ).setTint( 0xffd23a ).setDepth( behindGrass - 0.01 ).setBlendMode( Phaser.BlendModes.ADD ) );
-    this.padHalo = this.add( scene.add.image( 0, 0, 'soft' ).setTint( 0xfff0a0 ).setDepth( behindGrass - 0.005 ).setBlendMode( Phaser.BlendModes.ADD ) );
-    // Межа зони: середина 'soft' (40 з 64 px), розтягнута на ширину майданчика, — яскравість майже рівна,
-    // а краї м'яко тануть там, де він закінчується. Перед травою, тож підсвічує самі стебла й повітря над ними
-    this.padBand = this.add( scene.add.image( 0, 0, 'soft' ).setCrop( 12, 0, 40, 64 ).setTint( 0xffe07a ).setDepth( FRONT_DEPTH + 0.01 ).setBlendMode( Phaser.BlendModes.ADD ) );
+    // Світло зони посадки — поверх усього у світі (трави, погоди, кулі), щоб межі майданчика було чітко видно.
+    // Колона: вузький вертикальний зріз верхньої половини 'soft' (2 px через центр), розтягнутий на ширину майданчика, —
+    // по ширині яскравість рівна, тож боки чіткі; угору тане, а низ обрізано рівно по поверхні майданчика.
+    // Боки ще позначено тонкими світлішими смугами з того самого зрізу
+    const padSlice = ( tint: number, d: number ) =>
+      this.add( scene.add.image( 0, 0, 'soft' ).setCrop( 31, 0, 2, 32 ).setTint( tint ).setDepth( PAD_DEPTH + d ).setBlendMode( Phaser.BlendModes.ADD ) );
+    this.padBeam = padSlice( 0xffd870, 0 );
+    this.padEdgeL = padSlice( 0xfff0b0, 0.01 );
+    this.padEdgeR = padSlice( 0xfff0b0, 0.01 );
     const spark = scene.textures.exists( 'p-star' ) ? 'p-star' : 'spark';
     if ( scene.textures.exists( spark ) )
     {
@@ -174,7 +181,7 @@ export class WorldView
         speedY: { min: -45, max: -20 }, speedX: { min: -8, max: 8 }, lifespan: { min: 900, max: 1400 },
         frequency: 150, scale: { start: 12 / sz, end: 5 / sz }, alpha: { start: 0.9, end: 0, ease: 'Cubic.in' },
         rotate: { min: 0, max: 360 }, tint: [ 0xffd23a, 0xffe9a0, 0xffffff ]
-      } ).setDepth( 6 ) );
+      } ).setDepth( PAD_DEPTH + 0.03 ) );
     }
     this.setActiveTarget( 0 );
 
@@ -360,7 +367,7 @@ export class WorldView
   private drawBlock( g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, th: ThemeStyle ): void
   {
     const onGround = y + h >= groundY( this.lvl ) - 1;
-    if ( this.lvl.theme === 'sea' && h > w * 2.5 )
+    if ( isLighthouse( this.lvl, { x, y, w, h } ) )
     {
       this.drawLighthouse( g, x, y, w, h );
       return;
@@ -374,8 +381,11 @@ export class WorldView
       const hh = onGround ? h + 60 : h;
       const s = Math.min( BLOCK_SCALE, ( w * 0.9 ) / ( art.left + art.right ), ( hh * 0.9 ) / ( art.top + art.bottom ) );
       const top = y - art.lift * s;
+      // Малюнок ширший за блок на прозорі поля текстури: видима стіна — рівно по межі колайдера
+      const ax = x - art.il * s;
+      const aw = w / s + art.il + art.ir;
       // Кадр '__BASE' явно: без нього Phaser бере «перший кадр» текстури, а ним після першого блока стає смуга трави front-*
-      this.add( this.scene.add.nineslice( x, top, key, '__BASE', w / s, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
+      this.add( this.scene.add.nineslice( ax, top, key, '__BASE', aw, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
         .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ).setTint( BLOCK_TINT[ this.lvl.theme ] ?? 0xffffff ) );
       // Трава, що стирчить над блоком, — ще й перед кулею (смуга лише з верхнього краю текстури, без тягнутої середини).
       // Сніговій шапці гір (lift 10) це не потрібно
@@ -390,7 +400,7 @@ export class WorldView
         {
           tex.add( frame, 0, 0, cut, tex.getSourceImage().width, band );
         }
-        this.add( this.scene.add.nineslice( x, top + cut * s, key, frame, w / s, band, art.left, art.right, band, 0 )
+        this.add( this.scene.add.nineslice( ax, top + cut * s, key, frame, aw, band, art.left, art.right, band, 0 )
           .setOrigin( 0, 0 ).setScale( s ).setDepth( FRONT_DEPTH ) );
       }
       return;
@@ -430,11 +440,10 @@ export class WorldView
     {
       // Масштаб — середнє між «тіло в ширину блока» і «весь маяк у висоту блока»: інакше блок низький для такої
       // ширини, ліхтар виходить величезним, а смуги стиснутими. Вежа трохи занурена у воду
+      // Той самий розклад, що й у колайдера (core/shapes.ts), щоб куля торкалась саме намальованого силуету
       const a = LIGHTHOUSE_ART;
-      const src = this.scene.textures.get( 'pk-lighthouse' ).getSourceImage();
-      const hh = h + a.sink;
-      const s = Math.sqrt( ( w / a.body ) * ( hh / src.height ) );
-      this.add( this.scene.add.nineslice( x + w / 2, y, 'pk-lighthouse', undefined, src.width, Math.max( hh / s, a.top + a.bottom ), 0, 0, a.top, a.bottom )
+      const { s, cx, texH } = lighthouseLayout( { x, y, w, h } );
+      this.add( this.scene.add.nineslice( cx, y, 'pk-lighthouse', undefined, a.w, texH, 0, 0, a.top, a.bottom )
         .setOrigin( 0.5, 0 ).setScale( s ).setDepth( 3.9 ) );
       return;
     }
@@ -482,18 +491,20 @@ export class WorldView
     } );
     const tg = this.lvl.targets[ idx ];
     this.padBeam.setVisible( !!tg );
-    this.padHalo.setVisible( !!tg );
-    this.padBand.setVisible( !!tg );
+    this.padEdgeL.setVisible( !!tg );
+    this.padEdgeR.setVisible( !!tg );
     this.padSparks?.setVisible( !!tg );
     if ( !tg )
     {
       this.padSparks?.stop();
       return;
     }
-    // 'soft' — радіальна пляма 64 px: центр на майданчику, тож угору світло тане, а нижню половину ховає блок
-    this.padBeam.setPosition( tg.x, tg.y ).setScale( tg.w * 1.05 / 64, 200 / 64 );
-    this.padHalo.setPosition( tg.x, tg.y ).setScale( tg.w * 1.25 / 64, 46 / 64 );
-    this.padBand.setPosition( tg.x, tg.y - 22 ).setScale( tg.w / 40, 96 / 64 );
+    // Центр 'soft' (низ зрізу) — на поверхні майданчика; висота зрізу 32 px, ширина 2 px
+    // Опущено на 6 px: низ стоїть на видимій землі під травою, а не на лінії майданчика
+    const by = tg.y + 6;
+    this.padBeam.setPosition( tg.x, by ).setScale( tg.w / 2, 75 / 32 );
+    this.padEdgeL.setPosition( tg.x - tg.w / 2 + 1.5, by ).setScale( 1.5, 60 / 32 );
+    this.padEdgeR.setPosition( tg.x + tg.w / 2 - 1.5, by ).setScale( 1.5, 60 / 32 );
     if ( this.padSparks )
     {
       this.padZone.setTo( tg.x - tg.w / 2 + 6, tg.y - 8, tg.w - 12, 6 );
@@ -657,9 +668,10 @@ export class WorldView
       this.stampGlow.setScale( 1.5 + Math.sin( t * 3 ) * 0.15 );
     }
     // Світло на місці посадки дихає, щоб око знаходило його навіть у русі
-    this.padBeam.setAlpha( 0.18 + Math.sin( t * 2.4 ) * 0.05 );
-    this.padHalo.setAlpha( 0.5 + Math.sin( t * 2.4 + 0.6 ) * 0.08 );
-    this.padBand.setAlpha( 0.26 + Math.sin( t * 2.4 + 0.6 ) * 0.06 );
+    const pulse = Math.sin( t * 2.4 );
+    this.padBeam.setAlpha( 0.2 + pulse * 0.04 );
+    this.padEdgeL.setAlpha( 0.5 + pulse * 0.08 );
+    this.padEdgeR.setAlpha( 0.5 + pulse * 0.08 );
     // Вода повільно хитається вбік і ледь підіймається: хвилі живі, але лінія води лишається на місці
     for ( const w of this.waterImgs )
     {
