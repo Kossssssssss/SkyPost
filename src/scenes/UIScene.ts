@@ -754,10 +754,15 @@ export class UIScene extends Phaser.Scene
           track( 'reward', { placement, via: 'ad', level: this.gs.levelId } );
           grant();
         }
-        else if ( !platform.rewardedAvailable() )
+        else
         {
-          // Портал сказав, що реклами немає: перемальовуємо, щоб кнопка показала безрекламну альтернативу
-          this.rebuild();
+          // Портал сказав, що реклами немає: перемальовуємо, щоб кнопка показала безрекламну альтернативу.
+          // І пояснюємо, чому нагороди не буде, а то здається, що кнопка просто зникла й гравця обдурили
+          if ( !platform.rewardedAvailable() )
+          {
+            this.rebuild();
+          }
+          this.showTip( t( 'noAd' ), true );
         }
       }
     } );
@@ -794,7 +799,8 @@ export class UIScene extends Phaser.Scene
     }
   }
 
-  private showTip( text: string ): void
+  // bottom — біля нижнього краю, щоб не закрити вікно результату чи картку рівня
+  private showTip( text: string, bottom = false ): void
   {
     const u = this.u;
     const w = this.scale.width;
@@ -803,8 +809,9 @@ export class UIScene extends Phaser.Scene
     // Як і бульбашка навчання: сепія на пергаменті, без обведення
     const tx = label( this, 0, 0, text, 32 * u, inkHex(), false );
     tx.setWordWrapWidth( Math.min( w * 0.7, 900 * u ) );
-    const c = this.add.container( w / 2, h * 0.24 );
-    c.add( hintPanel( this, tx.width + 110 * u, Math.max( 140 * u, tx.height + 76 * u ) ) );
+    const ph = Math.max( 140 * u, tx.height + 76 * u );
+    const c = this.add.container( w / 2, bottom ? h - ph / 2 - 24 * u : h * 0.24 );
+    c.add( hintPanel( this, tx.width + 110 * u, ph ) );
     c.add( tx );
     c.setAlpha( 0 ).setScale( 0.85 );
     this.layer.add( c );
@@ -960,7 +967,7 @@ export class UIScene extends Phaser.Scene
     {
       save().owned.push( special.id );
       persist();
-      info.newSkin = tn( special.name );
+      info.newSkin = special.id;
     }
     const after = totalStars();
     WORLD_UNLOCK.forEach( ( need, i ) =>
@@ -997,7 +1004,9 @@ export class UIScene extends Phaser.Scene
   {
     const u = this.u;
     const lvl = this.gs.lvl;
-    const c = this.modal( 720 * u, 680 * u, t( 'delivered' ) );
+    // Новий світ і нова куля разом — два рядки над кнопками: вікно трохи вище, щоб кнопки їх не підпирали
+    const both = info.newWorld && info.newSkin ? 60 * u : 0;
+    const c = this.modal( 720 * u, 680 * u + both, t( 'delivered' ) );
     const flags = [ info.delivered, info.gasOk, info.stampOk ];
     const stars = starsRow( this, 0, -165 * u, 0, 100 * u, 1.15 );
     stars.forEach( ( s, i ) =>
@@ -1036,7 +1045,7 @@ export class UIScene extends Phaser.Scene
       const ok = i === 0 ? info.gasOk : info.stampOk;
       c.add( fitText( label( this, 0, -85 * u + i * 36 * u, ( ok ? '✔ ' : '✖ ' ) + r, 24 * u, ok ? '#24804a' : '#a05050', false ), 600 * u ) );
     } );
-    let extraY = 146 * u;
+    let extraY = 150 * u;
     const late: Phaser.GameObjects.GameObject[] = [];
     // Гаманець угорі праворуч, поруч зі звуком: туди летять монети за рівень
     const wallet = this.walletBadge();
@@ -1112,12 +1121,27 @@ export class UIScene extends Phaser.Scene
     }
     if ( info.newWorld )
     {
-      late.push( c.add( label( this, 0, extraY, t( 'world', info.newWorld ) + ' ✔', 30 * u, '#3a8ee8', false ) ).last! );
-      extraY += 40 * u;
+      late.push( c.add( label( this, 0, extraY, t( 'worldOpen', info.newWorld ), 30 * u, '#3a8ee8', false ) ).last! );
+      extraY += 42 * u;
     }
     if ( info.newSkin )
     {
-      late.push( c.add( label( this, 0, extraY, info.newSkin + ' ✔', 30 * u, '#b05ad8', false ) ).last! );
+      // Мініатюра кулі й «Нова куля: …», щоб гравець бачив, що саме отримав і що це шукати в магазині
+      const sk = SKINS.find( ( s ) => s.id === info.newSkin );
+      const row = this.add.container( 0, extraY );
+      const tx = label( this, 0, 0, t( 'newBalloon', tn( sk?.name ?? info.newSkin ) ), 30 * u, '#b05ad8', false );
+      row.add( tx );
+      if ( this.textures.exists( 'env:' + info.newSkin ) )
+      {
+        const ic = this.add.image( 0, 0, 'env:' + info.newSkin );
+        ic.setScale( 46 * u / ic.height );
+        const gap = 10 * u;
+        const left = -( ic.displayWidth + gap + tx.width ) / 2;
+        ic.x = left + ic.displayWidth / 2;
+        tx.x = left + ic.displayWidth + gap + tx.width / 2;
+        row.add( ic );
+      }
+      late.push( c.add( row ).last! );
     }
     // Свято: перші ★★★ — хлопавки з листів, щойно стала третя зірка; новий світ — дощ із листів, коли вискакує «Світ N»
     if ( animate && info.prevStars < 3 && starsOf( lvl.id ) === 3 )
@@ -1146,7 +1170,7 @@ export class UIScene extends Phaser.Scene
     }
     this.popGain = false;
     // Ряд кнопок уміщається у внутрішню частину пергаменту: 150 + 150 + 230 і проміжки по 20
-    const by = 240 * u;
+    const by = 240 * u + both / 2;
     c.add( button( this, -210 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
     c.add( button( this, -40 * u, by, { w: 150 * u, h: 86 * u, icon: 'i-retry', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart( false ) } ) );
     c.add( button( this, 170 * u, by, { w: 230 * u, h: 86 * u, text: t( 'next' ), icon: 'i-next', color: COLORS.green, dark: COLORS.greenDark, size: 34 * u, onClick: () => this.goNext() } ) );
@@ -1278,6 +1302,10 @@ export class UIScene extends Phaser.Scene
     {
       this.layer.removeAll( true );
       this.buildResult( info, false );
+      if ( !ok )
+      {
+        this.showTip( t( 'noAd' ), true );
+      }
     }
   }
 

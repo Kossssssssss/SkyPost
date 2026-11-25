@@ -14,7 +14,7 @@ import { LangScene } from './scenes/LangScene.ts';
 import { audio } from './core/audio.ts';
 import { fullscreenOnFirstTap } from './platform/fullscreen.ts';
 import { loadGameFont } from './ui/font.ts';
-import { initCrash } from './platform/crash.ts';
+import { crashCrumb, crashReport, initCrash } from './platform/crash.ts';
 
 async function start(): Promise<void>
 {
@@ -56,6 +56,12 @@ async function start(): Promise<void>
     audio.setAdMuted( false );
     game.resume();
   };
+  // Чорний екран у WebView може бути й утратою WebGL (брак пам'яті): хочемо бачити це в Sentry
+  game.events.once( Phaser.Core.Events.READY, () =>
+  {
+    game.canvas.addEventListener( 'webglcontextlost', () => crashReport( 'webgl_context_lost' ) );
+    game.canvas.addEventListener( 'webglcontextrestored', () => crashCrumb( 'webgl_context_restored' ) );
+  } );
   void data.then( () =>
   {
     platform.onPlatformMute( () => audio.applyVolume() );

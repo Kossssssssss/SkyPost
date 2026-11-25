@@ -2,9 +2,16 @@
 // Під APK через Capacitor достатньо додати ще одну реалізацію Ads (AdMob).
 
 import { gameStartParams, initAnalytics, milestone, track } from './analytics.ts';
-import { crashTag } from './crash.ts';
+import { crashReport, crashTag } from './crash.ts';
 
 export type AdKind = 'midgame' | 'rewarded';
+
+// Скільки чекати відповіді на запит реклами, скільки — кінця вже показаної, і після скількох мс від її
+// початку дотик до гри вважається ознакою, що реклами на екрані вже немає
+const AD_WAIT_MS = 20_000;
+const AD_PLAY_MS = 75_000;
+const AD_TAP_MS = 3_000;
+const AD_LATE_MS = 4_000;
 
 export interface KeyValueStorage
 {
@@ -213,22 +220,67 @@ class CrazyGamesAds implements Ads
     this.busy = true;
     return new Promise( ( res ) =>
     {
-      let started = false;
-      const done = ( ok: boolean, error = '' ) =>
+      // Запобіжник: у програмі CrazyGames бувало, що після adStarted не приходив ні adFinished, ні adError —
+      // гра лишалась на паузі (у WebView чорний екран) і без звуку. Тож паузу знімаємо самі: коли гравець
+      // торкається гри (поверх реклами дотик до нас не дійде) або коли реклама надто довго мовчить
+      let paused = false;
+      let settled = false;
+      let since = 0;
+      let timer = 0;
+      const arm = ( ms: number, error: string ) =>
       {
-        this.busy = false;
-        track( 'ad', { kind, placement, result: ok ? 'shown' : error || 'failed' } );
-        if ( started )
+        clearTimeout( timer );
+        timer = window.setTimeout( () =>
         {
+          crashReport( 'ad_stuck', { kind, placement, by: error, started: since > 0 } );
+          done( false, error );
+        }, ms );
+      };
+      const onTap = () =>
+      {
+        if ( performance.now() - since < AD_TAP_MS )
+        {
+          return;
+        }
+        // Гру відпускаємо одразу, а adFinished ще трохи чекаємо: раптом реклама таки закінчилась
+        unpause();
+        arm( AD_LATE_MS, 'tap' );
+      };
+      const unpause = () =>
+      {
+        if ( paused )
+        {
+          paused = false;
+          window.removeEventListener( 'pointerdown', onTap, true );
           adHooks.onAdEnd();
         }
+      };
+      const done = ( ok: boolean, error = '' ) =>
+      {
+        clearTimeout( timer );
+        unpause();
+        if ( settled )
+        {
+          return;
+        }
+        settled = true;
+        this.busy = false;
+        track( 'ad', { kind, placement, result: ok ? 'shown' : error || 'failed' } );
         res( ok );
       };
+      arm( AD_WAIT_MS, 'no_start' );
       this.sdk.ad.requestAd( kind, {
         adStarted: () =>
         {
-          started = true;
+          if ( settled || paused )
+          {
+            return;
+          }
+          paused = true;
+          since = performance.now();
           adHooks.onAdStart();
+          window.addEventListener( 'pointerdown', onTap, true );
+          arm( AD_PLAY_MS, 'timeout' );
         },
         adFinished: () => done( true ),
         adError: ( e ) =>

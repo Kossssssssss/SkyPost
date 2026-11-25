@@ -53,7 +53,8 @@ export function initCrash(): void
     S.init( {
       dsn: DSN,
       release: version,
-      environment: import.meta.env.DEV ? 'dev' : 'production',
+      // MODE: 'production' у звичайній збірці, 'qa' у збірці для QA Tool (vite build --mode qa)
+      environment: import.meta.env.DEV ? 'dev' : import.meta.env.MODE,
       // Лише наші скрипти: помилки SDK порталу й розширень браузера не цікаві
       allowUrls: [ location.origin ],
       maxBreadcrumbs: CRUMBS_MAX,
@@ -110,6 +111,23 @@ export function crashTag( key: string, value: string ): void
 {
   tags[ key ] = value;
   sdk?.setTag( key, value );
+}
+
+// Не падіння, але збій, про який треба знати (застрягла реклама, втрата WebGL)
+export function crashReport( message: string, params?: Params ): void
+{
+  if ( !enabled )
+  {
+    return;
+  }
+  if ( sdk )
+  {
+    sdk.captureMessage( message, { level: 'warning', extra: params } );
+  }
+  else if ( early.length < EARLY_MAX )
+  {
+    early.push( new Error( message ) );
+  }
 }
 
 // Подія гри як хлібна крихта: що гравець робив перед падінням
