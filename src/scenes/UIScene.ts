@@ -163,6 +163,16 @@ export class UIScene extends Phaser.Scene
     const onPlay = () => this.onPlay();
     const onDeliver = () => this.refreshIcons();
     const onStamp = () => this.refreshIcons();
+    // Згорнули вкладку чи перемкнулись на іншу програму посеред польоту: ставимо паузу, щоб після повернення
+    // політ не продовжився сам, а палець чи пробіл, відпущені поза грою, не лишились «натиснутими»
+    const onHidden = () =>
+    {
+      if ( !this.overlay && this.gs?.phase === 'play' )
+      {
+        this.togglePause();
+      }
+    };
+    ev.on( Phaser.Core.Events.HIDDEN, onHidden );
     ev.on( 'level-ready', onReady );
     ev.on( 'level-won', onWon );
     ev.on( 'level-failed', onFail );
@@ -177,6 +187,7 @@ export class UIScene extends Phaser.Scene
       ev.off( 'play-started', onPlay );
       ev.off( 'deliver', onDeliver );
       ev.off( 'stamp', onStamp );
+      ev.off( Phaser.Core.Events.HIDDEN, onHidden );
     } );
     this.scale.on( 'resize', this.rebuild, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.rebuild, this ) );
