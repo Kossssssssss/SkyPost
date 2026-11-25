@@ -2,15 +2,8 @@ import { platform } from '../platform/platform.ts';
 import { save, persist } from './save.ts';
 import { track } from '../platform/analytics.ts';
 
-// Спокійний вальс — на мапі, в магазині й меню; зібраніший трек — під час польоту.
-// end — де закінчується повна гучність: після неї генератор затухає, і коло там провисало б
-export type MusicMode = 'map' | 'level';
-const TRACKS: Record<MusicMode, { url: string; end?: number }> = {
-  map: { url: 'assets/audio/music.mp3' },
-  level: { url: 'assets/audio/music_level.mp3', end: 81.5 },
-};
-// За скільки секунд один трек перетікає в інший при зміні сцени
-const SWITCH_FADE = 1.5;
+// Один спокійний вальс на всю гру: мапа, магазин і рівні
+const TRACK_URL = 'assets/audio/music.mp3';
 // Гучність треку відносно шини музики: згенерований трек тихий (пік ~0.3), тож трохи підсилюємо
 const TRACK_GAIN = 1.4;
 // Скільки секунд кінець кола накладається на початок наступного
@@ -69,8 +62,7 @@ class Synth
   private musicTimer = 0;
   private nextNote = 0;
   private noteIdx = 0;
-  private tracks: Partial<Record<MusicMode, { buf: AudioBuffer; len: number }>> = {};
-  private mode: MusicMode = 'map';
+  private track?: { buf: AudioBuffer; len: number };
   private voice?: GainNode;
   private voiceSrc?: AudioBufferSourceNode;
   private trackTimer = 0;
@@ -406,56 +398,37 @@ class Synth
     }
   }
 
-  // Сцена каже, який трек потрібен; якщо інший уже грає — плавно перетікає в новий
-  music( mode: MusicMode ): void
-  {
-    if ( mode === this.mode )
-    {
-      return;
-    }
-    this.mode = mode;
-    if ( this.tracks[ mode ] )
-    {
-      this.playTrack( SWITCH_FADE );
-    }
-  }
-
-  // Треки вантажаться після першого жесту, щоб не затримувати старт гри.
-  // Поки потрібного немає або він не завантажився, грає синтезована петля
+  // Трек вантажиться після першого жесту, щоб не затримувати старт гри.
+  // Поки він не завантажився, грає синтезована петля
   private async loadTrack(): Promise<void>
   {
-    // Спершу той, що потрібен зараз, — щоб музика почалась якомога раніше
-    const order: MusicMode[] = this.mode === 'map' ? [ 'map', 'level' ] : [ 'level', 'map' ];
-    for ( const mode of order )
+    try
     {
-      try
+      const res = await fetch( TRACK_URL );
+      if ( !res.ok || !this.ctx )
       {
-        const res = await fetch( TRACKS[ mode ].url );
-        if ( !res.ok || !this.ctx )
-        {
-          continue;
-        }
-        const buf = await this.ctx.decodeAudioData( await res.arrayBuffer() );
-        this.tracks[ mode ] = { buf, len: Math.min( audibleLength( buf ), TRACKS[ mode ].end ?? Infinity ) };
-        if ( mode === this.mode && !this.voice )
-        {
-          clearInterval( this.musicTimer );
-          this.playTrack( 2 );
-        }
+        return;
       }
-      catch
+      const buf = await this.ctx.decodeAudioData( await res.arrayBuffer() );
+      this.track = { buf, len: audibleLength( buf ) };
+      if ( !this.voice )
       {
-        // Немає файлу чи браузер не декодує MP3 — лишається синтез або інший трек
+        clearInterval( this.musicTimer );
+        this.playTrack( 2 );
       }
+    }
+    catch
+    {
+      // Немає файлу чи браузер не декодує MP3 — лишається синтез
     }
   }
 
   // Трек згенерований, а не написаний під безшовну петлю: кожне коло плавно перетікає в наступне.
-  // Попереднє коло (або трек іншої сцени) затухає за той самий час, за який наростає нове
+  // Попереднє коло затухає за той самий час, за який наростає нове
   private playTrack( fadeIn: number ): void
   {
     const ctx = this.ctx;
-    const track = this.tracks[ this.mode ];
+    const track = this.track;
     if ( !ctx || !track || !this.musicBus )
     {
       return;

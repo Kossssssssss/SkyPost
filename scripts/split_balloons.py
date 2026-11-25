@@ -75,7 +75,7 @@ for (x0, x1), id_ in zip(runs, ids):
         part = part.resize((48, round(part.height * k)), Image.LANCZOS)
         out = Image.new('RGBA', (52, max(52, part.height)))
         out.paste(part, (2, out.height - part.height))
-        out.save(f'public/assets/balloon/{id_}.png')
+        out.save(f'public/assets/balloon/{id_}.webp', quality=90, method=6, alpha_quality=100)
         print(id_, out.size)
         continue
     if id_.startswith('p-'):
@@ -92,7 +92,7 @@ for (x0, x1), id_ in zip(runs, ids):
             lum = q[..., 0] * 0.3 + q[..., 1] * 0.59 + q[..., 2] * 0.11
             v = np.clip(lum / np.median(lum[q[..., 3] > 200]) * 235, 0, 255)
             out = Image.fromarray(np.dstack([v, v, v, q[..., 3]]).astype(np.uint8))
-        out.save(f'public/assets/trail/{id_}.png')
+        out.save(f'public/assets/trail/{id_}.webp', quality=90, method=6, alpha_quality=100)
         print(id_, part.size)
         continue
     if id_.startswith('bas-'):
@@ -105,7 +105,7 @@ for (x0, x1), id_ in zip(runs, ids):
         part = part.resize((max(48, round(part.width * k)), round(part.height * k)), Image.LANCZOS)
         out = Image.new('RGBA', (60, 40))
         out.paste(part, (30 - part.width // 2, 39 - part.height))
-        out.save(f'public/assets/balloon/{id_}.png')
+        out.save(f'public/assets/balloon/{id_}.webp', quality=90, method=6, alpha_quality=100)
         print(id_, part.size)
         continue
     pa = a[:, x0:x1]
@@ -130,5 +130,5 @@ for (x0, x1), id_ in zip(runs, ids):
     big = part.resize((round(part.width * k), round(part.height * k)), Image.LANCZOS)
     out = Image.new('RGBA', (W, H))
     out.paste(big, (round(CX - cx * k), round(TOP - top * k)))
-    out.save(f'public/assets/balloon/{id_}.png')
+    out.save(f'public/assets/balloon/{id_}.webp', quality=90, method=6, alpha_quality=100)
     print(id_, 'k=%.3f' % k, 'env width %d px' % round(envw * k))

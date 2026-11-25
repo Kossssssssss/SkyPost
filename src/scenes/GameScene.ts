@@ -100,7 +100,6 @@ export class GameScene extends Phaser.Scene
     // Копія, щоб редактор і рестарти не псували дані модуля
     this.lvl = structuredClone( found.level );
     save().lastLevel = this.levelId;
-    audio.music( 'level' );
     // Годинник і твіни сцени живуть між рестартами, тож скидаємо сповільнення після удару
     this.setSlow( 1 );
     persist();

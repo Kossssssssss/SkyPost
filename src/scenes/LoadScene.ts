@@ -70,9 +70,9 @@ export class LoadScene extends Phaser.Scene
     {
       this.load.image( 'pw-' + id, worldUrl( id ) );
     }
-    this.load.image( 'p-puff', 'assets/trail/p-puff.png' );
+    this.load.image( 'p-puff', 'assets/trail/p-puff.webp' );
     // Під ключем гри: кулька на смузі — той самий скін, тож гра не вантажить його вдруге
-    this.load.image( 'pk-env-classic', 'assets/balloon/env-classic.png' );
+    this.load.image( 'pk-env-classic', 'assets/balloon/env-classic.webp' );
   }
 
   create(): void
