@@ -66,6 +66,7 @@ export class GameScene extends Phaser.Scene
   burning = false;
   // Номер спроби на цьому рівні за весь час гри; 0 — політ ще не почався
   attempt = 0;
+  autopilot?: number[];
   editorHook?: { update( dt: number ): void };
 
   constructor()
@@ -92,6 +93,7 @@ export class GameScene extends Phaser.Scene
     this.keyBurn = false;
     this.burning = false;
     this.attempt = 0;
+    this.autopilot = undefined;
   }
 
   create(): void
@@ -308,6 +310,11 @@ export class GameScene extends Phaser.Scene
 
   wantsBurn(): boolean
   {
+    if ( this.autopilot )
+    {
+      // Запис відео (dev): рішення розв'язувача «гріти / не гріти» на кожен крок симуляції
+      return this.autopilot[ Math.round( this.s.t / DT ) ] === 1;
+    }
     return this.pointerBurn || this.keyBurn;
   }
 

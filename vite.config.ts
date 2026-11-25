@@ -70,6 +70,24 @@ function levelSaver(): Plugin
           res.end( 'ok' );
         } );
       } );
+      // Відео-прев'ю для порталу, записане в браузері покадрово (src/editor/video.ts), кладемо поруч з обкладинками
+      server.middlewares.use( '/__save-video', ( req, res ) =>
+      {
+        const name = new URL( req.url ?? '', 'http://x' ).searchParams.get( 'name' ) ?? '';
+        if ( req.method !== 'POST' || !/^video-\d+x\d+$/.test( name ) )
+        {
+          res.statusCode = 400;
+          res.end( 'bad request' );
+          return;
+        }
+        const chunks: Buffer[] = [];
+        req.on( 'data', ( c: Buffer ) => chunks.push( c ) );
+        req.on( 'end', () =>
+        {
+          writeFileSync( resolve( import.meta.dirname, 'art', name + '.mp4' ), Buffer.concat( chunks ) );
+          res.end( 'ok' );
+        } );
+      } );
     }
   };
 }

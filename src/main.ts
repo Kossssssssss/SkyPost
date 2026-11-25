@@ -72,6 +72,7 @@ async function start(): Promise<void>
   {
     ( window as unknown as { game: Phaser.Game } ).game = game;
     import( './editor/editor.ts' ).then( ( m ) => m.installEditor( game ) );
+    import( './editor/video.ts' ).then( ( m ) => m.installVideo( game ) );
   }
 }
 

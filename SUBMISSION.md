@@ -29,8 +29,10 @@
    - Орієнтація: **Landscape** (лише її). Платформи: Desktop + Mobile. Саме це поле вмикає на телефонах їхню підказку «поверніть пристрій».
    - Увімкнути **Progress Save**, інакше `SDK.data` вимкнений.
    - Тип інтеграції: Full (SDK, реклама, gameplay-події).
-6. Обкладинки з `art/`: `cover-1920x1080.jpg` (16:9), `cover-800x1200.jpg` (2:3) і `cover-800x800.jpg` (1:1). Тексту на них немає, назву можна додати поверх.
-7. Відео-прев'ю (обов'язкове): 15–20 секунд, 1080p 16:9 і 2:3, без звуку й прискорення, перший кадр — обкладинка. Записати проходження 1-4 або 2-5 з маркою, без курсора миші.
+6. Обкладинки з `art/`: `cover-1920x1080.jpg` (16:9), `cover-800x1200.jpg` (2:3) і `cover-800x800.jpg` (1:1), назва «SKY POST» внизу по центру. Усі три вирізані з однієї картинки без назви (`assets/raw/cover5_plate_11.png`, seed 11 в `assets/prompts.md`), щоб лис і куля збігались до пікселя; логотип — `assets/raw/title_22_key.png` (title_22 без зеленого тла). Готові композиції — `assets/raw/cover5_land/square/port.png`. `cover-1080x1620.jpg` — та сама портретна, але під перший кадр вертикального відео.
+7. Відео-прев'ю (обов'язкове): 15–20 секунд, 1080p 16:9 і 2:3, без звуку й прискорення, перший кадр — обкладинка. Готові файли: `art/video-1920x1080.mp4` і `art/video-1080x1620.mp4` (19.9 с, без звуку).
+   - Перезаписати: `npm run dev`, вікно браузера 16:9, у консолі `video.record( 1920, 1080 )`; потім вікно 4:3 і `video.record( 1080, 1620 )`. Сцени — `SHOTS` у `src/editor/video.ts`, кадр для вибору моменту — `video.peek( '2-8', 60 )` → `.shots/peek.jpg`.
+   - Гра лише горизонтальна, тож 2:3 — це вікно, вирізане з горизонтальної гри (рендер 4:3), без HUD.
 8. Опис:
    - EN: *Fly the mail by hot-air balloon! Hold to heat, release to sink — the wind blows a different way at every height. Land on the mailbox, save gas and grab the stamp for three stars.*
    - Керування: Hold mouse / touch / Space — heat the balloon.

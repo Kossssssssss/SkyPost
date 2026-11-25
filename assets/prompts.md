@@ -2974,3 +2974,255 @@
 - input_image_0: assets/ref/style_ref_512.png
 - input_image_1: assets/ref/approved/balloon_512.png
 - промпт: Two hot air balloons standing side by side in a row with even spacing, each with a small wicker basket hanging on ropes and a tiny brass burner: the left envelope dark slate blue grey painted with bold ochre yellow zigzag lightning stripes running around it, the right envelope deep indigo blue painted with small cream stars and one pale cream crescent moon, front view, full objects in frame with margin, the flat solid pure green background fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/cover_land_44.png
+- дата: 2026-11-24 14:36
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: A red and cream striped hot-air balloon with a wicker basket carrying a small fox mail pilot and a bundle of letters, flying above rolling green meadow hills with a small village of red-roofed cottages, a blue mailbox with a raised red flag standing on a grassy hilltop, a few paper envelopes drifting on the wind, soft round clouds in a pale blue sky. Wide landscape game cover composition, the balloon large in the left third of the image, the mailbox on a hill in the lower right, calm open sky in the upper right, the scene fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/cover_land_11.png
+- дата: 2026-11-24 14:36
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: A red and cream striped hot-air balloon with a wicker basket carrying a small fox mail pilot and a bundle of letters, flying above rolling green meadow hills with a small village of red-roofed cottages, a blue mailbox with a raised red flag standing on a grassy hilltop, a few paper envelopes drifting on the wind, soft round clouds in a pale blue sky. Wide landscape game cover composition, the balloon large in the left third of the image, the mailbox on a hill in the lower right, calm open sky in the upper right, the scene fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/cover_land_22.png
+- дата: 2026-11-24 14:36
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: A red and cream striped hot-air balloon with a wicker basket carrying a small fox mail pilot and a bundle of letters, flying above rolling green meadow hills with a small village of red-roofed cottages, a blue mailbox with a raised red flag standing on a grassy hilltop, a few paper envelopes drifting on the wind, soft round clouds in a pale blue sky. Wide landscape game cover composition, the balloon large in the left third of the image, the mailbox on a hill in the lower right, calm open sky in the upper right, the scene fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/cover_land_33.png
+- дата: 2026-11-24 14:36
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/style_ref_512.png
+- input_image_1: assets/ref/approved/balloon_512.png
+- промпт: A red and cream striped hot-air balloon with a wicker basket carrying a small fox mail pilot and a bundle of letters, flying above rolling green meadow hills with a small village of red-roofed cottages, a blue mailbox with a raised red flag standing on a grassy hilltop, a few paper envelopes drifting on the wind, soft round clouds in a pale blue sky. Wide landscape game cover composition, the balloon large in the left third of the image, the mailbox on a hill in the lower right, calm open sky in the upper right, the scene fills the entire image edge to edge. hand-painted watercolor illustration on textured cream paper, visible paper grain, soft wet-on-wet edges with pigment blooms, thin uneven sepia ink outline, muted earthy palette of sage green, dusty blue, warm cream, faded brick red and ochre, gentle flat daylight, vintage children's picture book style
+
+## assets/raw/cover2_land_33.png
+- дата: 2026-11-24 14:38
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a big red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and a red postage stamp around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and dark storm clouds with a small lightning bolt on the far horizon. Wide landscape game cover key art, the balloon large in the center slightly left, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover2_land_22.png
+- дата: 2026-11-24 14:38
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a big red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and a red postage stamp around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and dark storm clouds with a small lightning bolt on the far horizon. Wide landscape game cover key art, the balloon large in the center slightly left, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover2_land_11.png
+- дата: 2026-11-24 14:38
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a big red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and a red postage stamp around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and dark storm clouds with a small lightning bolt on the far horizon. Wide landscape game cover key art, the balloon large in the center slightly left, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover2_land_44.png
+- дата: 2026-11-24 14:38
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a big red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and a red postage stamp around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and dark storm clouds with a small lightning bolt on the far horizon. Wide landscape game cover key art, the balloon large in the center slightly left, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover3_land_11.png
+- дата: 2026-11-24 14:40
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft drop shadow, across the top center of the image. Below the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt on the right horizon. Wide landscape game cover key art, the whole balloon visible in the left half under the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover3_land_22.png
+- дата: 2026-11-24 14:40
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft drop shadow, across the top center of the image. Below the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt on the right horizon. Wide landscape game cover key art, the whole balloon visible in the left half under the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover3_land_44.png
+- дата: 2026-11-24 14:40
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft drop shadow, across the top center of the image. Below the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt on the right horizon. Wide landscape game cover key art, the whole balloon visible in the left half under the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover3_land_33.png
+- дата: 2026-11-24 14:40
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: —
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft drop shadow, across the top center of the image. Below the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, holding up a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt on the right horizon. Wide landscape game cover key art, the whole balloon visible in the left half under the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/title_33.png
+- дата: 2026-11-24 14:41
+- модель: runware flux-2-klein-9b-kv, 2048x640, seed 33, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/title_ref_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered in the image, the flat solid pure green background fills the entire image edge to edge. Bright saturated colors, smooth cartoon shading, polished mobile game logo in the style of the reference image
+
+## assets/raw/title_11.png
+- дата: 2026-11-24 14:41
+- модель: runware flux-2-klein-9b-kv, 2048x640, seed 11, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/title_ref_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered in the image, the flat solid pure green background fills the entire image edge to edge. Bright saturated colors, smooth cartoon shading, polished mobile game logo in the style of the reference image
+
+## assets/raw/title_44.png
+- дата: 2026-11-24 14:41
+- модель: runware flux-2-klein-9b-kv, 2048x640, seed 44, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/title_ref_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered in the image, the flat solid pure green background fills the entire image edge to edge. Bright saturated colors, smooth cartoon shading, polished mobile game logo in the style of the reference image
+
+## assets/raw/title_22.png
+- дата: 2026-11-24 14:41
+- модель: runware flux-2-klein-9b-kv, 2048x640, seed 22, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/title_ref_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered in the image, the flat solid pure green background fills the entire image edge to edge. Bright saturated colors, smooth cartoon shading, polished mobile game logo in the style of the reference image
+
+## assets/raw/cover4_bottom_22.png
+- дата: 2026-11-25 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the upper half slightly left of center. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_bottom_33.png
+- дата: 2026-11-25 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the upper half slightly left of center. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_bottom_11.png
+- дата: 2026-11-25 12:09
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the upper half slightly left of center. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_bottom_44.png
+- дата: 2026-11-25 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the upper half slightly left of center. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_clean_11.png
+- дата: 2026-11-25 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the middle of the image slightly left of center, the top quarter of the image is open calm blue sky. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt at the right edge. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_clean_44.png
+- дата: 2026-11-25 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the middle of the image slightly left of center, the top quarter of the image is open calm blue sky. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt at the right edge. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_clean_22.png
+- дата: 2026-11-25 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the middle of the image slightly left of center, the top quarter of the image is open calm blue sky. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt at the right edge. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_clean_33.png
+- дата: 2026-11-25 12:10
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover3_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the whole balloon visible in the middle of the image slightly left of center, the top quarter of the image is open calm blue sky. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt at the right edge. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_port_22.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1024x1536, seed 22, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Tall portrait game cover key art, the whole balloon large in the upper half of the image in the center, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_square_44.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1280x1280, seed 44, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Square game cover key art, the whole balloon large in the center of the image slightly left, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_square_11.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1280x1280, seed 11, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Square game cover key art, the whole balloon large in the center of the image slightly left, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_port_44.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1024x1536, seed 44, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Tall portrait game cover key art, the whole balloon large in the upper half of the image in the center, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_port_11.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1024x1536, seed 11, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Tall portrait game cover key art, the whole balloon large in the upper half of the image in the center, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_square_33.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1280x1280, seed 33, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Square game cover key art, the whole balloon large in the center of the image slightly left, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_square_22.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1280x1280, seed 22, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Square game cover key art, the whole balloon large in the center of the image slightly left, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover4_port_33.png
+- дата: 2026-11-25 12:14
+- модель: runware flux-2-klein-9b-kv, 1024x1536, seed 33, ціна $0.00195
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: The game title "SKY POST" in big bold rounded cartoon letters, warm cream white letters with a thick dark red outline and a soft darker red bottom edge, one line of text centered horizontally across the bottom of the image over the green hills, the title spans most of the image width. Above the title, a cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below, green hills with yellow flowers and a blue mailbox with a raised red flag on the right; in the distance a sea coast with a red and white lighthouse, snowy mountain peaks, and a dark storm cloud with a small lightning bolt in the upper right corner. Tall portrait game cover key art, the whole balloon large in the upper half of the image in the center, the fox and basket just above the title, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover5_plate_33.png
+- дата: 2026-11-25 12:53
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 33, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the balloon top touches the top edge of the image, the basket in the lower middle of the image. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below the basket, green grassy hills with yellow flowers slope down to a small blue sea bay in the center with a red and white lighthouse; a blue mailbox with a raised red flag on the right hill; snowy mountain peak and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover5_plate_44.png
+- дата: 2026-11-25 12:53
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 44, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the balloon top touches the top edge of the image, the basket in the lower middle of the image. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below the basket, green grassy hills with yellow flowers slope down to a small blue sea bay in the center with a red and white lighthouse; a blue mailbox with a raised red flag on the right hill; snowy mountain peak and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover5_plate_22.png
+- дата: 2026-11-25 12:53
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 22, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the balloon top touches the top edge of the image, the basket in the lower middle of the image. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below the basket, green grassy hills with yellow flowers slope down to a small blue sea bay in the center with a red and white lighthouse; a blue mailbox with a raised red flag on the right hill; snowy mountain peak and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
+
+## assets/raw/cover5_plate_11.png
+- дата: 2026-11-25 12:53
+- модель: runware flux-2-klein-9b-kv, 2048x1152, seed 11, ціна $0.00299
+- input_image_0: assets/ref/cover_old_512.png
+- input_image_1: assets/ref/cover4_bottom_11_512.png
+- промпт: A cheerful fox mail pilot with aviator goggles and a red scarf rides in a wicker basket under a red and white striped hot-air balloon, waving a letter, flying through a bright blue sky with fluffy white clouds, the balloon top touches the top edge of the image, the basket in the lower middle of the image. White wind swirls carry paper envelopes and red postage stamps around the balloon. Below the basket, green grassy hills with yellow flowers slope down to a small blue sea bay in the center with a red and white lighthouse; a blue mailbox with a raised red flag on the right hill; snowy mountain peak and a dark storm cloud with a small lightning bolt in the upper right corner. Wide landscape game cover key art, the scene fills the entire image. Bright saturated colors, soft warm sunlight, smooth cartoon shading, polished mobile game key art illustration in the style of the reference image
