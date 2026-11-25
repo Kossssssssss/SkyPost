@@ -29,6 +29,7 @@ export class Tutorial
   private t = 0;
   private airborne = 0;
   private calm = 0;
+  private stepT = 0;
 
   constructor( scene: Phaser.Scene, layer: Phaser.GameObjects.Container, u: number, step: TutStep )
   {
@@ -51,6 +52,7 @@ export class Tutorial
   private go( step: TutStep ): void
   {
     this.step = step;
+    this.stepT = 0;
     this.report();
     this.showText();
   }
@@ -88,6 +90,7 @@ export class Tutorial
   update( gs: GameScene, dt: number ): void
   {
     this.t += dt;
+    this.stepT += dt;
     const s = gs.s;
     const lvl = gs.lvl;
     if ( gs.phase === 'play' || gs.phase === 'intro' )
@@ -103,8 +106,9 @@ export class Tutorial
           }
           break;
         case 'release':
-          // Чекаємо, поки гравець справді відпустить, — так він відчує, що куля сповільнюється сама
-          if ( this.calm > 0.8 && this.airborne > 0 )
+          // Чекаємо, поки гравець справді відпустить, — так він відчує, що куля сповільнюється сама.
+          // Підказка тримається щонайменше 3 с: хто відпустив одразу, все одно встигне її прочитати
+          if ( this.calm > 0.8 && this.airborne > 0 && this.stepT > 3 )
           {
             this.go( !s.stamp && s.x < lvl.stamp.x ? 'stamp' : 'land' );
           }

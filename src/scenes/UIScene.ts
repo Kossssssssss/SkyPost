@@ -298,11 +298,21 @@ export class UIScene extends Phaser.Scene
       }
     } );
     this.hud.add( muteBtn );
+    // Музика поруч зі звуком, як на карті: обидва перемикачі в одному місці
+    const musBtn = button( this, w - m - bs * 1.5 - 12 * u, m + bs / 2, {
+      w: bs, h: bs, icon: save().music ? 'i-music' : 'i-musicoff', color: COLORS.blue, dark: COLORS.blueDark,
+      onClick: () =>
+      {
+        audio.toggleMusic();
+        musBtn.ico?.setTexture( save().music ? 'i-music' : 'i-musicoff' );
+      }
+    } );
+    this.hud.add( musBtn );
 
     const gh = 30 * u;
     // Смуга газу по центру, але не налазить на назву рівня ліворуч і на іконки праворуч
     const minX = name.x + name.width + 60 * u;
-    const maxX = w - m * 2 - bs - 70 * u - lvl.targets.length * 62 * u - 40 * u;
+    const maxX = w - m * 2 - bs * 2 - 12 * u - 70 * u - lvl.targets.length * 62 * u - 40 * u;
     const gw = Math.max( 160 * u, Math.min( 520 * u, w * 0.34, ( maxX - minX ) ) );
     const gx = Phaser.Math.Clamp( w / 2 - gw / 2, minX, Math.max( minX, maxX - gw ) );
     this.gasRect = { x: gx, y: m + 22 * u, w: gw, h: gh };
@@ -324,7 +334,7 @@ export class UIScene extends Phaser.Scene
     this.hud.add( this.gasText );
 
     // Іконки цілей рівня праворуч: листи по черзі й марка
-    const iconsRight = w - m * 2 - bs;
+    const iconsRight = w - m * 2 - bs * 2 - 12 * u;
     this.stampIcon = this.add.image( iconsRight - 30 * u, m + bs / 2, 'stamp' ).setScale( 1.15 * u );
     this.hud.add( this.stampIcon );
     this.letterIcons = lvl.targets.map( ( _tg, i ) =>
@@ -905,17 +915,7 @@ export class UIScene extends Phaser.Scene
     // Три ряди кнопок рівно між заголовком і нижньою рамкою, з однаковими проміжками
     c.add( button( this, 0, -75 * u, { w: bw, h: bh, text: t( 'resume' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, onClick: () => this.togglePause() } ) );
     c.add( button( this, 0, 28 * u, { w: bw, h: bh, text: t( 'restart' ), icon: 'i-retry', onClick: () => this.restart() } ) );
-    c.add( button( this, -105 * u, 131 * u, { w: 190 * u, h: bh, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
-    const mus = button( this, 105 * u, 131 * u, {
-      w: 190 * u, h: bh, icon: save().music ? 'i-music' : 'i-musicoff', color: save().music ? COLORS.blue : COLORS.grey, dark: save().music ? COLORS.blueDark : COLORS.greyDark,
-      onClick: () =>
-      {
-        audio.toggleMusic();
-        mus.ico?.setTexture( save().music ? 'i-music' : 'i-musicoff' );
-        mus.setColor( save().music ? COLORS.blue : COLORS.grey, save().music ? COLORS.blueDark : COLORS.greyDark );
-      }
-    } );
-    c.add( mus );
+    c.add( button( this, 0, 131 * u, { w: bw, h: bh, text: t( 'map' ), icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
   }
 
   // ---------- Програш ----------
@@ -1276,7 +1276,7 @@ export class UIScene extends Phaser.Scene
     const bs = 84 * u;
     const bw = 190 * u;
     const bh = 70 * u;
-    const cx = w - m - bs - 24 * u - bw / 2;
+    const cx = w - m - bs * 2 - 12 * u - 24 * u - bw / 2;
     const cy = m + bs / 2;
     const box = this.add.container( cx, cy );
     box.add( panel( this, bw, bh ) );
