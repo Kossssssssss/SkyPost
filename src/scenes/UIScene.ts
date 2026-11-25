@@ -39,6 +39,12 @@ interface ResultInfo
   doubled?: boolean;
 }
 
+interface Wallet
+{
+  num: Phaser.GameObjects.Text;
+  at: { x: number; y: number };
+}
+
 export class UIScene extends Phaser.Scene
 {
   private game2?: GameScene;
@@ -70,7 +76,6 @@ export class UIScene extends Phaser.Scene
   private afterMidgame = false;
   // Наступна перебудова екрана результату анімує подвоєні монети
   private popGain = false;
-  private walletNum?: Phaser.GameObjects.Text;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
   // Уже показані кнопки винагороди за спробу (стан симуляції новий на кожну спробу)
@@ -152,7 +157,14 @@ export class UIScene extends Phaser.Scene
       }
       else if ( this.overlay === 'fail' )
       {
-        this.restart();
+        if ( this.gs.canResume() )
+        {
+          this.continueCheckpoint();
+        }
+        else
+        {
+          this.restart();
+        }
       }
     } );
 
@@ -212,6 +224,10 @@ export class UIScene extends Phaser.Scene
     this.pop = true;
     this.rebuild();
     this.pop = false;
+    if ( g.resumed )
+    {
+      this.showTip( t( 'cpResume' ) );
+    }
   }
 
   private rebuild(): void
@@ -234,8 +250,9 @@ export class UIScene extends Phaser.Scene
     {
       this.tut = new Tutorial( this, this.layer, this.u, this.tutStep );
     }
-    else if ( this.gs.phase === 'intro' )
+    else if ( this.gs.phase === 'intro' && !this.gs.resumed )
     {
+      // З чекпойнта картки немає: бонуси й опис рівня — для старту з початку
       this.buildCard();
     }
     if ( this.overlay === 'pause' )
@@ -919,10 +936,38 @@ export class UIScene extends Phaser.Scene
     const u = this.u;
     const g = this.gs;
     const title = g.fail === 'water' ? t( 'splash' ) : g.fail === 'gas' ? t( 'outOfGas' ) : t( 'popped' );
-    const c = this.modal( 640 * u, 440 * u, title );
-    c.add( button( this, 0, -20 * u, { w: 420 * u, h: 100 * u, text: t( 'retry' ), icon: 'i-retry', color: COLORS.green, dark: COLORS.greenDark, size: 40 * u, onClick: () => this.restart() } ) );
+    const resume = g.canResume();
+    const c = this.modal( ( resume ? 720 : 640 ) * u, 440 * u, title );
     const fails = save().fails[ g.levelId ] ?? 0;
     const lvl = g.lvl;
+    if ( resume )
+    {
+      // Довгий рівень і вже є доставлені листи: «Продовжити» від останньої скриньки або «Спочатку».
+      // «Маршрут» теж продовжує з тієї ж скриньки з тим самим газом, лише з примарною лінією
+      const cp = g.checkpoint!;
+      c.add( label( this, 0, -95 * u, t( 'cpNote', cp.target, lvl.targets.length ), 24 * u, inkHex(), false ) );
+      c.add( button( this, 0, -5 * u, { w: 420 * u, h: 100 * u, text: t( 'cpContinue' ), icon: 'i-play', color: COLORS.green, dark: COLORS.greenDark, size: 40 * u, onClick: () => this.continueCheckpoint() } ) );
+      const route = lvl.hint && !g.hint;
+      // Ряд: карта (100), «Спочатку» (240), «Маршрут» (250) з проміжками 16
+      const restartW = route ? 240 : 270;
+      const x0 = -( 100 + restartW + ( route ? 250 + 32 : 16 ) ) / 2 * u;
+      c.add( button( this, x0 + 50 * u, 120 * u, { w: 100 * u, h: 76 * u, icon: 'i-map', color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.toMap() } ) );
+      c.add( button( this, x0 + ( 116 + restartW / 2 ) * u, 120 * u, {
+        w: restartW * u, h: 76 * u, text: t( 'cpRestart' ), icon: 'i-retry', size: 26 * u, color: COLORS.blue, dark: COLORS.blueDark, onClick: () => this.restart()
+      } ) );
+      if ( route )
+      {
+        const rb = this.rewardButton( 'fail_route', t( 'showRoute' ), 'i-route', fails >= FREE_AFTER, fails, () =>
+        {
+          g.hint = true;
+          this.continueCheckpoint();
+        } );
+        rb.setPosition( x0 + ( 116 + restartW + 16 + 125 ) * u, 120 * u );
+        c.add( rb );
+      }
+      return;
+    }
+    c.add( button( this, 0, -20 * u, { w: 420 * u, h: 100 * u, text: t( 'retry' ), icon: 'i-retry', color: COLORS.green, dark: COLORS.greenDark, size: 40 * u, onClick: () => this.restart() } ) );
     if ( lvl.hint && !g.hint )
     {
       const rb = this.rewardButton( 'fail_route', t( 'showRoute' ), 'i-route', fails >= FREE_AFTER, fails, () =>
@@ -1052,7 +1097,7 @@ export class UIScene extends Phaser.Scene
     const gainNow = info.coins * ( info.doubled ? 2 : 1 );
     // Перший показ — гаманець ще без нагороди; щойно подвоїли — без другої порції; інакше вже повний
     const from = animate ? save().coins - gainNow : this.popGain ? save().coins - info.coins : save().coins;
-    wallet.set( from );
+    wallet.num.setText( String( from ) );
     let totalAt: { x: number; y: number } | undefined;
     if ( info.coins > 0 )
     {
@@ -1223,7 +1268,7 @@ export class UIScene extends Phaser.Scene
   }
 
   // Лічильник монет на пергаментній плашці, угорі праворуч поруч зі звуком
-  private walletBadge(): { set: ( n: number ) => void; at: { x: number; y: number } }
+  private walletBadge(): Wallet
   {
     const u = this.u;
     const w = this.scale.width;
@@ -1239,12 +1284,11 @@ export class UIScene extends Phaser.Scene
     const num = label( this, -bw / 2 + 80 * u, 0, '0', 34 * u, inkHex(), false ).setOrigin( 0, 0.5 );
     box.add( [ coin, num ] );
     this.layer.add( box );
-    this.walletNum = num;
-    return { set: ( n: number ) => num.setText( String( n ) ), at: { x: cx + coin.x, y: cy } };
+    return { num, at: { x: cx + coin.x, y: cy } };
   }
 
   // Кілька монет летять дугою в гаманець; кожна долетіла — лічильник докручується, монета дзенькає
-  private flyCoins( from: { x: number; y: number }, wallet: { set: ( n: number ) => void; at: { x: number; y: number } }, start: number, end: number, delay: number ): void
+  private flyCoins( from: { x: number; y: number }, wallet: Wallet, start: number, end: number, delay: number ): void
   {
     const u = this.u;
     const n = Phaser.Math.Clamp( Math.round( ( end - start ) / 4 ), 4, 8 );
@@ -1267,12 +1311,15 @@ export class UIScene extends Phaser.Scene
         onComplete: () =>
         {
           img.destroy();
-          if ( !this.walletNum?.scene )
+          // Саме цей гаманець: поки монети летіли, екран могли перебудувати («Далі», «×2») — старий уже знищено,
+          // а новий показує правильну суму сам
+          const num = wallet.num;
+          if ( !num.scene )
           {
             return;
           }
-          wallet.set( Math.round( start + ( end - start ) * ( i + 1 ) / n ) );
-          this.tweens.add( { targets: this.walletNum, scale: { from: 1.25, to: 1 }, duration: 160 } );
+          num.setText( String( Math.round( start + ( end - start ) * ( i + 1 ) / n ) ) );
+          this.tweens.add( { targets: num, scale: { from: 1.25, to: 1 }, duration: 160 } );
           audio.coin( i );
         }
       } );
@@ -1341,6 +1388,17 @@ export class UIScene extends Phaser.Scene
   }
 
   // ---------- Навігація ----------
+
+  // Після програшу — з останньої доставленої скриньки
+  private continueCheckpoint(): void
+  {
+    if ( this.busy )
+    {
+      return;
+    }
+    this.overlay = '';
+    this.gs.resumeFromCheckpoint();
+  }
 
   private restart( keep = true ): void
   {

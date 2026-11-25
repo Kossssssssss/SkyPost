@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import type { LevelData } from '../core/level.ts';
 import { findLevel } from '../levels/index.ts';
 import {
-  createState, step, canBurn, hazardPos, DT, NEUTRAL, MID_OFF, ENV_OFF,
+  cloneState, createState, step, canBurn, hazardPos, DT, NEUTRAL, MID_OFF, ENV_OFF,
   EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_LIFTOFF, EV_STAMP, EV_WIN, type SimState
 } from '../core/sim.ts';
 import { WorldView, MAILBOX_SCALE } from '../ui/worldView.ts';
@@ -22,6 +22,8 @@ export interface GameInit
   levelId?: string;
   hint?: boolean;
   bonus?: number;
+  // Чекпойнт: продовжити зі стану після останньої доставки, а не з початку рівня
+  from?: SimState;
 }
 
 export const VIEW_H = 720;
@@ -63,7 +65,14 @@ export class GameScene extends Phaser.Scene
   private camX = 0;
   private camY = 0;
   private ghostT = 0;
+  // Точка маршруту-підказки, з якої його програвати: з чекпойнта — найближча до кулі на скриньці
+  private ghostFrom = 0;
   burning = false;
+  // Стан одразу після останньої доставки (не останньої скриньки): з нього «Продовжити» після програшу.
+  // Разом зі станом відновлюється й час, тож птахи, каміння й пориви там само, а газ і марка — чесно ті самі
+  checkpoint?: SimState;
+  // Цю спробу почато з чекпойнта: картки рівня немає, зверху підказка
+  resumed = false;
   // Номер спроби на цьому рівні за весь час гри; 0 — політ ще не почався
   attempt = 0;
   autopilot?: number[];
@@ -83,6 +92,8 @@ export class GameScene extends Phaser.Scene
     }
     this.hint = !!data.hint;
     this.bonusFuel = data.bonus ?? 0;
+    this.checkpoint = data.from;
+    this.resumed = !!data.from;
     this.phase = 'intro';
     this.fail = '';
     this.acc = 0;
@@ -159,8 +170,16 @@ export class GameScene extends Phaser.Scene
     this.ghostBalloon?.destroy();
     this.trail = undefined;
 
-    this.s = createState( this.lvl );
+    this.s = this.checkpoint ? cloneState( this.checkpoint ) : createState( this.lvl );
     this.view = new WorldView( this, this.lvl );
+    if ( this.checkpoint )
+    {
+      this.view.setActiveTarget( this.s.target );
+      if ( this.s.stamp )
+      {
+        this.view.hideStamp();
+      }
+    }
     this.balloon = new BalloonView( this, this.s.x, this.s.y ).setDepth( 10 );
     this.makeTrail();
     this.applyBounds();
@@ -225,8 +244,22 @@ export class GameScene extends Phaser.Scene
       return;
     }
     this.ghost?.destroy();
+    this.ghostFrom = 0;
+    if ( this.checkpoint )
+    {
+      let best = Infinity;
+      for ( let i = 0; i < pts.length / 2 - 1; i++ )
+      {
+        const d = ( pts[ i * 2 ] - this.s.x ) ** 2 + ( pts[ i * 2 + 1 ] - this.s.y ) ** 2;
+        if ( d < best )
+        {
+          best = d;
+          this.ghostFrom = i;
+        }
+      }
+    }
     const g = this.add.graphics().setDepth( 3 );
-    for ( let i = 2; i < pts.length; i += 2 )
+    for ( let i = this.ghostFrom * 2 + 2; i < pts.length; i += 2 )
     {
       if ( ( i / 2 ) % 2 === 0 )
       {
@@ -236,8 +269,8 @@ export class GameScene extends Phaser.Scene
       g.lineBetween( pts[ i - 2 ], pts[ i - 1 ] - MID_OFF, pts[ i ], pts[ i + 1 ] - MID_OFF );
     }
     this.ghost = g;
-    this.ghostBalloon = this.add.image( pts[ 0 ], pts[ 1 ], 'env:' + save().equip.envelope ).setScale( 0.32 ).setAlpha( 0.45 ).setDepth( 3 );
-    this.ghostT = 0;
+    this.ghostBalloon = this.add.image( pts[ this.ghostFrom * 2 ], pts[ this.ghostFrom * 2 + 1 ], 'env:' + save().equip.envelope ).setScale( 0.32 ).setAlpha( 0.45 ).setDepth( 3 );
+    this.ghostT = this.ghostFrom;
   }
 
   // Подія від UI або клавіатури: перший жар знімає картку рівня й запускає політ
@@ -249,7 +282,10 @@ export class GameScene extends Phaser.Scene
       this.phase = 'play';
       platform.gameplayStart();
       this.attempt = nextAttempt( this.levelId );
-      track( 'level_start', { level: this.levelId, world: this.levelId.split( '-' )[ 0 ], attempt: this.attempt, hint: this.hint, bonus_gas: this.bonusFuel > 0 } );
+      track( 'level_start', {
+        level: this.levelId, world: this.levelId.split( '-' )[ 0 ], attempt: this.attempt, hint: this.hint, bonus_gas: this.bonusFuel > 0,
+        checkpoint: this.resumed ? this.s.target : 0
+      } );
       milestone( 'f03_first_burn', { level: this.levelId } );
       this.game.events.emit( 'play-started' );
     }
@@ -306,6 +342,18 @@ export class GameScene extends Phaser.Scene
   restartLevel( levelId = this.levelId, keep = true ): void
   {
     this.scene.restart( { levelId, hint: keep && levelId === this.levelId && this.hint, bonus: keep && levelId === this.levelId ? this.bonusFuel : 0 } as GameInit );
+  }
+
+  // Чи є звідки продовжити: чекпойнт є і з нього можна злетіти (на рівні з баком лишився газ)
+  canResume(): boolean
+  {
+    const cp = this.checkpoint;
+    return !!cp && ( this.lvl.fuel === undefined || cp.gas < this.lvl.fuel + this.bonusFuel - 1e-6 );
+  }
+
+  resumeFromCheckpoint(): void
+  {
+    this.scene.restart( { levelId: this.levelId, hint: this.hint, bonus: this.bonusFuel, from: this.checkpoint } as GameInit );
   }
 
   wantsBurn(): boolean
@@ -387,7 +435,7 @@ export class GameScene extends Phaser.Scene
     const n = pts.length / 2;
     if ( this.ghostT >= n - 1 )
     {
-      this.ghostT = 0;
+      this.ghostT = this.ghostFrom;
     }
     const i = Math.floor( this.ghostT );
     const f = this.ghostT - i;
@@ -472,6 +520,11 @@ export class GameScene extends Phaser.Scene
         }
       } );
       this.view.setActiveTarget( this.s.target );
+      if ( !this.s.won )
+      {
+        // Куля стоїть на скриньці: звідси й продовжимо, уже без швидкості
+        this.checkpoint = { ...cloneState( this.s ), vx: 0, vy: 0, settle: 0 };
+      }
       // Поки лист летить, скринька ще чекає — прапорець опуститься, коли лист долетить
       mb.setTexture( 'mailbox' );
       this.game.events.emit( 'deliver', this.s.target );
