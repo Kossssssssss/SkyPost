@@ -93,6 +93,11 @@ export class Tutorial
     this.stepT += dt;
     const s = gs.s;
     const lvl = gs.lvl;
+    // Остання доставка в тому самому кадрі ставить фазу 'won', тож цей крок перевіряємо й після перемоги
+    if ( this.step === 'land' && s.target >= lvl.targets.length )
+    {
+      this.go( 'done' );
+    }
     if ( gs.phase === 'play' || gs.phase === 'intro' )
     {
       this.airborne = s.grounded ? 0 : this.airborne + dt;
@@ -117,12 +122,6 @@ export class Tutorial
           if ( s.stamp || s.x > lvl.stamp.x + 60 )
           {
             this.go( 'land' );
-          }
-          break;
-        case 'land':
-          if ( s.target >= lvl.targets.length )
-          {
-            this.go( 'done' );
           }
           break;
       }

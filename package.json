@@ -1,7 +1,7 @@
 {
   "name": "sky-post",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -12,7 +12,6 @@
   },
   "dependencies": {
     "@sentry/browser": "11.11.0",
-    "bytebrew-web-sdk": "1.0.1",
     "phaser": "4.2.1"
   },
   "devDependencies": {

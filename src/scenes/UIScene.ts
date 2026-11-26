@@ -78,8 +78,6 @@ export class UIScene extends Phaser.Scene
   private popGain = false;
   private tut?: Tutorial;
   private tutStep: TutStep = 'done';
-  // Уже показані кнопки винагороди за спробу (стан симуляції новий на кожну спробу)
-  private offers = new WeakMap<object, Set<string>>();
   // Скільки секунд ще блимає панель вітру, коли підказка вперше пояснює шари
   private windPulse = 0;
   // Наступне вікно чи картка щойно відкриваються й мають виринути плавно; перебудова при зміні розміру — без анімації
@@ -742,19 +740,6 @@ export class UIScene extends Phaser.Scene
 
   // Кнопка винагороди: реклама, якщо доступна; інакше безрекламна альтернатива — безкоштовно після кількох спроб
   // Показ кнопки винагороди — раз на спробу й місце (кнопки перемальовуються при rebuild і resize).
-  // via: ad — за рекламу, free — безкоштовно, none — реклами немає, а безкоштовно ще не можна
-  private offerShown( placement: string, via: string ): void
-  {
-    const s = this.gs.s;
-    const seen = this.offers.get( s ) ?? new Set<string>();
-    this.offers.set( s, seen );
-    if ( seen.has( placement ) )
-    {
-      return;
-    }
-    seen.add( placement );
-    track( 'ad_offer', { placement, via, level: this.gs.levelId, attempt: this.gs.attempt } );
-  }
 
   // placement — назва місця кнопки для аналітики
   private rewardButton( placement: string, text: string, icon: string, free: boolean, fails: number, grant: () => void ): Button
@@ -762,7 +747,6 @@ export class UIScene extends Phaser.Scene
     const u = this.u;
     const adsOk = platform.rewardedAvailable();
     // Довгі підписи йдуть у два рядки, щоб влізти в кнопку без дрібного шрифту
-    this.offerShown( placement, free ? 'free' : adsOk ? 'ad' : 'none' );
     const caption = free ? text + '\n' + t( 'free' ) : adsOk ? text : t( 'freeAfter', FREE_AFTER - fails );
     const b = button( this, 0, 0, {
       w: 250 * u, h: 76 * u, text: caption, icon: free || !adsOk ? icon : 'tv', size: ( adsOk && !free ? 26 : 20 ) * u,
@@ -884,13 +868,7 @@ export class UIScene extends Phaser.Scene
     {
       return;
     }
-    const wasIntro = g.phase === 'intro';
     g.pause();
-    if ( wasIntro )
-    {
-      // Пауза з картки повертає на картку, а не в політ
-      g.phase = 'paused';
-    }
     this.overlay = 'pause';
     this.pointers.clear();
     this.pop = true;
@@ -1165,7 +1143,6 @@ export class UIScene extends Phaser.Scene
       }
       if ( offer )
       {
-        this.offerShown( 'result_x2', 'ad' );
         const b = button( this, 125 * u, totalY, {
           w: 150 * u, h: 60 * u, text: '×2', icon: 'tv', size: 30 * u, color: COLORS.green, dark: COLORS.greenDark,
           onClick: () => void this.doubleCoins( info )
@@ -1454,11 +1431,12 @@ export class UIScene extends Phaser.Scene
     }
   }
 
-  // Гравець кинув незавершену спробу: перезапуск посеред польоту або вихід на карту (зокрема після програшу)
+  // Гравець кинув незавершену спробу: перезапуск посеред польоту або вихід на карту.
+  // Після програшу спробу вже закрив level_fail, а без польоту (картка рівня) спроби не було
   private trackQuit( action: 'restart' | 'map' ): void
   {
     const p = this.gs?.phase;
-    if ( !p || p === 'won' || p === 'editor' || ( action === 'restart' && p === 'dead' ) )
+    if ( !p || p === 'won' || p === 'dead' || p === 'editor' || !this.gs.attempt )
     {
       return;
     }

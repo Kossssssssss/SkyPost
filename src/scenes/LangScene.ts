@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { LANGS, LANG_NAMES, currentLang, setLang, type Lang } from '../core/i18n.ts';
 import { save } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
-import { setPlace, track } from '../platform/analytics.ts';
+import { setPlace } from '../platform/analytics.ts';
 import { findLevel } from '../levels/index.ts';
 import { pack } from '../ui/pack.ts';
 import { button, label, panel, uiScale, fitText, fadeIn, COLORS, inkHex } from '../ui/widgets.ts';
@@ -73,7 +73,6 @@ export class LangScene extends Phaser.Scene
 
   private pick( l: Lang ): void
   {
-    track( 'setting', { lang: l, from: currentLang() } );
     setLang( l );
     if ( this.back )
     {

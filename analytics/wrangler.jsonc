@@ -1,0 +1,11 @@
+// Worker власної аналітики: приймає події гри (POST /e) і показує звіти (GET /report).
+// Секрети: npx wrangler secret put CF_ACCOUNT_ID | CF_API_TOKEN | REPORT_PASSWORD (локально — у .dev.vars)
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "sky-post-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-11-01",
+  "analytics_engine_datasets": [ { "binding": "EVENTS", "dataset": "sky_post_events" } ],
+  // Логи запитів вимкнені, щоб Cloudflare не зберігав IP і User-Agent гравців
+  "observability": { "enabled": false }
+}

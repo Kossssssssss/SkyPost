@@ -1,7 +1,7 @@
 // Єдина точка доступу до платформи: реклама, події гри, сховище, mute від порталу.
 // Під APK через Capacitor достатньо додати ще одну реалізацію Ads (AdMob).
 
-import { gameStartParams, initAnalytics, milestone, track } from './analytics.ts';
+import { initAnalytics, note } from './analytics.ts';
 import { crashReport, crashTag } from './crash.ts';
 
 export type AdKind = 'midgame' | 'rewarded';
@@ -265,7 +265,7 @@ class CrazyGamesAds implements Ads
         }
         settled = true;
         this.busy = false;
-        track( 'ad', { kind, placement, result: ok ? 'shown' : error || 'failed' } );
+        note( 'ad', { kind, placement, result: ok ? 'shown' : error || 'failed' } );
         res( ok );
       };
       arm( AD_WAIT_MS, 'no_start' );
@@ -407,8 +407,6 @@ export async function initPlatform(): Promise<void>
   await platform.init();
   crashTag( 'platform', platform.name );
   initAnalytics();
-  track( 'game_start', { platform: platform.name, locale: platform.locale() ?? navigator.language, ...gameStartParams() } );
-  milestone( 'f01_open', { platform: platform.name } );
   // Завантаження вже йде (екран завантаження показаний раніше за SDK), тож повідомляємо одразу
   platform.loadingStart();
 }

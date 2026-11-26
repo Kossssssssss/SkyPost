@@ -12,6 +12,8 @@ npm-debug.log*
 .env
 .env.local
 *.local
+.dev.vars
+.wrangler
 
 # Системне сміття
 .DS_Store
@@ -20,3 +22,7 @@ desktop.ini
 
 # Сирі генерації й скачані кандидати звуків (у гру йдуть лише оброблені файли з public/)
 assets/raw/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example

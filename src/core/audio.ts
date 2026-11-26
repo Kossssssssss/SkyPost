@@ -1,6 +1,5 @@
 import { platform } from '../platform/platform.ts';
 import { save, persist } from './save.ts';
-import { track } from '../platform/analytics.ts';
 
 // Один спокійний вальс на всю гру: мапа, магазин і рівні
 const TRACK_URL = 'assets/audio/music.mp3';
@@ -114,7 +113,6 @@ class Synth
   {
     save().sfx = !save().sfx;
     persist();
-    track( 'setting', { sfx: save().sfx } );
     this.applyVolume();
   }
 
@@ -122,7 +120,6 @@ class Synth
   {
     save().music = !save().music;
     persist();
-    track( 'setting', { music: save().music } );
     this.applyVolume();
   }
 

@@ -7,13 +7,16 @@ import { SKINS, skin, trailLook, canBuySomething } from '../core/skins.ts';
 import { BalloonView } from '../ui/balloonView.ts';
 import { THEMES } from '../ui/worldView.ts';
 import { audio } from '../core/audio.ts';
-import { milestone, setPlace } from '../platform/analytics.ts';
+import { setPlace } from '../platform/analytics.ts';
 import { button, label, panel, painted, starsRow, uiScale, fitText, fadeIn, shade, COLORS, inkHex } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
 import type { BgScene } from './BgScene.ts';
 import type { Theme } from '../core/level.ts';
 
 const LANG_CODES: Record<Lang, string> = { uk: 'УКР', ru: 'РУС', en: 'ENG' };
+
+// Політика конфіденційності (вимога CrazyGames — згадка в самій грі); збирається scripts/build-privacy.mjs
+const PRIVACY_URL = 'https://kosmogames.pages.dev/sky-post/privacy';
 
 // Рівні, які вже показувались на карті відкритими в цій сесії, і світи ('w' + номер), чию карту вже бачили
 const seenOpen = new Set<string>();
@@ -42,7 +45,6 @@ export class MapScene extends Phaser.Scene
   create(): void
   {
     setPlace( 'map', () => ( { world: this.world } ) );
-    milestone( 'm_map' );
     this.root = this.add.container( 0, 0 );
     this.scale.on( 'resize', this.build, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
@@ -334,6 +336,19 @@ export class MapScene extends Phaser.Scene
         this.root.add( [ img, tx ] );
       }
     }
+
+    // Тихе посилання на політику в куті: сепія зі світлою обвідкою читається і на денному, і на нічному небі.
+    // Текст англійською, як і сама політика
+    const privacy = label( this, w - m, h - m, 'Privacy', 24 * u, inkHex(), 0xfff4dc ).setOrigin( 1, 1 ).setAlpha( 0.8 );
+    privacy.setInteractive( { useHandCursor: true } );
+    privacy.on( 'pointerover', () => privacy.setAlpha( 1 ) );
+    privacy.on( 'pointerout', () => privacy.setAlpha( 0.8 ) );
+    privacy.on( 'pointerup', () =>
+    {
+      audio.click();
+      window.open( PRIVACY_URL, '_blank', 'noopener' );
+    } );
+    this.root.add( privacy );
   }
 
   private makeTrail( target: BalloonView, k: number ): void

@@ -84,12 +84,15 @@ function fresh(): SaveData
 }
 
 let data: SaveData = fresh();
+// Сейв уже був у сховищі на старті: гравець повертається
+let existed = false;
 
 export function loadSave(): void
 {
   try
   {
     const raw = platform.storage.getItem( KEY );
+    existed = !!raw;
     if ( raw )
     {
       const parsed = JSON.parse( raw ) as Partial<SaveData> & { wallet?: number; muted?: boolean };
@@ -115,6 +118,17 @@ export function loadSave(): void
   }
   setClears( clearedCount() );
   setCoins( data.coins );
+}
+
+export function hadSave(): boolean
+{
+  return existed;
+}
+
+// Номер спроби на рівні: поразки поспіль із сейву + 1 (після перемоги лічильник обнуляється)
+export function attemptNo( id: string ): number
+{
+  return ( data.fails[ id ] ?? 0 ) + 1;
 }
 
 function clearedCount(): number
@@ -184,7 +198,7 @@ export function applyResult( id: string, gasOk: boolean, stampOk: boolean, gas: 
   data.coins += coins;
   data.fails[ id ] = 0;
   persist();
-  track( 'level_complete', { ...stats, level: id, stars: starsOf( id ), new_stars: gained, coins, first_clear: !prev.done, gas_ok: gasOk, stamp_ok: stampOk, difficulty: difficulty ?? 'normal' } );
+  track( 'level_complete', { ...stats, level: id, stars: starsOf( id ), new_stars: gained, coins, first: !prev.done, gas_ok: gasOk, stamp_ok: stampOk, difficulty: difficulty ?? 'normal' } );
   if ( !prev.done )
   {
     cleared( clearedCount(), id );

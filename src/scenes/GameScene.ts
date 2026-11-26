@@ -8,11 +8,11 @@ import {
 import { WorldView, MAILBOX_SCALE } from '../ui/worldView.ts';
 import { baseScale } from '../core/art.ts';
 import { BalloonView } from '../ui/balloonView.ts';
-import { save, persist } from '../core/save.ts';
+import { attemptNo, save, persist } from '../core/save.ts';
 import { skin, trailLook } from '../core/skins.ts';
 import { audio } from '../core/audio.ts';
 import { platform } from '../platform/platform.ts';
-import { milestone, nextAttempt, setPlace, track, type Params } from '../platform/analytics.ts';
+import { early, note, setPlace, track, type Params } from '../platform/analytics.ts';
 
 export type Phase = 'intro' | 'play' | 'paused' | 'dead' | 'won' | 'editor';
 export type FailReason = '' | 'water' | 'hazard' | 'gas';
@@ -47,6 +47,8 @@ export class GameScene extends Phaser.Scene
   levelId = '1-1';
   s!: SimState;
   phase: Phase = 'intro';
+  // З якої фази поставлено паузу: з картки рівня «Продовжити» повертає на картку, а не в політ
+  private pausedFrom: 'intro' | 'play' = 'play';
   fail: FailReason = '';
   hint = false;
   bonusFuel = 0;
@@ -73,6 +75,8 @@ export class GameScene extends Phaser.Scene
   checkpoint?: SimState;
   // Цю спробу почато з чекпойнта: картки рівня немає, зверху підказка
   resumed = false;
+  // З якої скриньки почато спробу (0 — з початку), для аналітики
+  private from = 0;
   // Номер спроби на цьому рівні за весь час гри; 0 — політ ще не почався
   attempt = 0;
   autopilot?: number[];
@@ -94,6 +98,7 @@ export class GameScene extends Phaser.Scene
     this.bonusFuel = data.bonus ?? 0;
     this.checkpoint = data.from;
     this.resumed = !!data.from;
+    this.from = 0;
     this.phase = 'intro';
     this.fail = '';
     this.acc = 0;
@@ -281,12 +286,10 @@ export class GameScene extends Phaser.Scene
     {
       this.phase = 'play';
       platform.gameplayStart();
-      this.attempt = nextAttempt( this.levelId );
-      track( 'level_start', {
-        level: this.levelId, world: this.levelId.split( '-' )[ 0 ], attempt: this.attempt, hint: this.hint, bonus_gas: this.bonusFuel > 0,
-        checkpoint: this.resumed ? this.s.target : 0
-      } );
-      milestone( 'f03_first_burn', { level: this.levelId } );
+      this.attempt = attemptNo( this.levelId );
+      this.from = this.resumed ? this.s.target : 0;
+      note( 'level_start', { level: this.levelId, attempt: this.attempt, checkpoint: this.from } );
+      early( 'f03_first_burn', { level: this.levelId } );
       this.game.events.emit( 'play-started' );
     }
   }
@@ -304,6 +307,7 @@ export class GameScene extends Phaser.Scene
   {
     if ( this.phase === 'play' || this.phase === 'intro' )
     {
+      this.pausedFrom = this.phase;
       this.phase = 'paused';
       audio.burner( false );
       platform.gameplayStop();
@@ -314,10 +318,14 @@ export class GameScene extends Phaser.Scene
   {
     if ( this.phase === 'paused' )
     {
-      this.phase = 'play';
+      this.phase = this.pausedFrom;
       this.pointerBurn = false;
       this.keyBurn = false;
-      platform.gameplayStart();
+      // На картці гра ще не почалась: gameplayStart дасть перший жар (або UI, якщо картки немає)
+      if ( this.phase === 'play' )
+      {
+        platform.gameplayStart();
+      }
     }
   }
 
@@ -335,7 +343,10 @@ export class GameScene extends Phaser.Scene
       sec: Math.round( s.t ),
       progress: Math.round( progress * 100 ),
       letters: s.target + '/' + lvl.targets.length,
-      gas: Math.round( s.gas * 10 ) / 10
+      gas: Math.round( s.gas * 10 ) / 10,
+      hint: this.hint,
+      bonus_gas: this.bonusFuel > 0,
+      checkpoint: this.from
     };
   }
 
@@ -528,7 +539,7 @@ export class GameScene extends Phaser.Scene
       // Поки лист летить, скринька ще чекає — прапорець опуститься, коли лист долетить
       mb.setTexture( 'mailbox' );
       this.game.events.emit( 'deliver', this.s.target );
-      milestone( 'f04_first_letter', { level: this.levelId } );
+      early( 'f04_first_letter', { level: this.levelId } );
     }
     if ( ev & EV_WIN )
     {

@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 import { makeCommon, makeSkins } from '../core/art.ts';
 import { platform } from '../platform/platform.ts';
-import { milestone, track } from '../platform/analytics.ts';
+import { early } from '../platform/analytics.ts';
 import { save } from '../core/save.ts';
 import { pack, packLayers } from '../ui/pack.ts';
 import { TRAIL_PARTICLES } from '../core/skins.ts';
@@ -133,8 +133,7 @@ export class BootScene extends Phaser.Scene
     platform.loadingStop();
     // Від відкриття сторінки до готової гри: на довгому завантаженні гравці йдуть ще до першого кліку
     const loadSec = Math.round( performance.now() / 100 ) / 10;
-    track( 'load_done', { sec: loadSec } );
-    milestone( 'f02_load_done', { load_sec: loadSec } );
+    early( 'f02_load_done', { sec: loadSec } );
     document.getElementById( 'loading' )?.remove();
     // Перший запуск: одразу в перший рівень, без мапи й вибору мови (CrazyGames: новий гравець має потрапити в гру
     // щонайбільше за 1 клік). Мову вгадано з порталу чи браузера, змінити її можна кнопкою на мапі

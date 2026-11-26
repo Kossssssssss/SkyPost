@@ -33,7 +33,7 @@ export class ShopScene extends Phaser.Scene
   create(): void
   {
     setPlace( 'shop' );
-    milestone( 'm_shop', { coins: save().coins } );
+    milestone( 'shop_open', { coins: save().coins } );
     this.root = this.add.container( 0, 0 );
     this.scale.on( 'resize', this.build, this );
     this.events.once( 'shutdown', () => this.scale.off( 'resize', this.build, this ) );
@@ -296,8 +296,7 @@ export class ShopScene extends Phaser.Scene
     sv.owned.push( sk.id );
     sv.equip[ sk.slot ] = sk.id;
     persist();
-    track( 'skin_purchase', { skin: sk.id, slot: sk.slot, price: sk.price, coins_left: sv.coins } );
-    milestone( 'm_first_purchase', { skin: sk.id, price: sk.price } );
+    track( 'skin_purchase', { skin: sk.id, slot: sk.slot, price: sk.price, coins: sv.coins } );
     audio.buy();
     this.hovered = undefined;
     this.build();

@@ -1,5 +1,6 @@
-import { initPlatform } from '../platform/platform.ts';
-import { loadSave } from './save.ts';
+import { initPlatform, platform } from '../platform/platform.ts';
+import { early, track } from '../platform/analytics.ts';
+import { hadSave, loadSave } from './save.ts';
 import { loadLang } from './i18n.ts';
 
 let ready: Promise<void> | null = null;
@@ -12,6 +13,9 @@ export function gameDataReady(): Promise<void>
   {
     loadSave();
     loadLang();
+    // Після сейву: з нього видно, новий гравець чи той, що повертається
+    track( 'game_start', { platform: platform.name, locale: platform.locale() ?? navigator.language, returning: hadSave() } );
+    early( 'f01_open', { platform: platform.name } );
   } );
   return ready;
 }
