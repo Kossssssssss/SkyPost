@@ -21,6 +21,12 @@ const early: unknown[] = [];
 const crumbs: Array<[ string, Params | undefined ]> = [];
 const tags: Record<string, string> = {};
 
+// Query і hash в адресах портал може використати під свої параметри: у звіт іде лише шлях
+function stripQuery<T>( url: T ): T
+{
+  return ( typeof url === 'string' ? url.replace( /[?#].*$/s, '' ) : url ) as T;
+}
+
 function onError( e: ErrorEvent ): void
 {
   if ( early.length < EARLY_MAX )
@@ -60,6 +66,21 @@ export function initCrash(): void
       maxBreadcrumbs: CRUMBS_MAX,
       // Жодних даних гравця: лише браузер, версія гри й контекст сцени
       dataCollection: { userInfo: false, cookies: false },
+      beforeBreadcrumb( crumb )
+      {
+        const data = crumb.data;
+        if ( data )
+        {
+          for ( const key of [ 'url', 'from', 'to' ] )
+          {
+            if ( key in data )
+            {
+              data[ key ] = stripQuery( data[ key ] );
+            }
+          }
+        }
+        return crumb;
+      },
       beforeSend( event )
       {
         if ( sent >= EVENTS_MAX )
@@ -67,6 +88,16 @@ export function initCrash(): void
           return null;
         }
         sent++;
+        const request = event.request;
+        if ( request )
+        {
+          request.url = stripQuery( request.url );
+          delete request.query_string;
+          if ( request.headers?.Referer )
+          {
+            request.headers.Referer = stripQuery( request.headers.Referer );
+          }
+        }
         try
         {
           event.contexts = { ...event.contexts, game: context() };
