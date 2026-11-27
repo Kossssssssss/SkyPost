@@ -28,7 +28,27 @@ function key( s: SimState ): string
     Math.round( s.vy / 18 ) + '|' + Math.round( s.vx / 14 ) + '|' + Math.round( s.heat * 12 );
 }
 
-export function solve( lvl: LevelData ): SolveResult
+// Довгі рівні (Доставка дня) повний пошук рахує хвилинами й з'їдає гігабайти пам'яті. Тоді на кожному кроці лишаємо
+// beam найперспективніших станів — окремо тих, що вже з маркою, і тих, що без неї: хто далі по маршруту (листи, потім x),
+// а з рівних — ощадніший. Відповідь може бути трохи гіршою за найкращу, для порогу зірки це не страшно
+function prune( list: { s: SimState; n: number }[], beam: number ): { s: SimState; n: number }[]
+{
+  const score = ( s: SimState ) => s.target * 100000 + s.x - s.gas * 40;
+  const out: { s: SimState; n: number }[] = [];
+  for ( const st of [ false, true ] )
+  {
+    const part = list.filter( ( f ) => !!f.s.stamp === st );
+    if ( part.length > beam / 2 )
+    {
+      part.sort( ( a, b ) => score( b.s ) - score( a.s ) );
+      part.length = beam / 2;
+    }
+    out.push( ...part );
+  }
+  return out;
+}
+
+export function solve( lvl: LevelData, beam = 0 ): SolveResult
 {
   const t0 = performance.now();
   const parent: number[] = [ -1 ];
@@ -87,6 +107,11 @@ export function solve( lvl: LevelData ): SolveResult
           continue;
         }
         const kk = key( s );
+        // З обмеженим пошуком пам'ять теж обмежена: старі відвідини забуваємо
+        if ( beam && visited.size > 4e6 )
+        {
+          visited.clear();
+        }
         const prev = visited.get( kk );
         if ( prev !== undefined && prev <= s.gas + 1e-6 )
         {
@@ -105,6 +130,10 @@ export function solve( lvl: LevelData ): SolveResult
     else
     {
       frontier = next;
+    }
+    if ( beam && frontier.length > beam )
+    {
+      frontier = prune( frontier, beam );
     }
   }
   return { plain, stamp, nodes: parent.length, ms: Math.round( performance.now() - t0 ) };

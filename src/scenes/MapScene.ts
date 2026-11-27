@@ -10,6 +10,7 @@ import { audio } from '../core/audio.ts';
 import { setPlace } from '../platform/analytics.ts';
 import { button, label, panel, painted, starsRow, uiScale, fitText, fadeIn, shade, COLORS, inkHex } from '../ui/widgets.ts';
 import { pack } from '../ui/pack.ts';
+import { dailyPick } from '../levels/daily.ts';
 import type { BgScene } from './BgScene.ts';
 import type { Theme } from '../core/level.ts';
 
@@ -349,6 +350,16 @@ export class MapScene extends Phaser.Scene
       window.open( PRIVACY_URL, '_blank', 'noopener' );
     } );
     this.root.add( privacy );
+
+    // ТИМЧАСОВО (до п. 3 ROADMAP): вхід у Доставку дня для перевірки; замінити на справжню кнопку
+    const pick = dailyPick();
+    if ( pick )
+    {
+      this.root.add( button( this, m + 130 * u, h - m - bs / 2, {
+        w: 260 * u, h: bs, text: 'Daily', size: 30 * u, color: COLORS.blue, dark: COLORS.blueDark,
+        onClick: () => this.play( pick.id )
+      } ) );
+    }
   }
 
   private makeTrail( target: BalloonView, k: number ): void

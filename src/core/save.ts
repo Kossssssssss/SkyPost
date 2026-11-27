@@ -1,5 +1,6 @@
 import { platform } from '../platform/platform.ts';
 import { cleared, setClears, setCoins, track, type Params } from '../platform/analytics.ts';
+import { isDaily } from './level.ts';
 
 export interface LevelRecord
 {
@@ -133,7 +134,7 @@ export function attemptNo( id: string ): number
 
 function clearedCount(): number
 {
-  return Object.values( data.levels ).filter( ( r ) => r.done ).length;
+  return Object.entries( data.levels ).filter( ( [ id, r ] ) => r.done && !isDaily( id ) ).length;
 }
 
 export function save(): SaveData
@@ -175,7 +176,7 @@ export function totalStars(): number
   let n = 0;
   for ( const id of Object.keys( data.levels ) )
   {
-    n += starsOf( id );
+    n += isDaily( id ) ? 0 : starsOf( id );
   }
   return n;
 }

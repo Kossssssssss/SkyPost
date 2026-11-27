@@ -80,6 +80,50 @@ export interface LevelData
   difficulty?: 'hard' | 'super';
   hint?: number[];
   best?: { gas: number; stampGas?: number; time?: number };
+  // Доставка дня: інші варіанти вітру (рівень сам — варіант 0), кожен зі своїм порогом і маршрутом
+  winds?: WindVariant[];
+}
+
+// Варіант вітру рівня дня: множник сили кожного шару (і поривів у ньому); поріг, найкраще й маршрут рахує розв'язувач
+export interface WindVariant
+{
+  k: number[];
+  gasStar: number;
+  best?: { gas: number; stampGas?: number; time?: number };
+  hint?: number[];
+}
+
+// Рівні Доставки дня мають id daily-N: у зірки, відкриття світів і воронку проходжень вони не йдуть
+export function isDaily( id: string ): boolean
+{
+  return id.startsWith( 'daily-' );
+}
+
+// Скільки варіантів вітру в рівня (з самим рівнем)
+export function windCount( lvl: LevelData ): number
+{
+  return 1 + ( lvl.winds?.length ?? 0 );
+}
+
+// Рівень з варіантом вітру i: шари сильніші чи слабші, поріг газу, найкраще й маршрут — цього варіанта
+export function withWind( lvl: LevelData, i: number ): LevelData
+{
+  const v = i > 0 ? lvl.winds?.[ i - 1 ] : undefined;
+  if ( !v )
+  {
+    return lvl;
+  }
+  return {
+    ...lvl,
+    layers: lvl.layers.map( ( l, j ) => ( {
+      ...l,
+      wind: Math.round( l.wind * ( v.k[ j ] ?? 1 ) ),
+      ...( l.gust !== undefined ? { gust: Math.round( l.gust * ( v.k[ j ] ?? 1 ) ) } : {} )
+    } ) ),
+    gasStar: v.gasStar,
+    best: v.best,
+    hint: v.hint
+  };
 }
 
 // Підказки, що знайомлять з новою механікою (а не просто пояснюють керування чи зірки):

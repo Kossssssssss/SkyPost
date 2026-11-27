@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import type { LevelData } from '../core/level.ts';
 import { findLevel } from '../levels/index.ts';
+import { dailyLevel } from '../levels/daily.ts';
 import {
   cloneState, createState, step, canBurn, hazardPos, DT, NEUTRAL, MID_OFF, ENV_OFF,
   EV_BUMP, EV_DEAD, EV_DELIVER, EV_LAND, EV_LIFTOFF, EV_STAMP, EV_WIN, type SimState
@@ -115,9 +116,14 @@ export class GameScene extends Phaser.Scene
   create(): void
   {
     const found = findLevel( this.levelId )!;
-    // Копія, щоб редактор і рестарти не псували дані модуля
-    this.lvl = structuredClone( found.level );
-    save().lastLevel = this.levelId;
+    // Копія, щоб редактор і рестарти не псували дані модуля. Рівень дня — з вітром сьогоднішнього дня
+    const daily = dailyLevel( this.levelId );
+    this.lvl = structuredClone( daily ?? found.level );
+    // Доставка дня — не місце на карті: карта й «продовжити» лишаються на звичайному рівні
+    if ( !daily )
+    {
+      save().lastLevel = this.levelId;
+    }
     // Годинник і твіни сцени живуть між рестартами, тож скидаємо сповільнення після удару
     this.setSlow( 1 );
     persist();
