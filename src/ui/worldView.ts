@@ -104,7 +104,7 @@ export class WorldView
   // Перешкоди, у які врізалась куля: їх веде твін відльоту, а не маршрут
   private knocked = new Set<number>();
   private motes: Phaser.GameObjects.Image[] = [];
-  // Погода теми (п. 47): бризки біля води на морі, легкий сніг у горах
+  // Погода теми: бризки біля води на морі, легкий сніг у горах
   private spray?: Phaser.GameObjects.Particles.ParticleEmitter;
   private sprayIn = 0;
   private weatherT = 0;

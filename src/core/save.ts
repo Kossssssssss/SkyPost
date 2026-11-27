@@ -32,7 +32,7 @@ const KEY = 'skypost.save.v1';
 // Стара валюта v1 — зірки на витрати; при переході на монети кожна зірка = 10 монет
 const WALLET_TO_COINS = 10;
 
-// Нарахування монет за рівень (стартові числа, ROADMAP п. 2)
+// Нарахування монет за рівень (стартові числа)
 export const COIN_RULES = {
   firstClear: 10,
   newStar: 7,

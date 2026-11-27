@@ -9,7 +9,7 @@ export interface Skin
   slot: SkinSlot;
   name: string;
   price: number;
-  // Ціни в монетах (ROADMAP п. 3): дешеві 30–50, середні 80–150, дорогі 200–300; пілоти трохи дорожчі за інші слоти
+  // Ціни в монетах: дешеві 30–50, середні 80–150, дорогі 200–300; пілоти трохи дорожчі за інші слоти
   // Особливий скін відкривається не за зірки, а за ★★★ на всіх рівнях світу
   world?: number;
   style?: EnvelopeStyle;
@@ -105,7 +105,7 @@ export function skinsOf( slot: SkinSlot ): Skin[]
   return SKINS.filter( ( s ) => s.slot === slot );
 }
 
-// Чи є в магазині щось, на що вистачає монет (значок «!» на кнопці магазину; бустери додати сюди в п. 17)
+// Чи є в магазині щось, на що вистачає монет (значок «!» на кнопці магазину; бустери додати сюди, коли з'являться — ROADMAP п. 20)
 export function canBuySomething( coins: number, owned: readonly string[] ): boolean
 {
   return SKINS.some( ( s ) => !s.world && s.price > 0 && s.price <= coins && !owned.includes( s.id ) );
