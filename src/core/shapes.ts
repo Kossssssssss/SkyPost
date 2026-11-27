@@ -1,4 +1,4 @@
-import type { LevelData, Rect } from './level.ts';
+import { themeAt, type LevelData, type Rect } from './level.ts';
 
 // Маяк (lighthouse.webp, 221x768): ліхтар зверху (215 рядків) і основа знизу (80) не тягнуться, тіло вежі посередині
 // тягнеться у висоту; body — ширина тіла в текстурі для підбору масштабу, sink — скільки вежі занурено у воду
@@ -16,7 +16,7 @@ const LIGHTHOUSE_PROFILE: [ number, number, number ][] = [
 
 export function isLighthouse( lvl: LevelData, b: Rect ): boolean
 {
-  return lvl.theme === 'sea' && b.h > b.w * 2.5;
+  return themeAt( lvl, b.x + b.w / 2 ) === 'sea' && b.h > b.w * 2.5;
 }
 
 // Як маяк лягає на блок: масштаб — середнє між «тіло в ширину блока» і «весь маяк у висоту блока»,

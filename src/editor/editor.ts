@@ -1,6 +1,6 @@
 import Phaser from 'phaser';
 import type { GameScene } from '../scenes/GameScene.ts';
-import { groundY, layerBottom, type LevelData, type Rect } from '../core/level.ts';
+import { groundY, layerBottom, themeAt, type LevelData, type Rect } from '../core/level.ts';
 import { findLevel, WORLDS } from '../levels/index.ts';
 import { formatWorld } from '../core/levelJson.ts';
 import { t } from '../core/i18n.ts';
@@ -203,7 +203,7 @@ class Editor
         l.start = { x: snap( x ), y: this.surfaceBelow( x, y ) };
         break;
       case 'bird':
-        l.hazards.push( { kind: l.theme === 'sea' ? 'gull' : 'bird', x: snap( x ), y: snap( y ), r: 20 } );
+        l.hazards.push( { kind: themeAt( l, x ) === 'sea' ? 'gull' : 'bird', x: snap( x ), y: snap( y ), r: 20 } );
         this.sel = { kind: 'hazard', i: l.hazards.length - 1 };
         break;
       case 'layer':

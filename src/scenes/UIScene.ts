@@ -2,7 +2,7 @@ import Phaser from 'phaser';
 import { GameScene } from './GameScene.ts';
 import { BgScene } from './BgScene.ts';
 import { t, tn, hasText } from '../core/i18n.ts';
-import { groundY, layerBottom, layerIndexAt, windAt } from '../core/level.ts';
+import { biomeBlend, groundY, layerBottom, layerIndexAt, windAt } from '../core/level.ts';
 import { MID_OFF } from '../core/sim.ts';
 import { save, persist, applyResult, addFail, record, starsOf, totalStars, type CoinParts } from '../core/save.ts';
 import { audio } from '../core/audio.ts';
@@ -638,6 +638,11 @@ export class UIScene extends Phaser.Scene
     bg.progress = span > 0 ? ( cam.midPoint.x - viewW / 2 ) / span : 0.5;
     bg.camX = cam.scrollX * cam.zoom;
     bg.camY = ( cam.scrollY - ( this.gs.lvl.height - cam.height / cam.zoom ) ) * cam.zoom;
+    if ( this.gs.lvl.biomes )
+    {
+      const k = biomeBlend( this.gs.lvl, cam.midPoint.x );
+      bg.setBlend( k.a, k.b, k.mix );
+    }
   }
 
   // ---------- Картка рівня ----------

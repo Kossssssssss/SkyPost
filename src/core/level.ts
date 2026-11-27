@@ -48,11 +48,21 @@ export interface Target
   w: number;
 }
 
+// Відрізок рівня в одній темі (Доставка дня): діє від x до початку наступного; перший — з x = 0
+export interface Biome
+{
+  x: number;
+  theme: Theme;
+  water?: boolean;
+}
+
 export interface LevelData
 {
   id: string;
   name: string;
+  // З біомами — тема й вода першого відрізка (на них дивляться карта й картка рівня)
   theme: Theme;
+  biomes?: Biome[];
   width: number;
   height: number;
   start: { x: number; y: number };
@@ -89,6 +99,62 @@ export const GROUND_H = 40;
 export function groundY( lvl: LevelData ): number
 {
   return lvl.height - GROUND_H;
+}
+
+// Номер біома в точці x (без біомів — 0). Без виділення пам'яті: зветься з кроку фізики
+export function biomeIndexAt( lvl: LevelData, x: number ): number
+{
+  const b = lvl.biomes;
+  let i = 0;
+  if ( b )
+  {
+    while ( i + 1 < b.length && b[ i + 1 ].x <= x )
+    {
+      i++;
+    }
+  }
+  return i;
+}
+
+export function themeAt( lvl: LevelData, x: number ): Theme
+{
+  return lvl.biomes ? lvl.biomes[ biomeIndexAt( lvl, x ) ].theme : lvl.theme;
+}
+
+export function waterAt( lvl: LevelData, x: number ): boolean
+{
+  return lvl.biomes ? !!lvl.biomes[ biomeIndexAt( lvl, x ) ].water : !!lvl.water;
+}
+
+// Відрізки рівня з межами; без біомів — один відрізок на весь рівень
+export function biomeSpans( lvl: LevelData ): { x0: number; x1: number; theme: Theme; water: boolean }[]
+{
+  const b = lvl.biomes ?? [ { x: 0, theme: lvl.theme, water: lvl.water } ];
+  return b.map( ( k, i ) => ( { x0: k.x, x1: i + 1 < b.length ? b[ i + 1 ].x : lvl.width, theme: k.theme, water: !!k.water } ) );
+}
+
+// Ширина переходу між біомами (одиниць рівня): небо й пейзаж фону перетікають, поки середина кадру її минає
+export const BIOME_BLEND = 700;
+
+// Що показує фон у точці x: тема a, і наскільки вже проступила тема b (0..1, плавний старт і фініш)
+export function biomeBlend( lvl: LevelData, x: number ): { a: Theme; b: Theme; mix: number }
+{
+  const bs = lvl.biomes ?? [ { x: 0, theme: lvl.theme } ];
+  for ( let i = 1; i < bs.length; i++ )
+  {
+    const d = x - ( bs[ i ].x - BIOME_BLEND / 2 );
+    if ( d < 0 )
+    {
+      return { a: bs[ i - 1 ].theme, b: bs[ i - 1 ].theme, mix: 0 };
+    }
+    if ( d < BIOME_BLEND )
+    {
+      const k = d / BIOME_BLEND;
+      return { a: bs[ i - 1 ].theme, b: bs[ i ].theme, mix: k * k * ( 3 - 2 * k ) };
+    }
+  }
+  const last = bs[ bs.length - 1 ].theme;
+  return { a: last, b: last, mix: 0 };
 }
 
 export function moverOffset( m: Mover | undefined, t: number ): { x: number; y: number }

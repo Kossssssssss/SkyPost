@@ -6,9 +6,18 @@ import { pack, themeArt, type LayerSpec } from '../ui/pack.ts';
 interface Layer
 {
   name: 'far' | 'mid' | 'near';
+  // Набір шарів: 0 чи 1. На межі біомів пейзажі двох тем перетікають один в одний
+  slot: number;
   spec: LayerSpec;
   key: string;
   imgs: Phaser.GameObjects.Image[];
+}
+
+// Набір пейзажу: тема й її вага (0..1); поза межею біомів видно лише один
+interface Slot
+{
+  theme: Theme;
+  w: number;
 }
 
 interface SkyCloud
@@ -29,6 +38,20 @@ const HAZE = 0.38;
 const BOLT_GAP = [ 7, 16 ];
 const BOLT_LIFE = 0.6;
 
+function mixColor( a: number, b: number, k: number ): number
+{
+  const c = Phaser.Display.Color.Interpolate.RGBWithRGB( a >> 16, ( a >> 8 ) & 255, a & 255, b >> 16, ( b >> 8 ) & 255, b & 255, 1000, Math.round( k * 1000 ) );
+  return Phaser.Display.Color.GetColor( c.r, c.g, c.b );
+}
+
+// Колір градієнта неба в точці t (0 — верх, 1 — низ)
+function skyAt( stops: number[], t: number ): number
+{
+  const f = t * ( stops.length - 1 );
+  const i = Math.min( stops.length - 2, Math.floor( f ) );
+  return mixColor( stops[ i ], stops[ i + 1 ], f - i );
+}
+
 // Окрема сцена під грою: небо й далекий план не залежать від зуму ігрової камери
 export class BgScene extends Phaser.Scene
 {
@@ -40,6 +63,8 @@ export class BgScene extends Phaser.Scene
   private sunRays?: Phaser.GameObjects.Image;
   private raysK = 1;
   private sunK = 1;
+  // Світило гасне й знову проступає, коли на межі біомів сонце змінюється місяцем
+  private sunW = 1;
   private layers: Layer[] = [];
   private clouds: SkyCloud[] = [];
   private birds: Bird[] = [];
@@ -48,7 +73,11 @@ export class BgScene extends Phaser.Scene
   private flash?: Phaser.GameObjects.Graphics;
   private boltIn = 3;
   private boltT = BOLT_LIFE;
+  // Що показано: тема, друга тема й наскільки вона вже проступила (0..1); поза межею біомів mix = 0
   private theme: Theme = 'meadow';
+  private blendTo: Theme = 'meadow';
+  private mix = 0;
+  private slots: Slot[] = [ { theme: 'meadow', w: 1 }, { theme: 'meadow', w: 0 } ];
   private w = 0;
   private h = 0;
   private t = 0;
@@ -105,7 +134,10 @@ export class BgScene extends Phaser.Scene
     };
     const layer = ( name: Layer[ 'name' ] ) =>
     {
-      this.layers.push( { name, spec: themeArt( this.theme )[ name ], key: '', imgs: [] } );
+      for ( const slot of [ 0, 1 ] )
+      {
+        this.layers.push( { name, slot, spec: themeArt( this.slots[ slot ].theme )[ name ], key: '', imgs: [] } );
+      }
     };
     this.flash = this.add.graphics().setAlpha( 0 );
     cloud( 0 );
@@ -128,9 +160,9 @@ export class BgScene extends Phaser.Scene
   // Кожна тема має свої шари пейзажу; копії шарів перестворюємо під нову текстуру
   private applyThemeArt(): void
   {
-    const art = themeArt( this.theme );
     for ( const l of this.layers )
     {
+      const art = themeArt( this.slots[ l.slot ].theme );
       const key = 'pk-' + art.prefix + l.name;
       if ( key === l.key )
       {
@@ -141,12 +173,36 @@ export class BgScene extends Phaser.Scene
       l.imgs.forEach( ( img ) => img.destroy() );
       l.imgs = [];
     }
+    this.applyBlend();
+  }
+
+  // Наскільки тема зараз на екрані (0..1)
+  private weightOf( theme: Theme ): number
+  {
+    return this.slots.reduce( ( sum, sl ) => sum + ( sl.theme === theme ? sl.w : 0 ), 0 );
+  }
+
+  // Хмари й світило між двома темами: тонування змішуємо, а сонце й місяць міняються через «захід» —
+  // старе світило гасне до середини переходу, нове проступає після неї
+  private applyBlend(): void
+  {
+    if ( !pack )
+    {
+      return;
+    }
+    const artA = themeArt( this.theme );
+    const artB = themeArt( this.blendTo );
+    const m = this.mix;
+    const tint = mixColor( artA.cloudTint ?? 0xffffff, artB.cloudTint ?? 0xffffff, m );
     for ( const c of this.clouds )
     {
-      c.img.setTint( art.cloudTint ?? 0xffffff );
+      c.img.setTint( tint );
     }
     // Світило теми: сонце, місяць або нічого (гроза); промені — лише в сонця
-    const sunKey = art.sun ?? 'pk-sun';
+    const keyA = artA.sun ?? 'pk-sun';
+    const keyB = artB.sun ?? 'pk-sun';
+    const sunKey = keyA === keyB || m < 0.5 ? keyA : keyB;
+    this.sunW = keyA === keyB ? 1 : Math.abs( 1 - m * 2 );
     const shown = sunKey !== '' && this.textures.exists( sunKey );
     if ( shown && this.sun.texture.key !== sunKey )
     {
@@ -154,42 +210,96 @@ export class BgScene extends Phaser.Scene
     }
     this.sun.setVisible( shown );
     this.sunRays?.setVisible( shown && sunKey === 'pk-sun' );
-    this.boltT = BOLT_LIFE;
-    this.bolt?.setAlpha( 0 );
-    this.flash?.setAlpha( 0 );
   }
 
   // Chrome на Android фарбує системну панель навігації під грою кольором фону сторінки,
   // тож тримаємо його в тон землі, а не голубим, як на екрані завантаження
   private paintPage(): void
   {
-    const col = '#' + THEMES[ this.theme ].ground.toString( 16 ).padStart( 6, '0' );
+    const col = '#' + THEMES[ this.mix < 0.5 ? this.theme : this.blendTo ].ground.toString( 16 ).padStart( 6, '0' );
     document.documentElement.style.backgroundColor = col;
     document.body.style.backgroundColor = col;
   }
 
   setTheme( theme: Theme ): void
   {
-    this.theme = theme;
-    this.paintPage();
-    if ( pack )
+    this.boltT = BOLT_LIFE;
+    this.bolt?.setAlpha( 0 );
+    this.flash?.setAlpha( 0 );
+    this.setBlend( theme, theme, 0, true );
+  }
+
+  // Межа біомів (Доставка дня): тема a, і mix (0..1) — наскільки вже проступила тема b.
+  // Зветься щокадру; пейзаж перебудовується лише тоді, коли в набір заходить нова тема
+  setBlend( a: Theme, b: Theme, mix: number, force = false ): void
+  {
+    if ( a === b )
+    {
+      mix = 0;
+    }
+    if ( !force && a === this.theme && b === this.blendTo && Math.abs( mix - this.mix ) < 0.001 )
+    {
+      return;
+    }
+    const was = this.mix < 0.5 ? this.theme : this.blendTo;
+    this.theme = a;
+    this.blendTo = b;
+    this.mix = mix;
+    if ( force || ( mix < 0.5 ? a : b ) !== was )
+    {
+      this.paintPage();
+    }
+    const w = this.w || this.scale.width;
+    const h = this.h || this.scale.height;
+    if ( !pack )
+    {
+      const key = THEMES[ mix < 0.5 ? a : b ].far;
+      if ( force || this.far?.texture.key !== key )
+      {
+        this.far?.destroy();
+        this.far = this.textures.exists( key ) ? this.add.image( 0, 0, key ).setOrigin( 0, 1 ).setAlpha( 0.6 ) : undefined;
+      }
+      this.layout( w, h );
+      return;
+    }
+    // Тема, що вже стоїть у наборі, лишається там; нова займає набір, якого зараз не видно (на краю переходу його вага 0)
+    let ia = this.slots.findIndex( ( sl ) => sl.theme === a );
+    let ib = a === b ? -1 : this.slots.findIndex( ( sl, i ) => sl.theme === b && i !== ia );
+    if ( ia < 0 && ib < 0 )
+    {
+      ia = this.slots[ 0 ].w >= this.slots[ 1 ].w ? 1 : 0;
+      ib = a === b ? -1 : 1 - ia;
+    }
+    else if ( ia < 0 )
+    {
+      ia = 1 - ib;
+    }
+    else if ( ib < 0 && a !== b )
+    {
+      ib = 1 - ia;
+    }
+    let changed = this.slots[ ia ].theme !== a;
+    this.slots[ ia ].theme = a;
+    this.slots[ ia ].w = 1 - mix;
+    const other = this.slots[ 1 - ia ];
+    if ( ib >= 0 )
+    {
+      changed ||= other.theme !== b;
+      other.theme = b;
+      other.w = mix;
+    }
+    else
+    {
+      other.w = 0;
+    }
+    if ( changed || force )
     {
       this.applyThemeArt();
-      this.layout( this.w || this.scale.width, this.h || this.scale.height );
+      this.layout( w, h );
       return;
     }
-    if ( this.far?.texture.key === THEMES[ theme ].far )
-    {
-      return;
-    }
-    this.far?.destroy();
-    this.far = undefined;
-    const key = THEMES[ theme ].far;
-    if ( this.textures.exists( key ) )
-    {
-      this.far = this.add.image( 0, 0, key ).setOrigin( 0, 1 ).setAlpha( 0.6 );
-    }
-    this.layout( this.w || this.scale.width, this.h || this.scale.height );
+    this.applyBlend();
+    this.drawSky();
   }
 
   layout( w: number, h: number ): void
@@ -197,28 +307,7 @@ export class BgScene extends Phaser.Scene
     this.w = w;
     this.h = h;
     this.cameras.main.setSize( w, h );
-    this.sky.clear();
-    this.haze.clear();
-    if ( pack )
-    {
-      // Кілька зупинок градієнта: двоколірний fillGradient не дає заходу сонця
-      const st = themeArt( this.theme ).sky ?? pack.sky;
-      for ( let i = 0; i < st.length - 1; i++ )
-      {
-        const y0 = ( h * i ) / ( st.length - 1 );
-        for ( const g of [ this.sky, this.haze ] )
-        {
-          g.fillGradientStyle( st[ i ], st[ i ], st[ i + 1 ], st[ i + 1 ], 1 );
-          g.fillRect( 0, y0, w, h / ( st.length - 1 ) + 1 );
-        }
-      }
-    }
-    else
-    {
-      const th = THEMES[ this.theme ];
-      this.sky.fillGradientStyle( th.skyTop, th.skyTop, th.skyBottom, th.skyBottom, 1 );
-      this.sky.fillRect( 0, 0, w, h );
-    }
+    this.drawSky();
     // Діаметр сонця — 13% меншої сторони екрана (м'яку пляму без пака лишаємо як була)
     const painted = this.sun.texture.key.startsWith( 'pk-' );
     const sunK = painted ? ( Math.min( w, h ) * 0.13 ) / this.sun.width : Math.min( w, h ) / 220;
@@ -236,7 +325,7 @@ export class BgScene extends Phaser.Scene
       const n = Math.ceil( w / ( tex.width * k ) ) + 2;
       while ( l.imgs.length < n )
       {
-        const img = this.add.image( 0, 0, l.key ).setOrigin( 0, 1 ).setAlpha( l.spec.alpha ).setTint( themeArt( this.theme ).layerTint ?? 0xffffff );
+        const img = this.add.image( 0, 0, l.key ).setOrigin( 0, 1 ).setAlpha( l.spec.alpha ).setTint( themeArt( this.slots[ l.slot ].theme ).layerTint ?? 0xffffff );
         img.setDepth( 0 );
         l.imgs.push( img );
       }
@@ -255,12 +344,49 @@ export class BgScene extends Phaser.Scene
     }
   }
 
+  // Небо й серпанок того ж кольору; на межі біомів — суміш градієнтів двох тем
+  private drawSky(): void
+  {
+    const { w, h } = this;
+    this.sky.clear();
+    this.haze.clear();
+    if ( pack )
+    {
+      // Кілька зупинок градієнта: двоколірний fillGradient не дає заходу сонця
+      const a = themeArt( this.theme ).sky ?? pack.sky;
+      const b = themeArt( this.blendTo ).sky ?? pack.sky;
+      const n = Math.max( a.length, b.length );
+      const st: number[] = [];
+      for ( let i = 0; i < n; i++ )
+      {
+        const t = i / ( n - 1 );
+        st.push( this.mix > 0 ? mixColor( skyAt( a, t ), skyAt( b, t ), this.mix ) : skyAt( a, t ) );
+      }
+      for ( let i = 0; i < st.length - 1; i++ )
+      {
+        const y0 = ( h * i ) / ( st.length - 1 );
+        for ( const g of [ this.sky, this.haze ] )
+        {
+          g.fillGradientStyle( st[ i ], st[ i ], st[ i + 1 ], st[ i + 1 ], 1 );
+          g.fillRect( 0, y0, w, h / ( st.length - 1 ) + 1 );
+        }
+      }
+    }
+    else
+    {
+      const th = THEMES[ this.theme ];
+      this.sky.fillGradientStyle( th.skyTop, th.skyTop, th.skyBottom, th.skyBottom, 1 );
+      this.sky.fillRect( 0, 0, w, h );
+    }
+  }
+
   // Нові копії шарів додаються в кінець списку, тож повертаємо кожну під свій наступний шар
   private sortLayers(): void
   {
     let d = 1;
     this.sky.setDepth( 0 );
     const order: ( Phaser.GameObjects.Image | Phaser.GameObjects.Graphics )[] = [];
+    const imgs = ( name: Layer[ 'name' ] ) => this.layers.filter( ( l ) => l.name === name ).flatMap( ( l ) => l.imgs );
     if ( this.flash )
     {
       order.push( this.flash );
@@ -273,17 +399,17 @@ export class BgScene extends Phaser.Scene
     {
       order.push( this.bolt );
     }
-    order.push( ...this.layers[ 0 ]?.imgs ?? [] );
+    order.push( ...imgs( 'far' ) );
     for ( const c of this.clouds.filter( ( c ) => c.depth === 1 ) )
     {
       order.push( c.img );
     }
-    order.push( ...this.layers[ 1 ]?.imgs ?? [] );
+    order.push( ...imgs( 'mid' ) );
     if ( this.fx )
     {
       order.push( this.fx );
     }
-    order.push( ...this.layers[ 2 ]?.imgs ?? [] );
+    order.push( ...imgs( 'near' ) );
     order.push( this.haze );
     // Сонце над серпанком, бо під ним охра сіріє; на рівні його натомість приглушує власна прозорість
     order.push( ...( this.sunRays ? [ this.sunRays ] : [] ), this.sun );
@@ -314,7 +440,7 @@ export class BgScene extends Phaser.Scene
     }
     this.menuDrop += ( ( menu ? 0.07 : 0 ) - this.menuDrop ) * Math.min( 1, dt * 3 );
     this.haze.alpha += ( ( menu ? 0 : HAZE ) - this.haze.alpha ) * Math.min( 1, dt * 3 );
-    const sunA = 0.9 - this.haze.alpha;
+    const sunA = ( 0.9 - this.haze.alpha ) * this.sunW;
     this.sun.setAlpha( sunA );
     this.sunRays?.setAlpha( sunA * 0.8 );
     // Повний оберт приблизно за 5 хвилин і подих ±3%: небо живе, але не мерехтить
@@ -336,18 +462,22 @@ export class BgScene extends Phaser.Scene
     fx.clear();
     // Декоративних рисок вітру тут немає: вони летіли завжди справа наліво й плутали з реальним вітром
     // Уночі птахи сплять
-    if ( this.theme !== 'night' )
+    const awake = 1 - this.weightOf( 'night' );
+    if ( awake > 0.01 )
     {
-      this.drawBirds( fx, dt );
+      this.drawBirds( fx, dt, awake );
     }
     this.updateBolt( dt );
   }
 
-  // Удар: яскраво, мить темніше, ще раз яскраво й повільне згасання
+  // Удар: яскраво, мить темніше, ще раз яскраво й повільне згасання. На межі біомів — слабше, як гроза віддаляється
   private updateBolt( dt: number ): void
   {
-    if ( !this.bolt || this.theme !== 'storm' )
+    const storm = this.weightOf( 'storm' );
+    if ( !this.bolt || storm < 0.01 )
     {
+      this.bolt?.setAlpha( 0 );
+      this.flash?.setAlpha( 0 );
       return;
     }
     this.boltIn -= dt;
@@ -355,7 +485,7 @@ export class BgScene extends Phaser.Scene
     {
       this.boltIn = Phaser.Math.FloatBetween( BOLT_GAP[ 0 ], BOLT_GAP[ 1 ] );
       this.boltT = 0;
-      const far = this.layers[ 0 ];
+      const far = this.layers.find( ( l ) => l.name === 'far' && this.slots[ l.slot ].theme === 'storm' );
       const top = far?.imgs[ 0 ] ? far.imgs[ 0 ].y - far.imgs[ 0 ].displayHeight * 0.6 : this.h * 0.6;
       this.bolt.setPosition( this.w * Phaser.Math.FloatBetween( 0.1, 0.9 ), this.h * 0.1 ).setFlipX( Math.random() < 0.5 );
       this.bolt.setScale( Math.max( 0.1, top - this.bolt.y ) / this.bolt.height );
@@ -363,14 +493,20 @@ export class BgScene extends Phaser.Scene
     this.boltT += dt;
     const t = this.boltT;
     const a = t < 0.06 ? 0.9 : t < 0.12 ? 0.25 : t < 0.18 ? 0.8 : Math.max( 0, 0.8 * ( 1 - ( t - 0.18 ) / ( BOLT_LIFE - 0.18 ) ) );
-    this.bolt.setAlpha( a );
-    this.flash!.setAlpha( a * 0.3 );
+    this.bolt.setAlpha( a * storm );
+    this.flash!.setAlpha( a * 0.3 * storm );
   }
 
-  // Дзеркальне тайлінгування: кожна друга копія віддзеркалена, тож шов між копіями не видно
+  // Дзеркальне тайлінгування: кожна друга копія віддзеркалена, тож шов між копіями не видно.
+  // Прозорість — за вагою набору: на межі біомів пейзажі перетікають
   private placeLayer( l: Layer ): void
   {
+    const wgt = this.slots[ l.slot ].w;
     const img0 = l.imgs[ 0 ];
+    if ( !img0 )
+    {
+      return;
+    }
     const tw = img0.displayWidth;
     const scroll = this.camX * l.spec.scroll;
     let idx = Math.floor( scroll / tw );
@@ -381,6 +517,7 @@ export class BgScene extends Phaser.Scene
     {
       img.setFlipX( ( ( idx % 2 ) + 2 ) % 2 === 1 );
       img.setPosition( x, y );
+      img.setVisible( wgt > 0.001 ).setAlpha( l.spec.alpha * wgt );
       x += tw;
       idx++;
     }
@@ -400,10 +537,10 @@ export class BgScene extends Phaser.Scene
     c.img.y = h * c.y - this.camY * sp;
   }
 
-  private drawBirds( g: Phaser.GameObjects.Graphics, dt: number ): void
+  private drawBirds( g: Phaser.GameObjects.Graphics, dt: number, alpha: number ): void
   {
     const { w, h } = this;
-    g.lineStyle( Math.max( 2, h * 0.003 ), pack!.ink, 0.5 );
+    g.lineStyle( Math.max( 2, h * 0.003 ), pack!.ink, 0.5 * alpha );
     for ( const b of this.birds )
     {
       b.x -= dt * 0.025 * b.s;

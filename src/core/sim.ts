@@ -1,4 +1,4 @@
-import { groundY, moverOffset, windAt, type LevelData, type Rect } from './level.ts';
+import { groundY, moverOffset, waterAt, windAt, type LevelData, type Rect } from './level.ts';
 import { blockShape } from './shapes.ts';
 
 export const DT = 1 / 60;
@@ -284,7 +284,7 @@ export function step( lvl: LevelData, s: SimState, burn: boolean, bonusFuel = 0 
   const gy = groundY( lvl );
   if ( s.y >= gy )
   {
-    if ( lvl.water )
+    if ( waterAt( lvl, s.x ) )
     {
       s.dead = 'water';
       return ev | EV_DEAD;

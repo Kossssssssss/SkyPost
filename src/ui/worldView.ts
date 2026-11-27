@@ -1,10 +1,10 @@
 import Phaser from 'phaser';
-import { groundY, layerBottom, windAt, type LevelData, type Theme } from '../core/level.ts';
+import { biomeIndexAt, biomeSpans, groundY, layerBottom, themeAt, waterAt, windAt, type LevelData, type Theme } from '../core/level.ts';
 import { hazardPos } from '../core/sim.ts';
 import { LIGHTHOUSE_ART, isLighthouse, lighthouseLayout } from '../core/shapes.ts';
 import { RES } from '../core/art.ts';
 import { FONT, inkHex } from './widgets.ts';
-import { pack } from './pack.ts';
+import { pack, themeArt } from './pack.ts';
 
 // Смуги ground_<тема>.webp і water_<тема>.webp у рівні: висота в одиницях рівня і де на картинці (частка висоти)
 // трава переходить у землю (у води — гребені в суцільну воду). Ця межа стає на лінію ґрунту, трава стирчить над нею.
@@ -73,6 +73,8 @@ const DASH_ALPHA = 0.45;
 interface Drifter
 {
   img: Phaser.GameObjects.Image;
+  // Біом, у якому він зараз летить: на межі біомів листок стає пір'їнкою чи сніжинкою
+  biome: number;
   layer: number;
   speedK: number;
   baseY: number;
@@ -91,8 +93,30 @@ const DRIFT_TEX: Partial<Record<Theme, string[]>> = {
 };
 
 
+const groundKey = ( sp: { theme: Theme; water: boolean } ) => ( sp.water ? 'pk-water_' : 'pk-ground_' ) + sp.theme;
+
 // 0.8 / RES — старий розмір 96x128, ×1.7 — більша скринька, ×0.5 — нова текстура вдвічі вища
 export const MAILBOX_SCALE = 0.8 / RES * 1.7 * 0.5;
+
+// Відрізок рівня в одній темі; крайні відкриті, щоб погода й декор жили й за краями рівня, як раніше
+interface Span
+{
+  x0: number;
+  x1: number;
+  theme: Theme;
+  water: boolean;
+}
+
+// Погода, що йде лише над біомами своєї теми (чи над водою): частинки народжуються в тій частині кадру, що на них припадає
+interface Weather
+{
+  em: Phaser.GameObjects.Particles.ParticleEmitter;
+  match: ( sp: Span ) => boolean;
+  // На скільки за краї кадру народжуються частинки
+  margin: number;
+  // Інтервал народження, коли весь кадр — цей біом
+  freq: number;
+}
 
 export class WorldView
 {
@@ -108,6 +132,10 @@ export class WorldView
   private spray?: Phaser.GameObjects.Particles.ParticleEmitter;
   private sprayIn = 0;
   private weatherT = 0;
+  private weather: Weather[] = [];
+  // Гряда хмар на кожній межі біомів: копії, що ледь гойдаються
+  private biomeClouds: { img: Phaser.GameObjects.Image; x: number; y: number; ph: number }[] = [];
+  private spans: Span[];
   private water?: Phaser.GameObjects.Graphics;
   // Намальована вода: копії смуги, що повільно гойдаються
   private waterImgs: { img: Phaser.GameObjects.Image; x: number; y: number }[] = [];
@@ -127,6 +155,9 @@ export class WorldView
     this.scene = scene;
     this.lvl = lvl;
     const th = THEMES[ lvl.theme ];
+    this.spans = biomeSpans( lvl );
+    this.spans[ 0 ].x0 = -Infinity;
+    this.spans[ this.spans.length - 1 ].x1 = Infinity;
     this.buildLayers();
     this.buildWeather();
     this.buildUpdrafts();
@@ -136,16 +167,17 @@ export class WorldView
     // Якщо старт на блоці, будинок цілком стоїть на ньому: ліворуч від кулі, а як не влазить — праворуч чи біля блока
     // Нерухомі будинок і скриньки — позаду всієї трави (смуги землі й блоків), а не лише її нижньої смуги, як куля:
     // інакше верхівки стебел на їхньому тлі обриваються рівною лінією
-    const behindGrass = lvl.water ? 3.89 : 4.94;
-    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( behindGrass ) );
+    const behindGrass = ( x: number ) => waterAt( lvl, x ) ? 3.89 : 4.94;
+    const office = this.add( scene.add.image( lvl.start.x - 70, lvl.start.y, 'office' ).setOrigin( 0.5, 1 ).setScale( 0.75 / RES ).setDepth( behindGrass( lvl.start.x ) ) );
     const op = this.officePos( office.displayWidth * 0.85 );
     office.setPosition( op.x, op.y + 3 );
 
     const g = this.add( scene.add.graphics().setDepth( 5 ) );
     this.drawGround( g, th );
+    this.buildBiomeClouds();
     for ( const b of lvl.blocks )
     {
-      this.drawBlock( g, b.x, b.y, b.w, b.h, th );
+      this.drawBlock( g, b.x, b.y, b.w, b.h );
     }
 
     lvl.targets.forEach( ( tg, i ) =>
@@ -153,7 +185,7 @@ export class WorldView
       const m = this.add( scene.add.graphics().setDepth( 6 ) );
       this.markers.push( m );
       // Скринька в 1.7 раза більша за стару (текстура 168x256 замість 96x128), низ стовпчика ховається в траві
-      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 8, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( MAILBOX_SCALE ).setDepth( behindGrass ) );
+      const mb = this.add( scene.add.image( tg.x + tg.w / 2 - 8, tg.y + 2, 'mailbox' ).setOrigin( 0.5, 1 ).setScale( MAILBOX_SCALE ).setDepth( behindGrass( tg.x ) ) );
       this.mailboxes.push( mb );
       if ( lvl.targets.length > 1 )
       {
@@ -229,16 +261,17 @@ export class WorldView
           dashes.fillRect( x, y0 - DASH_H / 2, DASH_LEN, DASH_H );
         }
       }
-      const drift = ( DRIFT_TEX[ lvl.theme ] ?? [ 'p-leaf' ] ).filter( ( k ) => this.scene.textures.exists( k ) );
+      const drift = this.driftTex( lvl.theme );
       // У горах падає ще й сніг, тож пухнастих сніжинок, що летять із вітром, менше
       const dk = lvl.theme === 'mountain' ? 0.6 : 1;
       const nd = !windy || !drift.length ? 0 : Math.max( lvl.theme === 'mountain' ? 1 : 2, Math.round( area * dk / 145000 ) );
       for ( let k = 0; k < nd; k++ )
       {
         const baseY = Phaser.Math.Between( y0 + 20, y1 - 20 );
-        const img = this.add( this.scene.add.image( Math.random() * lvl.width, baseY, Phaser.Utils.Array.GetRandom( drift ) )
+        const x = Math.random() * lvl.width;
+        const img = this.add( this.scene.add.image( x, baseY, Phaser.Utils.Array.GetRandom( this.driftAt( x, drift ) ) )
           .setScale( 0.24 + Math.random() * 0.08 ).setAlpha( 0.5 ).setRotation( Math.random() * Math.PI * 2 ).setDepth( 1.1 ) );
-        this.drifters.push( { img, layer: i, baseY, speedK: 0.85 + Math.random() * 0.35, phase: Math.random() * Math.PI * 2,
+        this.drifters.push( { img, biome: biomeIndexAt( lvl, x ), layer: i, baseY, speedK: 0.85 + Math.random() * 0.35, phase: Math.random() * Math.PI * 2,
           amp: 6 + Math.random() * 10, spin: ( Math.random() < 0.5 ? -1 : 1 ) * ( 0.6 + Math.random() ) } );
       }
       if ( !windy )
@@ -251,6 +284,50 @@ export class WorldView
         }
       }
     } );
+  }
+
+  private driftTex( theme: Theme ): string[]
+  {
+    return ( DRIFT_TEX[ theme ] ?? [ 'p-leaf' ] ).filter( ( k ) => this.scene.textures.exists( k ) );
+  }
+
+  // Межа біомів — гряда хмар від землі до неба. Знизу густа: ховає стик смуг землі й води та пейзажі, що перетікають;
+  // вгорі прозора. Вона під кулею, марками й птахами (8–10), тож їх видно й крізь хмари; блоків біля межі не ставимо
+  private buildBiomeClouds(): void
+  {
+    const lvl = this.lvl;
+    if ( !lvl.biomes || !this.scene.textures.exists( 'pk-cloud0' ) )
+    {
+      return;
+    }
+    const gy = groundY( lvl );
+    const rnd = new Phaser.Math.RandomDataGenerator( [ lvl.id ] );
+    lvl.biomes.forEach( ( b, bi ) =>
+    {
+      if ( bi === 0 )
+      {
+        return;
+      }
+      // Тон хмар — середина між темами з обох боків (уночі й у грозу хмари притінені, як на небі)
+      const ta = themeArt( lvl.biomes![ bi - 1 ].theme ).cloudTint ?? 0xffffff;
+      const tb = themeArt( b.theme ).cloudTint ?? 0xffffff;
+      const c = Phaser.Display.Color.Interpolate.RGBWithRGB( ta >> 16, ( ta >> 8 ) & 255, ta & 255, tb >> 16, ( tb >> 8 ) & 255, tb & 255, 2, 1 );
+      const tint = Phaser.Display.Color.GetColor( c.r, c.g, c.b );
+      for ( let y = gy + 70, i = 0; y > -120; y -= 140, i++ )
+      {
+        const low = i < 2;
+        const img = this.add( this.scene.add.image( b.x + rnd.between( -50, 50 ), y, low ? 'pk-cloud0' : rnd.pick( [ 'pk-cloud1', 'pk-cloud2' ] ) ) );
+        img.setScale( ( low ? 560 : 420 ) / img.width ).setFlipX( rnd.frac() < 0.5 ).setAlpha( low ? 0.95 : 0.5 ).setDepth( 7.5 - i * 0.01 ).setTint( tint );
+        this.biomeClouds.push( { img, x: img.x, y, ph: rnd.frac() * Math.PI * 2 } );
+      }
+    } );
+  }
+
+  // Що несе вітер у точці x; тема без своїх партиклів — те, що й на старті рівня
+  private driftAt( x: number, fallback: string[] ): string[]
+  {
+    const list = this.driftTex( themeAt( this.lvl, x ) );
+    return list.length ? list : fallback;
   }
 
   private buildUpdrafts(): void
@@ -297,7 +374,7 @@ export class WorldView
         return { x, y: b.y };
       }
     }
-    if ( !lvl.water && b.y + b.h >= groundY( lvl ) - 1 )
+    if ( !waterAt( lvl, b.x + b.w / 2 ) && b.y + b.h >= groundY( lvl ) - 1 )
     {
       // Блок стоїть на землі: будинок — біля його підніжжя, з того боку, де більше місця в рівні
       const left = b.x - foot / 2 - 10;
@@ -310,42 +387,11 @@ export class WorldView
   {
     const lvl = this.lvl;
     const gy = groundY( lvl );
-    // Намальована смуга (трава й земля або вода); без малюнка для теми — стара заливка кодом
-    const key = lvl.water ? 'pk-water_' + lvl.theme : 'pk-ground_' + lvl.theme;
-    const art = GROUND_ART[ lvl.water ? 'water' : lvl.theme ];
-    if ( pack && art && this.scene.textures.exists( key ) )
+    // Намальована смуга (трава й земля або вода) на кожен біом; без малюнка для теми — стара заливка кодом
+    const spans = biomeSpans( lvl );
+    if ( pack && spans.every( ( sp ) => GROUND_ART[ sp.water ? 'water' : sp.theme ] && this.scene.textures.exists( groundKey( sp ) ) ) )
     {
-      const src = this.scene.textures.get( key ).getSourceImage();
-      const k = art.height / src.height;
-      const tw = src.width * k;
-      const y = gy - art.surface * art.height;
-      // Копії через одну віддзеркалені, тож шов між ними не видно; 1 px перекриття проти щілин.
-      // Вода ширша з обох боків: вона гойдається вбік
-      const pad = lvl.water ? 460 : 400;
-      // На високих екранах камера бачить нижче за смугу: туди тягнемо вниз її нижні 15 % (та сама вода чи земля)
-      const fillFrom = src.height * 0.85;
-      const fillK = 440 / ( src.height * 0.15 );
-      const fillY = y + art.height - 2 - fillFrom * fillK;
-      for ( let x = -pad, i = 0; x < lvl.width + pad; x += tw - 1, i++ )
-      {
-        const depth = lvl.water ? 4 : 5;
-        const img = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( k ).setFlipX( i % 2 === 1 ).setDepth( depth ) );
-        const fill = this.add( this.scene.add.image( x, fillY, key ).setOrigin( 0, 0 ).setScale( k, fillK ).setFlipX( i % 2 === 1 ).setDepth( depth - 0.01 ) );
-        fill.setCrop( 0, fillFrom, src.width, src.height - fillFrom );
-        if ( lvl.water )
-        {
-          this.waterImgs.push( { img, x, y }, { img: fill, x, y: fillY } );
-        }
-        else
-        {
-          // Псевдо-3D: стебла трави над лінією ґрунту ще раз, але перед кулею, будинком і скриньками —
-          // те, що стоїть на траві, ховає низ у ній
-          // Спереду лише нижня частина стебел: верхівки лишаються позаду, і кошик виглядає з трави, а не зникає в ній
-          const cut = Math.max( 0, src.height * art.surface - FRONT_GRASS / k );
-          const front = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( k ).setFlipX( i % 2 === 1 ).setDepth( FRONT_DEPTH ) );
-          front.setCrop( 0, cut, src.width, src.height * art.surface + 4 - cut );
-        }
-      }
+      spans.forEach( ( sp, i ) => this.drawGroundSpan( sp, i === 0, i === spans.length - 1 ) );
       return;
     }
     if ( lvl.water )
@@ -364,18 +410,73 @@ export class WorldView
     }
   }
 
-  private drawBlock( g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number, th: ThemeStyle ): void
+  // Смуга землі чи води одного біома. Крайні відрізки виходять за краї рівня. На межі між біомами копії
+  // закінчуються рівно (ціле число копій, ледь розтягнутих по ширині), а вода ще й заходить під сусіда, бо гойдається вбік
+  private drawGroundSpan( sp: Span, first: boolean, last: boolean ): void
+  {
+    const lvl = this.lvl;
+    const gy = groundY( lvl );
+    const key = groundKey( sp );
+    const art = GROUND_ART[ sp.water ? 'water' : sp.theme ];
+    const src = this.scene.textures.get( key ).getSourceImage();
+    const k = art.height / src.height;
+    const y = gy - art.surface * art.height;
+    // Копії через одну віддзеркалені, тож шов між ними не видно; 1 px перекриття проти щілин.
+    // Вода ширша з обох боків: вона гойдається вбік
+    const pad = sp.water ? 460 : 400;
+    const under = sp.water ? 40 : 0;
+    const x0 = first ? -pad : sp.x0 - under;
+    const x1 = last ? lvl.width + pad : sp.x1 + under;
+    let tw = src.width * k;
+    let n = Math.ceil( ( x1 - x0 ) / ( tw - 1 ) );
+    if ( !last )
+    {
+      n = Math.max( 1, Math.round( ( x1 - x0 - 1 ) / ( tw - 1 ) ) );
+      tw = ( x1 - x0 - 1 ) / n + 1;
+    }
+    const kx = tw / src.width;
+    // На високих екранах камера бачить нижче за смугу: туди тягнемо вниз її нижні 15 % (та сама вода чи земля)
+    const fillFrom = src.height * 0.85;
+    const fillK = 440 / ( src.height * 0.15 );
+    const fillY = y + art.height - 2 - fillFrom * fillK;
+    const depth = sp.water ? 4 : 5;
+    for ( let i = 0; i < n; i++ )
+    {
+      const x = x0 + i * ( tw - 1 );
+      const img = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( kx, k ).setFlipX( i % 2 === 1 ).setDepth( depth ) );
+      const fill = this.add( this.scene.add.image( x, fillY, key ).setOrigin( 0, 0 ).setScale( kx, fillK ).setFlipX( i % 2 === 1 ).setDepth( depth - 0.01 ) );
+      fill.setCrop( 0, fillFrom, src.width, src.height - fillFrom );
+      if ( sp.water )
+      {
+        this.waterImgs.push( { img, x, y }, { img: fill, x, y: fillY } );
+      }
+      else
+      {
+        // Псевдо-3D: стебла трави над лінією ґрунту ще раз, але перед кулею, будинком і скриньками —
+        // те, що стоїть на траві, ховає низ у ній
+        // Спереду лише нижня частина стебел: верхівки лишаються позаду, і кошик виглядає з трави, а не зникає в ній
+        const cut = Math.max( 0, src.height * art.surface - FRONT_GRASS / k );
+        const front = this.add( this.scene.add.image( x, y, key ).setOrigin( 0, 0 ).setScale( kx, k ).setFlipX( i % 2 === 1 ).setDepth( FRONT_DEPTH ) );
+        front.setCrop( 0, cut, src.width, src.height * art.surface + 4 - cut );
+      }
+    }
+  }
+
+  private drawBlock( g: Phaser.GameObjects.Graphics, x: number, y: number, w: number, h: number ): void
   {
     const onGround = y + h >= groundY( this.lvl ) - 1;
+    // Блок належить біому, в якому стоїть його середина
+    const theme = themeAt( this.lvl, x + w / 2 );
+    const th = THEMES[ theme ];
     if ( isLighthouse( this.lvl, { x, y, w, h } ) )
     {
       this.drawLighthouse( g, x, y, w, h );
       return;
     }
     // На морі блоки стоять у воді: вода (depth 4) накриває їхню основу; на суші основу ховає смуга землі (depth 5)
-    const depth = this.lvl.water ? 3.9 : 4.95;
-    const art = BLOCK_ART[ this.lvl.theme ];
-    const key = 'pk-block_' + this.lvl.theme;
+    const depth = waterAt( this.lvl, x + w / 2 ) ? 3.9 : 4.95;
+    const art = BLOCK_ART[ theme ];
+    const key = 'pk-block_' + theme;
     if ( pack && art && this.scene.textures.exists( key ) )
     {
       const hh = onGround ? h + 60 : h;
@@ -386,7 +487,7 @@ export class WorldView
       const aw = w / s + art.il + art.ir;
       // Кадр '__BASE' явно: без нього Phaser бере «перший кадр» текстури, а ним після першого блока стає смуга трави front-*
       this.add( this.scene.add.nineslice( ax, top, key, '__BASE', aw, ( y + hh - top ) / s, art.left, art.right, art.top, art.bottom )
-        .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ).setTint( BLOCK_TINT[ this.lvl.theme ] ?? 0xffffff ) );
+        .setOrigin( 0, 0 ).setScale( s ).setDepth( depth ).setTint( BLOCK_TINT[ theme ] ?? 0xffffff ) );
       // Трава, що стирчить над блоком, — ще й перед кулею (смуга лише з верхнього краю текстури, без тягнутої середини).
       // Сніговій шапці гір (lift 10) це не потрібно
       if ( art.lift >= 30 )
@@ -424,7 +525,7 @@ export class WorldView
     {
       g.fillTriangle( px, y + 10, px + 8, y + 18, px + 16, y + 10 );
     }
-    if ( !onGround && this.lvl.theme === 'mountain' )
+    if ( !onGround && theme === 'mountain' )
     {
       g.fillStyle( 0xdff4ff, 0.9 );
       for ( let px = x + 10; px < x + w - 10; px += 26 )
@@ -527,31 +628,35 @@ export class WorldView
     }
   }
 
-  // Погода на весь рівень. Частинки народжуються в тій частині світу, яку зараз бачить камера (worldView — живий прямокутник)
+  // Погода біомів. Частинки народжуються в тій частині кадру (worldView — живий прямокутник), що припадає на біоми
+  // їхньої теми; без біомів це весь кадр, як раніше
   private buildWeather(): void
   {
     const lvl = this.lvl;
     const view = this.scene.cameras.main.worldView;
+    const has = ( m: ( sp: Span ) => boolean ) => this.spans.some( m );
     type P = Phaser.GameObjects.Particles.Particle;
-    if ( lvl.theme === 'mountain' && this.scene.textures.exists( 'p-snow' ) )
+    const snow = ( sp: Span ) => sp.theme === 'mountain';
+    if ( has( snow ) && this.scene.textures.exists( 'p-snow' ) )
     {
       // Дрібні рідкі сніжинки повільно падають і зносяться вітром свого шару; з'являються й гаснуть м'яко, без різкого краю
-      this.add( this.scene.add.particles( 0, 0, 'p-snow', {
-        x: { onEmit: () => view.x + Math.random() * view.width },
+      this.addWeather( snow, 0, 80, this.scene.add.particles( 0, 0, 'p-snow', {
+        x: { onEmit: () => this.pickX( snow, view.x, view.right ) },
         y: { onEmit: () => view.y + Math.random() * view.height },
         speedY: { min: 18, max: 42 }, speedX: { min: -8, max: 8 },
         accelerationX: { onEmit: () => 0, onUpdate: ( p: P ) => ( windAt( lvl, p.y, this.weatherT ) * 0.5 - p.velocityX ) * 1.5 },
         rotate: { min: 0, max: 360 }, scale: { min: 9 / 64, max: 16 / 64 },
         alpha: { onEmit: () => 0, onUpdate: ( _p: P, _k: string, t: number ) => Math.sin( t * Math.PI ) * 0.75 },
         lifespan: { min: 3500, max: 5500 }, frequency: 80
-      } ).setDepth( 1.2 ) );
+      } ) );
     }
-    if ( lvl.theme === 'storm' && this.scene.textures.exists( 'p-rain' ) )
+    const rain = ( sp: Span ) => sp.theme === 'storm';
+    if ( has( rain ) && this.scene.textures.exists( 'p-rain' ) )
     {
       // Косий дощ: краплі падають швидко й зносяться вітром свого шару; кожна повернута вздовж свого руху.
       // На p-rain голова краплі внизу ліворуч, тобто текстура «летить» під кутом ~121°
-      this.add( this.scene.add.particles( 0, 0, 'p-rain', {
-        x: { onEmit: () => view.x - 100 + Math.random() * ( view.width + 200 ) },
+      this.addWeather( rain, 100, 14, this.scene.add.particles( 0, 0, 'p-rain', {
+        x: { onEmit: () => this.pickX( rain, view.x - 100, view.right + 100 ) },
         y: { onEmit: () => view.y - 40 + Math.random() * view.height * 0.5 },
         speedY: { min: 520, max: 680 }, speedX: { min: -150, max: -110 },
         accelerationX: { onEmit: () => 0, onUpdate: ( p: P ) => ( windAt( lvl, p.y, this.weatherT ) * 2 - 130 - p.velocityX ) * 2 },
@@ -559,22 +664,23 @@ export class WorldView
         scale: { min: 26 / 64, max: 34 / 64 },
         alpha: { onEmit: () => 0, onUpdate: ( _p: P, _k: string, t: number ) => Math.min( 1, t * 6, ( 1 - t ) * 6 ) * 0.75 },
         lifespan: { min: 900, max: 1300 }, frequency: 14
-      } ).setDepth( 1.2 ) );
+      } ) );
     }
-    if ( lvl.theme === 'night' && this.scene.textures.exists( 'p-firefly' ) )
+    const night = ( sp: Span ) => sp.theme === 'night';
+    if ( has( night ) && this.scene.textures.exists( 'p-firefly' ) )
     {
       // Світлячки повільно блукають над землею й то спалахують, то гаснуть
       const gy = groundY( lvl );
-      this.add( this.scene.add.particles( 0, 0, 'p-firefly', {
-        x: { onEmit: () => view.x + Math.random() * view.width },
+      this.addWeather( night, 0, 300, this.scene.add.particles( 0, 0, 'p-firefly', {
+        x: { onEmit: () => this.pickX( night, view.x, view.right ) },
         y: { onEmit: () => gy - 20 - Math.random() * 160 },
         speedX: { min: -14, max: 14 }, speedY: { min: -8, max: 8 },
         scale: { min: 28 / 96, max: 36 / 96 },
         alpha: { onEmit: () => 0, onUpdate: ( p: P, _k: string, t: number ) => Math.min( 1, Math.sin( t * Math.PI ) * 2 ) * ( 0.7 + 0.3 * Math.sin( t * 18 + p.x ) ) },
         lifespan: { min: 4000, max: 7000 }, frequency: 300
-      } ).setDepth( 1.2 ) );
+      } ) );
     }
-    if ( lvl.water && this.scene.textures.exists( 'p-blob' ) )
+    if ( has( ( sp ) => sp.water ) && this.scene.textures.exists( 'p-blob' ) )
     {
       const k = 1 / 64;
       this.spray = this.add( this.scene.add.particles( 0, 0, 'p-blob', {
@@ -582,6 +688,62 @@ export class WorldView
         scale: { start: 16 * k, end: 7 * k }, alpha: { start: 0.9, end: 0 }, lifespan: { min: 500, max: 800 },
         tint: [ 0xffffff, 0xe6f4ff, 0xcfe6f2 ], emitting: false
       } ).setDepth( FRONT_DEPTH + 0.1 ) );
+    }
+  }
+
+  private addWeather( match: ( sp: Span ) => boolean, margin: number, freq: number, em: Phaser.GameObjects.Particles.ParticleEmitter ): void
+  {
+    this.add( em.setDepth( 1.2 ) );
+    this.weather.push( { em, match, margin, freq } );
+  }
+
+  // Скільки з проміжку [lo, hi] припадає на біоми, що підходять
+  private cover( match: ( sp: Span ) => boolean, lo: number, hi: number ): number
+  {
+    let len = 0;
+    for ( const sp of this.spans )
+    {
+      if ( match( sp ) )
+      {
+        len += Math.max( 0, Math.min( hi, sp.x1 ) - Math.max( lo, sp.x0 ) );
+      }
+    }
+    return len;
+  }
+
+  // Випадкова точка проміжку [lo, hi] у біомах, що підходять (рівномірно по їхній довжині)
+  private pickX( match: ( sp: Span ) => boolean, lo: number, hi: number ): number
+  {
+    let r = Math.random() * this.cover( match, lo, hi );
+    for ( const sp of this.spans )
+    {
+      if ( !match( sp ) )
+      {
+        continue;
+      }
+      const a = Math.max( lo, sp.x0 );
+      const len = Math.max( 0, Math.min( hi, sp.x1 ) - a );
+      if ( r <= len )
+      {
+        return a + r;
+      }
+      r -= len;
+    }
+    return lo + Math.random() * ( hi - lo );
+  }
+
+  // Погода йде лише там, де її біом у кадрі, і так само густо, хоч би яку частину кадру він займав
+  private updateWeather( view: Phaser.Geom.Rectangle ): void
+  {
+    for ( const w of this.weather )
+    {
+      const lo = view.x - w.margin;
+      const hi = view.right + w.margin;
+      const c = this.cover( w.match, lo, hi );
+      w.em.emitting = c > 1;
+      w.em.frequency = w.freq * ( hi - lo ) / Math.max( c, 1 );
+      // Поки біом лише заходив у кадр, до наступної частинки набігло багато часу: не чекаємо його, коли біом уже на весь кадр
+      w.em.flowCounter = Math.min( w.em.flowCounter, w.em.frequency );
     }
   }
 
@@ -598,8 +760,13 @@ export class WorldView
       return;
     }
     this.sprayIn = 0.5 + Math.random() * 0.9;
+    const water = ( sp: Span ) => sp.water;
+    if ( this.cover( water, view.x, view.right ) < 1 )
+    {
+      return;
+    }
     const gy = groundY( this.lvl );
-    const x = view.x + Math.random() * view.width;
+    const x = this.pickX( water, view.x, view.right );
     if ( this.lvl.blocks.some( ( b ) => x >= b.x - 10 && x <= b.x + b.w + 10 && b.y + b.h >= gy - 1 ) )
     {
       return;
@@ -616,6 +783,11 @@ export class WorldView
     const left = Math.min( 0, view.x );
     const right = Math.max( lvl.width, view.right );
     this.updateSpray( dt, view );
+    this.updateWeather( view );
+    for ( const c of this.biomeClouds )
+    {
+      c.img.setPosition( c.x + Math.sin( t * 0.3 + c.ph ) * 18, c.y + Math.sin( t * 0.5 + c.ph ) * 6 );
+    }
     // Предмети летять зі швидкістю вітру, гойдаються вгору-вниз і крутяться тим швидше, чим сильніше дме
     for ( const d of this.drifters )
     {
@@ -625,6 +797,16 @@ export class WorldView
       d.img.y = d.baseY + Math.sin( t * 1.4 + d.phase ) * d.amp;
       d.img.rotation += ( 0.3 + Math.abs( w ) / 60 ) * d.spin * dt;
       this.wrapX( d.img, left, right );
+      if ( lvl.biomes )
+      {
+        const bi = biomeIndexAt( lvl, d.img.x );
+        if ( bi !== d.biome )
+        {
+          d.biome = bi;
+          const list = this.driftAt( d.img.x, [ d.img.texture.key ] );
+          d.img.setTexture( list[ Math.floor( d.phase * 7 ) % list.length ] );
+        }
+      }
     }
     for ( let i = 0; i < this.motes.length; i++ )
     {
@@ -736,6 +918,8 @@ export class WorldView
     }
     this.objects = [];
     this.drifters = [];
+    this.weather = [];
+    this.biomeClouds = [];
     this.hazards = [];
     this.knocked.clear();
     this.motes = [];
